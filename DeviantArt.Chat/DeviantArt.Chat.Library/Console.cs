@@ -2,12 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using log4net;
 
 namespace DeviantArt.Chat.Library
 {
     public class Console
     {
-        protected string Format = "HH:mm:ss";
+        private ILog Logger = LogManager.GetLogger(typeof(Console));
+        private string Format = "HH:mm:ss";
+
+        public string Session { get; set; }
 
         public string Time() { return Time(DateTime.Now); }
         public string Time(DateTime ts) { return ts.ToString(Format); }
@@ -18,7 +22,7 @@ namespace DeviantArt.Chat.Library
         public void Message(string message) { Message(message, DateTime.Now); }
         public void Message(string message, DateTime ts)
         {
-            // TODO : if debug then log
+            Log(Clock(ts) + " " + message);
             System.Console.WriteLine(Clock(ts) + " " + message);
         }
 
@@ -37,7 +41,12 @@ namespace DeviantArt.Chat.Library
         {
             data = data.Replace("\n", "\n>>");
             System.Console.WriteLine(">>" + data);
-            // TODO : if debug then log
+            Log(">>" + data);
+        }
+
+        public void Log(string message)
+        {
+            Logger.InfoFormat(message);
         }
     }
 }
