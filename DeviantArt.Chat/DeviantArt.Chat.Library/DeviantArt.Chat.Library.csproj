@@ -39,6 +39,9 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Net">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Security" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq">
@@ -53,6 +56,7 @@
   <ItemGroup>
     <Compile Include="Bot.cs" />
     <Compile Include="Console.cs" />
+    <Compile Include="dAmnNET.cs" />
     <Compile Include="Enumerations.cs" />
     <Compile Include="EventSystem.cs" />
     <Compile Include="Module.cs" />
