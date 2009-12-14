@@ -8,7 +8,6 @@ namespace DeviantArt.Chat.Library
     public class EventSystem
     {
         private Bot Core;
-        private List<
 
         public EventSystem(Bot core)
         {
