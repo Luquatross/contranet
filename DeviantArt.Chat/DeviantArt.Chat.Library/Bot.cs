@@ -144,7 +144,7 @@ namespace DeviantArt.Chat.Library
                             new XElement("add", new XAttribute("key", "visitcount"), new XAttribute("value", Cookie.Values["visitcount"])),
                             new XElement("add", new XAttribute("key", "visittime"), new XAttribute("value", Cookie.Values["visittime"])),
                             new XElement("add", new XAttribute("key", "username"), new XAttribute("value", Cookie.Values["username"])),
-                            new XElement("add", new XAttribute("key", "authtoken"), new XAttribute("value", Cookie.Values["authtoken"])),
+                            new XElement("add", new XAttribute("key", "authtoken"), new XAttribute("value", Cookie.Values["authtoken"]))
                         )
                     )
                 );

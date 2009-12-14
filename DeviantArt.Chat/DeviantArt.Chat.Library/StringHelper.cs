@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using System.Xml;
+using System.Text.RegularExpressions;
+using System.Security.Cryptography;
+using System.Collections;
 
 namespace DeviantArt.Chat.Library
 {
@@ -532,6 +535,193 @@ namespace DeviantArt.Chat.Library
                 }
             }
             return sb.ToString().TrimEnd(); // to get rid of the extra space at the end.
+        }
+
+        /// <summary>
+        /// Deserialize string that's been serialized in PHP format.
+        /// Supported Types:
+        ///  * string
+        ///  * int
+        ///  * double
+        ///  * ArrayList
+        ///  * Hashtable
+        /// </summary>
+        /// <param name="str">String to deserialize.</param>        
+        /// <returns>Deserialized object.</returns>
+        public static object Deserialize(string str)
+        {
+            int pos = 0;
+            return Deserialize(str, ref pos);
+        }
+
+        /// <summary>
+        /// Deserialize string that's been serialized in PHP format.
+        /// Supported Types:
+        ///  * string
+        ///  * int
+        ///  * double
+        ///  * ArrayList
+        ///  * Hashtable
+        /// </summary>
+        /// <param name="str">String to deserialize.</param>
+        /// <param name="pos">Position in the string to start parsing.</param>
+        /// <returns>Deserialized object.</returns>
+        private static object Deserialize(string str, ref int pos)
+        {
+            if (str == null || str.Length <= pos)
+                return new Object();
+
+            int start, end, length;
+            string stLen;
+            switch (str[pos])
+            {
+                case 'N':
+                    pos += 2;
+                    return null;
+                case 'b':
+                    char chBool;
+                    chBool = str[pos + 2];
+                    pos += 4;
+                    return chBool == '1';
+                case 'i':
+                    string stInt;
+                    start = str.IndexOf(":", pos) + 1;
+                    end = str.IndexOf(";", start);
+                    stInt = str.Substring(start, end - start);
+                    pos += 3 + stInt.Length;
+                    return Int32.Parse(stInt);
+                case 'd':
+                    string stDouble;
+                    start = str.IndexOf(":", pos) + 1;
+                    end = str.IndexOf(";", start);
+                    stDouble = str.Substring(start, end - start);
+                    pos += 3 + stDouble.Length;
+                    return Double.Parse(stDouble);
+                case 's':
+                    //TODO: add bounds checking code
+                    start = str.IndexOf(":", pos) + 1;
+                    end = str.IndexOf(":", start);
+                    stLen = str.Substring(start, end - start);
+                    length = Int32.Parse(stLen);
+                    pos += 6 + stLen.Length + length;
+                    string stRet = str.Substring(end + 2, length);
+                    return stRet;
+                case 'a':
+                    //if keys are ints 0 through N, returns an ArrayList, else returns Hashtable
+                    start = str.IndexOf(":", pos) + 1;
+                    end = str.IndexOf(":", start);
+                    stLen = str.Substring(start, end - start);
+                    length = Int32.Parse(stLen);
+                    Hashtable htRet = new Hashtable(length);
+                    ArrayList alRet = new ArrayList(length);
+                    pos += 4 + stLen.Length; //a:Len:{
+                    for (int i = 0; i < length; i++)
+                    {
+                        //read key
+                        object key = Deserialize(str, ref pos);
+                        //read value
+                        object val = Deserialize(str, ref pos);
+
+                        if (alRet != null)
+                        {
+                            if (key is int && (int)key == alRet.Count)
+                                alRet.Add(val);
+                            else
+                                alRet = null;
+                        }
+                        htRet[key] = val;
+                    }
+                    pos++; //skip the }
+                    if (pos < str.Length && str[pos] == ';')//skipping our old extra array semi-colon bug (er... php's weirdness)
+                        pos++;
+                    if (alRet != null)
+                        return alRet;
+                    else
+                        return htRet;
+                default:
+                    return "";
+            }//switch            
+        }
+
+        /// <summary>
+        /// Serializes the provided object into a text-based string readable
+        /// by PHP.
+        /// </summary>
+        /// <param name="obj">Object to serialized.</param>
+        /// <returns>String representing serialized object.</returns>
+        public static string Serialize(object obj)
+        {
+            return Serialize(obj, new ArrayList()).ToString();
+        }
+
+        /// <summary>
+        /// Serializes the provided object into a text-based string readable
+        /// by PHP.
+        /// </summary>
+        private static StringBuilder Serialize(object obj, ArrayList hashes)
+        {
+            StringBuilder sb = new StringBuilder();
+            if (obj == null)
+            {
+                return sb.Append("N;");
+            }
+            else if (obj is string)
+            {
+                string str = (string)obj;
+                return sb.Append("s:" + str.Length + ":\"" + str + "\";");
+            }
+            else if (obj is bool)
+            {
+                return sb.Append("b:" + (((bool)obj) ? "1" : "0") + ";");
+            }
+            else if (obj is int)
+            {
+                int i = (int)obj;
+                return sb.Append("i:" + i + ";");
+            }
+            else if (obj is double)
+            {
+                double d = (double)obj;
+                return sb.Append("d:" + d + ";");
+            }
+            else if (obj is ArrayList)
+            {
+                if (hashes.Contains(obj.GetHashCode()))
+                    return sb.Append("N;");
+                else
+                    hashes.Add(obj.GetHashCode());
+
+                ArrayList a = (ArrayList)obj;
+                sb.Append("a:" + a.Count + ":{");
+                for (int i = 0; i < a.Count; i++)
+                {
+                    sb.Append(Serialize(i, hashes));
+                    sb.Append(Serialize(a[i], hashes));
+                }
+                sb.Append("}");
+                return sb;
+            }
+            else if (obj is Hashtable)
+            {
+                if (hashes.Contains(obj.GetHashCode()))
+                    return sb.Append("N;");
+                else
+                    hashes.Add(obj.GetHashCode());
+
+                Hashtable a = (Hashtable)obj;
+                sb.Append("a:" + a.Count + ":{");
+                foreach (DictionaryEntry entry in a)
+                {
+                    sb.Append(Serialize(entry.Key, hashes));
+                    sb.Append(Serialize(entry.Value, hashes));
+                }
+                sb.Append("}");
+                return sb;
+            }
+            else
+            {
+                return sb;
+            }
         }
     }
 }
