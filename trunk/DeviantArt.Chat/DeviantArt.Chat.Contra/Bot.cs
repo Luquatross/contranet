@@ -7,8 +7,9 @@ using System.Web;
 using System.Security.Cryptography;
 using System.Xml.Linq;
 using System.Threading;
+using DeviantArt.Chat.Library;
 
-namespace DeviantArt.Chat.Library
+namespace DeviantArt.Chat.Contra
 {
     public class Bot
     {
@@ -67,9 +68,6 @@ namespace DeviantArt.Chat.Library
 
             // Tell the console the session code for logging purposes.
             this.Console.Session = this.Session;
-
-            // Get a new timer class.
-            this.Timer = new Timer(this);
 
             // Some introduction messages! We've already done quite a bit but only introduce things here...
             this.Console.Notice("Hey thar!");
@@ -209,7 +207,11 @@ namespace DeviantArt.Chat.Library
             if (dAmn.Connect(Username, Password))
             {
                 foreach (string channel in AutoJoin)
-                    dAmn.Join(dAmn.FormatChat(channel));
+                {
+                    dAmn.Join(channel);
+                    dAmn.Say(channel, "Wassup!");
+                    dAmn.Action(channel, "is happy the bot is coming along nicely.");
+                }
                 listenThread.Start();
             }
         }

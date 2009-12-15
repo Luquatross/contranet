@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using log4net;
 
-namespace DeviantArt.Chat.Library
+namespace DeviantArt.Chat.Contra
 {
     public class Console
     {
