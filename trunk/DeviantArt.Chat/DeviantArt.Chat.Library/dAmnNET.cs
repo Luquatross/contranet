@@ -17,6 +17,19 @@ namespace DeviantArt.Chat.Library
 {
     public class dAmnNET
     {
+        public HttpCookie AuthCookie {
+            get
+            {
+                return _AuthCookie;
+            }
+            set
+            {
+                _AuthCookie = value;
+                AuthToken = _AuthCookie.Values["authtoken"];
+            }
+        }
+        private HttpCookie _AuthCookie;
+
         private const int Version = 4;
         private Dictionary<string, string> ChatSettings = new Dictionary<string, string>
         {
@@ -40,8 +53,7 @@ namespace DeviantArt.Chat.Library
         private TcpClient Socket;
         private StreamReader StreamReader;
         private StreamWriter StreamWriter;
-        private string AuthToken;
-        private HttpCookie AuthCookie;
+        private string AuthToken;        
         private Thread ChatThread;
 
         public dAmnNET()
@@ -60,24 +72,30 @@ namespace DeviantArt.Chat.Library
         }
 
         /// <summary>
-        /// his is the important one. It reads packets off of the stream and returns them in 
+        /// This is the important one. It reads packets off of the stream and returns them in 
         /// an array! 
         /// </summary>
         public string Read()
         {
+            StringBuilder sb = new StringBuilder();
             try
             {
-                string data = StreamReader.ReadToEnd();
-                if (string.IsNullOrEmpty(data))
-                    return "disconnect\ne=socket closed\n";
-                else
-                    return data;
+                int tmp;
+                while (true)
+                {
+                    tmp = StreamReader.Read();
+                    if (tmp == 0)
+                        break;
+                    else
+                        sb.Append((char)tmp);
+                }
             }
             catch (Exception ex)
             {
                 Logger.Warn("Unable to read from connection.", ex);
                 return "disconnect\ne=socket closed\n";
             }
+            return sb.ToString();
         }
 
         public string[] ReadLines()
@@ -228,51 +246,32 @@ namespace DeviantArt.Chat.Library
             }
         }
 
-        /// <summary>
-        /// Need to send a login packet? I'm your man!
-        /// </summary>
-        public void Login(string userName, string password)
+        public bool Connect(string username, string password)
         {
-            // get auth token if not there
-            bool hasAuthToken = true;
-            if (string.IsNullOrEmpty(AuthToken))
+            // get auth token if we don't have one
+            if (AuthCookie == null)
             {
-                hasAuthToken = false;
-                this.AuthCookie = GetAuthCookie(userName, password);
-                this.AuthToken = this.AuthCookie.Values["authtoken"];
+                AuthCookie = GetAuthCookie(username, password);
             }
 
-            // Thread stuff
+            // connect to the server
             Socket = new TcpClient("chat.deviantart.com", 3900);
-            // TODO - RaiseEvent connected
+
+            // create writers
             StreamWriter = new StreamWriter(Socket.GetStream());
             StreamReader = new StreamReader(Socket.GetStream());
+
+            // do handshake
             PerformHandshake();
 
-            // Send login to server
-            Send(BuildPacket("login", userName, "pk=" + AuthToken));
-            System.Threading.Thread.Sleep(300);
-            string loginResponse = Read();
-            if (loginResponse.Contains("e=ok"))
+            // do a login
+            if (Login(username))
             {
-                // TODO - RaiseEvent login complete
-                Logger.Info("Login successful.");
+                return true;
             }
             else
             {
-                // Not connected!
-                Logger.Warn("Unable to connect!");
-                // we had an auth token from before that was invalid. get a new one
-                if (hasAuthToken)
-                {
-                    AuthToken = null;
-                    Login(userName, password);
-                }
-                else
-                {
-                    // We got a new auth token but it didn't work. bail.
-                    // TODO - RaiseEvent Disconnect
-                }
+                return false;
             }
         }
 
@@ -281,15 +280,26 @@ namespace DeviantArt.Chat.Library
             // Now we make our handshake packet. Here we send information about the bot/client 
             // to the dAmn server.
             StringBuilder data = new StringBuilder();
-            data.AppendLine("dAmnClient " + ChatSettings["Version"]);
-            data.AppendLine("agent=" + Agent);
-            data.AppendLine("bot=" + Client);
-            data.AppendLine("owner=" + Owner);
-            data.AppendLine("trigger=" + Trigger);
-            data.AppendLine("creator=bigmanhaywood/deviant@thehomeofjon.net");
+            data.Append("dAmnClient " + ChatSettings["Version"] + "\n");
+            data.Append("agent=" + Agent + "\n");
+            data.Append("bot=" + Client + "\n");
+            data.Append("owner=" + Owner + "\n");
+            data.Append("trigger=" + Trigger + "\n");
+            data.Append("creator=bigmanhaywood/deviant@thehomeofjon.net\n\0");
 
             Send(data.ToString());
             string result = Read(); // toss out un-needed data
+        }
+
+        protected bool Login(string username)
+        {
+            Send(BuildPacket("login", username, "pk=" + AuthToken));
+            System.Threading.Thread.Sleep(300);
+            string loginResponse = Read();
+            if (loginResponse.ToLower().Contains("e=ok"))
+                return true;
+            else
+                return false;
         }
 
         public string DeformatChat(string chat)

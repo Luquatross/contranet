@@ -14,11 +14,9 @@ namespace DeviantArt.Chat.Contra
         {
             try
             {
-                dAmnNET da = new dAmnNET();
-                da.Login("bigmanhaywood", "batman");
-                da.Join("Botdom");
-                da.Say("Botdom", "Wassup!");
-                da.Disconnect();
+                Bot bot = new Bot(true);
+                bot.LoadConfig("bigmanhaywood", "batman", new string[] { "Botdom" });
+                bot.Run();
             }
             catch (Exception ex)
             {
