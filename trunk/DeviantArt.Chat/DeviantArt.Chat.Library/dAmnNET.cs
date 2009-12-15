@@ -15,8 +15,17 @@ using System.Collections;
 
 namespace DeviantArt.Chat.Library
 {
+    /// <summary>
+    /// Class that encapsulates the functionality needed to send and receive
+    /// communications from the dAmn chat server.
+    /// </summary>
     public class dAmnNET
     {
+        #region Public Properties
+        /// <summary>
+        /// Gets or sets the Authorization cookie received from the dAmn server after
+        /// logging in. Sets the Auth Token when set.
+        /// </summary>
         public HttpCookie AuthCookie {
             get
             {
@@ -29,42 +38,30 @@ namespace DeviantArt.Chat.Library
             }
         }
         private HttpCookie _AuthCookie;
+        #endregion
 
+        #region Private Variables
+        /// <summary>
+        /// Information about this bot
+        /// </summary>
         private const int Version = 4;
-        private Dictionary<string, string> ChatSettings = new Dictionary<string, string>
-        {
-            { "Host", "chat.deviantart.com" },
-            { "Version", "0.3" },
-            { "Port", "3900" }
-        };
-        private Dictionary<string, string> LoginSettings = new Dictionary<string, string>
-        {
-            { "Transport", "ssl://" },
-            { "Host", "www.deviantart.com" },
-            { "File", "/users/login" },
-            { "Port", "443" }
-        };
         public const string Client = "damnNET";
         public const string Agent = "damnNET/3.5";
         public const string Owner = "bigmanhaywood";
-        public string Trigger = "!";
 
+        public string Trigger = "!";   
         private ILog Logger = LogManager.GetLogger(typeof(dAmnNET));
         private TcpClient Socket;
         private StreamReader StreamReader;
         private StreamWriter StreamWriter;
-        private string AuthToken;        
-        private Thread ChatThread;
+        private string AuthToken;                
+        #endregion
 
-        public dAmnNET()
-        {
-
-        }
-
+        #region Send / Receive Methods
         /// <summary>
-        /// Here's the actual send function which sends the packets.
+        /// Method that sends the packets to the dAmn server.
         /// </summary>
-        /// <param name="data">Data to send</param>
+        /// <param name="data">Data to send.</param>
         public void Send(string data)
         {            
             StreamWriter.Write(data);
@@ -72,9 +69,9 @@ namespace DeviantArt.Chat.Library
         }
 
         /// <summary>
-        /// This is the important one. It reads packets off of the stream and returns them in 
-        /// an array! 
+        /// Method to read packets off of the stream and returns them.
         /// </summary>
+        /// <returns>String received from stream. If no data returns empty string.</returns>
         public string Read()
         {
             StringBuilder sb = new StringBuilder();
@@ -97,27 +94,59 @@ namespace DeviantArt.Chat.Library
             }
             return sb.ToString();
         }
-
+        
+        /// <summary>
+        /// Method to read packets off of the stream and return them in an arary.
+        /// </summary>
+        /// <returns>String array received from stream.</returns>
         public string[] ReadLines()
         {
             return Read().Split('\n');
         }
+        #endregion
 
+        #region Build Packet
+        /// <summary>
+        /// Builds a packet to send to the dAmn server.
+        /// </summary>
+        /// <param name="command">Command to send.</param>
+        /// <returns>Constructed packet.</returns>
         protected string BuildPacket(string command)
         {
             return BuildPacket(command, null, null, null);
         }
 
+        /// <summary>
+        /// Builds a packet to send to the dAmn server.
+        /// </summary>
+        /// <param name="command">Command to send.</param>
+        /// <param name="param">Parameter for the command.</param>
+        /// <returns>Constructed packet.</returns>
         protected string BuildPacket(string command, string param)
         {
             return BuildPacket(command, param, null, null);
         }
 
+        /// <summary>
+        /// Builds a packet to send to the dAmn server.
+        /// </summary>
+        /// <param name="command">Command to send.</param>
+        /// <param name="param">Parameter for the command.</param>
+        /// <param name="arg">Any additional args.</param>
+        /// <returns>Constructed packet.</returns>
         protected string BuildPacket(string command, string param, string arg)
         {
             return BuildPacket(command, param, arg, null);
         }
 
+        /// <summary>
+        /// Builds a packet to send to the dAmn server.
+        /// </summary>
+        /// <param name="command">Command to send.</param>
+        /// <param name="param">Parameter for the command.</param>
+        /// <param name="arg">Any additional args.</param>
+        /// <param name="body">Body of rhe packet.</param>
+        /// <returns>Constructed packet.</returns>
         protected string BuildPacket(string command, string param, string arg, string body)
         {
             StringBuilder rval = new StringBuilder();
@@ -133,25 +162,15 @@ namespace DeviantArt.Chat.Library
 
             return rval.ToString();
         }
+        #endregion              
 
-        public static bool ValidateServerCertificate(
-              object sender,
-              X509Certificate certificate,
-              X509Chain chain,
-              SslPolicyErrors sslPolicyErrors)
-        {
-            if (sslPolicyErrors == SslPolicyErrors.None)
-                return true;
-            
-            System.Console.WriteLine("Certificate error: {0}", sslPolicyErrors);
-
-            // Do not allow this client to communicate with unauthenticated servers.
-            return false;
-        }        
-
+        #region Public Methods
         /// <summary>
-        /// Retrieve a Cookie.
+        /// Get an authentication cookie from the dAmn server over SSL.
         /// </summary>
+        /// <param name="username">Username to use to login.</param>
+        /// <param name="password">Password to use to login.</param>
+        /// <returns>Cookie read from the SSL response.</returns>
         public HttpCookie GetAuthCookie(string username, string password)
         {
             // We need to use a query on deviantArt. 
@@ -171,8 +190,6 @@ namespace DeviantArt.Chat.Library
             {
                 // first, open an SSL connection with our host
                 tcpClient = new TcpClient("www.deviantart.com", 443);
-                //sr = new StreamReader(new SslStream(tcpClient.GetStream()));
-                //sw = new StreamWriter(new SslStream(tcpClient.GetStream()));
 
                 // create request
                 StringBuilder request = new StringBuilder();
@@ -185,28 +202,21 @@ namespace DeviantArt.Chat.Library
                 request.AppendLine("Content-Type: application/x-www-form-urlencoded"); // Finally we show the content type of the our data.
                 request.Append("Content-Length: " + post.Length + "\n\n" + post.ToString()); // Then the length of our query, and the query itself.
 
-                // test
+                // Create an SSL stream so that we can send and receive securely
                 SslStream s1 = new SslStream(tcpClient.GetStream(),
                     false,
                     new RemoteCertificateValidationCallback(ValidateServerCertificate),
                     null
                 );
 
+                // Authenticate the server's certificate and send the request
                 s1.AuthenticateAsClient("www.deviantart.com");
                 s1.Write(Encoding.UTF8.GetBytes(request.ToString()));
                 s1.Flush();
 
+                // Now that we have sent our data, we need to read the response. 
                 string response = ReadSslMessage(s1);
                 s1.Close();
-
-                // And now we send our header and post data. First we declare the method as POST, select our file and protocol.                
-                //sw.Write(request.ToString());
-                //sw.Flush();
-
-                // Now that we have sent our data, we need to read the response. 
-                //string response = sr.ReadToEnd();
-                //sr.Close();
-                //sw.Close();
                 tcpClient.Close();
 
                 // And now we do the normal stuff, like checking if the response was empty or not.
@@ -230,7 +240,7 @@ namespace DeviantArt.Chat.Library
 
                     return cookie;
                 }
-                // If we get here, then everything failed, so yeah...return Null
+                // If we get here, then everything failed
                 return null;
             }
             catch (Exception ex)
@@ -246,6 +256,14 @@ namespace DeviantArt.Chat.Library
             }
         }
 
+        /// <summary>
+        /// Connects to the dAmn server. If no cookie has been set, gets
+        /// one using the provided username and password. Then performs a
+        /// handshake with the server and logs in.
+        /// </summary>
+        /// <param name="username">Username to use to login.</param>
+        /// <param name="password">Password to use to login.</param>
+        /// <returns>True if connected and logged in successfully. Otherwise false.</returns>
         public bool Connect(string username, string password)
         {
             // get auth token if we don't have one
@@ -265,7 +283,7 @@ namespace DeviantArt.Chat.Library
             PerformHandshake();
 
             // do a login
-            if (Login(username))
+            if (Login(username, AuthToken))
             {
                 return true;
             }
@@ -275,6 +293,33 @@ namespace DeviantArt.Chat.Library
             }
         }
 
+        /// <summary>
+        /// Disconnects from the dAmn server. Shuts down the socket and streams.
+        /// </summary>
+        public void Disconnect()
+        {
+            try
+            {
+                Socket.Close();
+            }
+            catch { }
+            try
+            {
+                StreamReader.Close();
+            }
+            catch { }
+            try
+            {
+                StreamWriter.Close();
+            }
+            catch { }
+        }
+        #endregion
+
+        #region dAmn Helper Methods
+        /// <summary>
+        /// Performs a handshake with the server so it knows about this client.
+        /// </summary>
         protected void PerformHandshake()
         {
             // Now we make our handshake packet. Here we send information about the bot/client 
@@ -291,9 +336,15 @@ namespace DeviantArt.Chat.Library
             string result = Read(); // toss out un-needed data
         }
 
-        protected bool Login(string username)
+        /// <summary>
+        /// Logs in to the dAmn server. use
+        /// </summary>
+        /// <param name="username">Username to use to log in.</param>
+        /// <param name="authToken">AuthToken to use to log in.</param>
+        /// <returns>True if login was successful. Otherwise fals.</returns>
+        protected bool Login(string username, string authToken)
         {
-            Send(BuildPacket("login", username, "pk=" + AuthToken));
+            Send(BuildPacket("login", username, "pk=" + authToken));
             System.Threading.Thread.Sleep(300);
             string loginResponse = Read();
             if (loginResponse.ToLower().Contains("e=ok"))
@@ -302,11 +353,19 @@ namespace DeviantArt.Chat.Library
                 return false;
         }
 
+        /// <summary>
+        /// Deformats a chat string.
+        /// </summary>
+        /// <returns>Chat string de-formatted from a packet.</returns>
         public string DeformatChat(string chat)
         {
             return DeformatChat(chat, null);
         }
 
+        /// <summary>
+        /// Deformats a chat string.
+        /// </summary>
+        /// <returns>Chat string de-formatted from a packet.</returns>
         public string DeformatChat(string chat, string discard)
         {
             if (chat.Substring(0, 5) == "chat:")            
@@ -328,11 +387,19 @@ namespace DeviantArt.Chat.Library
             return (chat.StartsWith("#")) ? chat : (chat.StartsWith("@") ? chat : "#" + chat);
         }
 
+        /// <summary>
+        /// Formats the chat string.
+        /// </summary>        
+        /// <returns>Chat string formatted to be used in a packet</returns>
         public string FormatChat(string chat)
         {
             return FormatChat(chat, null);
         }
 
+        /// <summary>
+        /// Formats the chat string.
+        /// </summary>
+        /// <returns>Chat string formatted to be used in a packet.</returns>
         public string FormatChat(string chat, string chat2)
         {
             chat = chat.Replace("#", "");
@@ -350,6 +417,7 @@ namespace DeviantArt.Chat.Library
             }
             return (chat.StartsWith("chat:")) ? chat : (chat.StartsWith("pchat:") ? chat : "chat:" + chat);
         }
+        #endregion
 
         #region dAmn Commands
         public void Join(string channel)
@@ -453,22 +521,42 @@ namespace DeviantArt.Chat.Library
         }
         #endregion
 
-        #region Helper Methods
+        #region Utility Methods
+        /// <summary>
+        /// Determines if the string is a channel or not.
+        /// </summary>
+        /// <param name="ns">Channel to test.</param>
+        /// <returns>True if a channel, otherwise false.</returns>
         public bool IsChannel(string ns)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Encodes a string to be used in a URL.
+        /// </summary>
+        /// <param name="str">String to encode.</param>
+        /// <returns>Encoded string.</returns>
         private string UrlEncode(string str)
         {
             return HttpUtility.UrlEncode(str);
         }
 
+        /// <summary>
+        /// Decodes a string that was used in a URL.
+        /// </summary>
+        /// <param name="str">String to decode.</param>
+        /// <returns>Decoded string.</returns>
         private string UrlDecode(string str)
         {
             return HttpUtility.UrlDecode(str);
         }
 
+        /// <summary>
+        /// Reads a message from an SSL Stream.
+        /// </summary>
+        /// <param name="sslStream">Stream to read from.</param>
+        /// <returns>String response found in the stream.</returns>
         private string ReadSslMessage(SslStream sslStream)
         {
             // Read the  message sent by the server.
@@ -497,6 +585,27 @@ namespace DeviantArt.Chat.Library
             return messageData.ToString();
         }
 
+        #endregion
+
+        #region Static Methods
+        /// <summary>
+        /// Validates the certificate provided by the secure dAmn server.
+        /// </summary>
+        /// <returns>True if valid, otherwise false.</returns>
+        private static bool ValidateServerCertificate(
+              object sender,
+              X509Certificate certificate,
+              X509Chain chain,
+              SslPolicyErrors sslPolicyErrors)
+        {
+            if (sslPolicyErrors == SslPolicyErrors.None)
+                return true;
+
+            System.Console.WriteLine("Certificate error: {0}", sslPolicyErrors);
+
+            // Do not allow this client to communicate with unauthenticated servers.
+            return false;
+        }  
         #endregion
     }
 }
