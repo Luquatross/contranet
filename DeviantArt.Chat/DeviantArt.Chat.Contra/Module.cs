@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace DeviantArt.Chat.Library
+namespace DeviantArt.Chat.Contra
 {
     public abstract class Module
     {
         // variables to access parts of the core
         protected Bot Bot;
-        protected Console Console;
-        protected Timer Timer;
+        protected Console Console;        
         protected bool IsLoading = false;
 
         public Module(Bot bot)
@@ -18,7 +17,6 @@ namespace DeviantArt.Chat.Library
             Bot = bot;
             Console = bot.Console;
             // dAmn = bot.dAmn;
-            Timer = bot.Timer;
             // User = bot.User;
             // Now we're loading the module!
             IsLoading = true;

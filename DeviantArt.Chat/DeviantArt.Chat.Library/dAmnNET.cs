@@ -44,7 +44,7 @@ namespace DeviantArt.Chat.Library
         /// <summary>
         /// Information about this bot
         /// </summary>
-        private const int Version = 4;
+        public const string dAmnVersion = "0.3";
         public const string Client = "damnNET";
         public const string Agent = "damnNET/3.5";
         public const string Owner = "bigmanhaywood";
@@ -58,6 +58,16 @@ namespace DeviantArt.Chat.Library
         #endregion
 
         #region Send / Receive Methods
+        /// <summary>
+        /// Method that sends the packets to the dAmn server.
+        /// </summary>
+        /// <param name="packet">Packet to send.</param>
+        public void Send(dAmnPacket packet)
+        {
+            StreamWriter.Write(packet.ToString());
+            StreamWriter.Flush();
+        }
+
         /// <summary>
         /// Method that sends the packets to the dAmn server.
         /// </summary>
@@ -325,7 +335,7 @@ namespace DeviantArt.Chat.Library
             // Now we make our handshake packet. Here we send information about the bot/client 
             // to the dAmn server.
             StringBuilder data = new StringBuilder();
-            data.Append("dAmnClient " + ChatSettings["Version"] + "\n");
+            data.Append("dAmnClient " + dAmnVersion + "\n");
             data.Append("agent=" + Agent + "\n");
             data.Append("bot=" + Client + "\n");
             data.Append("owner=" + Owner + "\n");
@@ -421,31 +431,52 @@ namespace DeviantArt.Chat.Library
 
         #region dAmn Commands
         public void Join(string channel)
-        {            
-            Send(BuildPacket("join", channel));
+        {                        
+            Send(new dAmnPacket { cmd = "join", param = FormatChat(channel) });
         }
 
         public void Part(string channel)
-        {
-            Send("part " + channel + "\n");
+        {            
+            Send(new dAmnPacket { cmd = "part", param = FormatChat(channel) });
         }
 
         public void Say(string[] nss, string message)
         {
-            // WE CAN SEND MESSAGES TO A PLETHORA OF CHANNELS!
             foreach (string ns in nss)
                 Say(ns, message);            
         }
 
         public void Say(string ns, string message)
-        {
-            // The type of message is easily changeable.
-            string type = (message.StartsWith("/me ") ? "action" : (message.StartsWith("/npmsg ") ? "npmsg" : "msg"));
-            message = (type == "action") ? message.Substring(4) : ((type == "npmsg") ? message.Substring(7) : message);
+        {            
+            // determine message type
+            string type = "msg";
+            if (message.StartsWith("/me"))
+            {
+                type = "action";
+                message = message.Substring("/me ".Length); // strip /me from the string
+            }
+            else if (message.StartsWith("/npmsg"))
+            {
+                type = "npmsg";
+                message = message.Substring("/npmsg ".Length); // strip /npmsg from the string
+            }
+
+            // replace illegal characters
             message = message.Replace("&lt;", "<");
             message = message.Replace("&gt;", ">");
             message = message.Trim();
-            Send("send " + ns + "\n\n" + type + " main\n\n" + message);
+
+            // get chatroom name
+            ns = FormatChat(ns);
+
+            // send packet
+            dAmnPacket packet = new dAmnPacket
+            {
+                cmd = "send",
+                param = ns,
+                body = type + " main\n\n" + message
+            };
+            Send(packet);             
         }
 
         public void Action(string ns, string message)
@@ -460,22 +491,38 @@ namespace DeviantArt.Chat.Library
 
         public void Promote(string ns, string user)
         {
-            Promote(ns, user, string.Empty);
+            Promote(ns, user, null);
         }
 
-        public void Promote(string ns, string user, string pc)
-        {            
-            Send("send " + ns + "\n\npromote " + user + "\n\n" + pc);
+        public void Promote(string ns, string user, string privClass)
+        {
+            if (!string.IsNullOrEmpty(privClass))
+                privClass = "\n\n" + privClass;   // pc is optional. if it's there add it
+
+            Send(new dAmnPacket
+            {
+                cmd = "send",
+                param = FormatChat(ns),
+                body = "promote " + user + privClass
+            });            
         }
 
         public void Demote(string ns, string user)
         {
-            Demote(ns, user, string.Empty);
+            Demote(ns, user, null);
         }
 
-        public void Demote(string ns, string user, string pc)
+        public void Demote(string ns, string user, string privClass)
         {
-            Send("send " + ns + "\n\ndemote " + user + "\n\n" + pc);
+            if (!string.IsNullOrEmpty(privClass))
+                privClass = "\n\n" + privClass;   // pc is optional. if it's there add it
+
+            Send(new dAmnPacket
+            {
+                cmd = "send",
+                param = FormatChat(ns),
+                body = "demote " + user + privClass
+            });   
         }
 
         public void Kick(string ns, string user)
@@ -486,38 +533,71 @@ namespace DeviantArt.Chat.Library
         public void Kick(string ns, string user, string r)
         {
             if (!string.IsNullOrEmpty(r))
-                r = "\n" + r + "\n";
-            Send("kick " + ns + "\nu=" + user + "\n" + r);
+                r = "\n\n" + r;
+
+            Send(new dAmnPacket
+            {
+                cmd = "kick",
+                param = FormatChat(ns),
+                args = new Dictionary<string,string>{ { "u", user } },
+                body = r
+            });
         }
 
         public void Ban(string ns, string user)
-        {
-            Send("send " + ns + "\n\nban " + user + "\n");
+        {            
+            Send(new dAmnPacket { cmd = "send", param = FormatChat(ns), body = "ban " + user });
         }
 
         public void UnBan(string ns, string user)
         {
-            Send("send " + ns + "\n\nunban " + user + "\n");
+            Send(new dAmnPacket { cmd = "send", param = FormatChat(ns), body = "unban " + user });
         }
 
         public void Get(string ns, string property)
-        {
-            Send("get " + ns + "\np=" + property + "\n");
+        {            
+            Send(new dAmnPacket
+            {
+                cmd = "get",
+                param = FormatChat(ns),
+                args = new Dictionary<string, string> { { "p", property } }
+            });
         }
 
         public void Set(string ns, string property, string value)
         {
-            Send("set " + ns + "\np=" + property + "\n\n" + value + "\n");
+            Send(new dAmnPacket
+            {
+                cmd = "get",
+                param = FormatChat(ns),
+                args = new Dictionary<string, string> { { "p", property } },
+                body = value
+            });
         }
 
         public void Admin(string ns, string command)
-        {
-            Send("send " + ns + "\n\nadmin\n\n" + command);
+        {            
+            Send(new dAmnPacket { cmd = "send", param = FormatChat(ns), body = "admin\n\n" + command });
         }
 
-        public void Disconnect()
+        public void Close()
         {
-            Send("disconnect\n");
+            Send(new dAmnPacket { cmd = "disconnect" });
+        }
+
+        public void Pong()
+        {
+            Send(new dAmnPacket { cmd = "pong" });
+        }
+
+        public void UserInfo(string user)
+        {
+            Send(new dAmnPacket
+            {
+                cmd = "get",
+                param = "login:" + user,
+                args = new Dictionary<string, string> { { "p", "info" } }
+            });
         }
         #endregion
 
