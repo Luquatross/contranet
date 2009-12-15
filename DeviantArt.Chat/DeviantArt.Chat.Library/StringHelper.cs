@@ -14,7 +14,7 @@ namespace DeviantArt.Chat.Library
     /// Helper functions for String not already found in C#.
     /// Inspired by PHP String Functions that are missing in .Net.
     /// </summary>
-    public static class StringHelper
+    internal static class StringHelper
     {
         /// <summary>
         /// Base64 encodes a string.
