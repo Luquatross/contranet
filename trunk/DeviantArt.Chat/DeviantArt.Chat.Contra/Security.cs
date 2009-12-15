@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Security.Cryptography;
 
-namespace DeviantArt.Chat.Library
+namespace DeviantArt.Chat.Contra
 {
     public static class Security
     {
