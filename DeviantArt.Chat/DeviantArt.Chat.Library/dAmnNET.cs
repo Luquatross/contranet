@@ -113,6 +113,19 @@ namespace DeviantArt.Chat.Library
         {
             return Read().Split('\n');
         }
+
+        /// <summary>
+        /// Method to read packets off of the stream and return it.
+        /// </summary>
+        /// <returns>dAmnPacket. Null if no data is present.</returns>
+        public dAmnPacket ReadPacket()
+        {
+            string rawPacket = Read();
+            if (string.IsNullOrEmpty(rawPacket))
+                return null;
+            else
+                return dAmnPacket.Parse(rawPacket);
+        }
         #endregion
 
         #region Build Packet
