@@ -124,7 +124,7 @@ namespace DeviantArt.Chat.Library
         /// </summary>
         /// <param name="data">Data to parse.</param>
         /// <returns>dAmnPacket.</returns>
-        public static dAmnPacket parse(string data)
+        public static dAmnPacket Parse(string data)
         {
             if (data == null)
                 throw new ArgumentNullException("data");
