@@ -6,6 +6,7 @@ using System.Xml;
 using System.Web;
 using System.Security.Cryptography;
 using System.Xml.Linq;
+using System.Threading;
 
 namespace DeviantArt.Chat.Library
 {
@@ -26,11 +27,10 @@ namespace DeviantArt.Chat.Library
         public string Trigger { get; private set; }
         public string AboutString { get; private set; }
         public string[] AutoJoin { get; private set; }
-        public HttpCookie Cookie { get; private set; }
+        public HttpCookie AuthCookie { get; private set; }
         public Console Console { get; private set; }
         public string SystemString { get; private set; }
         public Timer Timer { get; private set; }
-
         public string Session { get; private set; }
 
         public string[] ShutDownString = new string[]
@@ -38,6 +38,9 @@ namespace DeviantArt.Chat.Library
             "Bot has quit.",
             "Bye bye!"
         };
+
+        private dAmnNET dAmn;
+        private Thread listenThread;
 
         private string ConfigPath
         {
@@ -86,10 +89,27 @@ namespace DeviantArt.Chat.Library
             // Loading the config file
             LoadConfig();
             if (debugMode) Console.Notice("Config loaded, loading events system.");
+
+            // Get the server connection
+            dAmn = new dAmnNET();
+            // load cookie if it exists
+            if (AuthCookie != null)
+                dAmn.AuthCookie = AuthCookie;
+        }
+
+        public void LoadConfig(string username, string password, string[] channels)
+        {
+            Username = username;
+            Password = password;
+            AutoJoin = channels;
         }
 
         public void LoadConfig()
         {
+            // if file doesn't exist
+            if (!System.IO.File.Exists(ConfigPath))
+                return;
+
             // create xml document
             XmlDocument configDoc = new XmlDocument();
             configDoc.Load(ConfigPath);
@@ -114,10 +134,10 @@ namespace DeviantArt.Chat.Library
             AutoJoin = autoJoins.ToArray();
 
             // get the cookie
-            Cookie = new HttpCookie("BotCookie");
+            AuthCookie = new HttpCookie("BotCookie");
             XmlNodeList cookieData = root.SelectNodes("cookieData/add");
             foreach (XmlNode data in cookieData)
-                Cookie.Values.Add(data["name"].Value, data["value"].Value);
+                AuthCookie.Values.Add(data["name"].Value, data["value"].Value);
         }
 
         public void SaveConfig()
@@ -140,20 +160,58 @@ namespace DeviantArt.Chat.Library
                         new XElement("about", new XCData(AboutString)),
                         new XElement("autoJoins", autoJoinsElements.ToArray()),
                         new XElement("cookieData",
-                            new XElement("add", new XAttribute("key", "uniqueid"), new XAttribute("value", Cookie.Values["uniqueid"])),
-                            new XElement("add", new XAttribute("key", "visitcount"), new XAttribute("value", Cookie.Values["visitcount"])),
-                            new XElement("add", new XAttribute("key", "visittime"), new XAttribute("value", Cookie.Values["visittime"])),
-                            new XElement("add", new XAttribute("key", "username"), new XAttribute("value", Cookie.Values["username"])),
-                            new XElement("add", new XAttribute("key", "authtoken"), new XAttribute("value", Cookie.Values["authtoken"]))
+                            new XElement("add", new XAttribute("key", "uniqueid"), new XAttribute("value", AuthCookie.Values["uniqueid"])),
+                            new XElement("add", new XAttribute("key", "visitcount"), new XAttribute("value", AuthCookie.Values["visitcount"])),
+                            new XElement("add", new XAttribute("key", "visittime"), new XAttribute("value", AuthCookie.Values["visittime"])),
+                            new XElement("add", new XAttribute("key", "username"), new XAttribute("value", AuthCookie.Values["username"])),
+                            new XElement("add", new XAttribute("key", "authtoken"), new XAttribute("value", AuthCookie.Values["authtoken"]))
                         )
                     )
                 );
             botConfig.Save(ConfigPath);
         }
 
-        public void Network(bool sec)
+        private void Listen()
         {
+            try
+            {
+                while (true)
+                {
+                    string packet = string.Empty;
+                    try
+                    {
+                        packet = dAmn.Read();
+                    }
+                    catch
+                    {
+                        try
+                        {
+                            Thread.CurrentThread.Abort();
+                        }
+                        catch
+                        {
+                            return;
+                        }
+                    }
+                    // raise event
+                    // process packet
+                }
+            }
+            catch (ThreadAbortException ex)
+            {
+                return;
+            }
+        }
 
+        public void Run()
+        {
+            listenThread = new Thread(new ThreadStart(Listen));
+            if (dAmn.Connect(Username, Password))
+            {
+                foreach (string channel in AutoJoin)
+                    dAmn.Join(dAmn.FormatChat(channel));
+                listenThread.Start();
+            }
         }
     }
 }
