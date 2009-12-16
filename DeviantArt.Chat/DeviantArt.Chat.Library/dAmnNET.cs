@@ -37,19 +37,56 @@ namespace DeviantArt.Chat.Library
                 AuthToken = _AuthCookie.Values["authtoken"];
             }
         }
-        private HttpCookie _AuthCookie;
+        
+
+        /// <summary>
+        /// Client name.
+        /// </summary>
+        public string Client
+        {
+            get { return _Client; }
+            set { _Client = value; }
+        }
+
+        /// <summary>
+        /// Agent name.
+        /// </summary>
+        public string Agent
+        {
+            get { return _Agent; }
+            set { _Agent = value; }
+        }
+
+        /// <summary>
+        /// Owner's name.
+        /// </summary>
+        public string Owner
+        {
+            get { return _Owner; }
+            set { _Owner = value; }
+        }
+
+        /// <summary>
+        /// Trigger for this client.
+        /// </summary>
+        public string Trigger
+        {
+            get { return _Trigger; }
+            set { _Trigger = value; }
+        }
         #endregion
 
         #region Private Variables
         /// <summary>
         /// Information about this bot
         /// </summary>
-        public const string dAmnVersion = "0.3";
-        public const string Client = "damnNET";
-        public const string Agent = "damnNET/3.5";
-        public const string Owner = "bigmanhaywood";
+        private HttpCookie _AuthCookie;
+        private string _dAmnVersion = "0.3";
+        private string _Client = "damnNET";
+        private string _Agent = "damnNET/3.5";
+        private string _Owner = "bigmanhaywood";
+        private string _Trigger = "!";   
 
-        public string Trigger = "!";   
         private ILog Logger = LogManager.GetLogger(typeof(dAmnNET));
         private TcpClient Socket;
         private StreamReader StreamReader;
@@ -348,7 +385,7 @@ namespace DeviantArt.Chat.Library
             // Now we make our handshake packet. Here we send information about the bot/client 
             // to the dAmn server.
             StringBuilder data = new StringBuilder();
-            data.Append("dAmnClient " + dAmnVersion + "\n");
+            data.Append("dAmnClient " + _dAmnVersion + "\n");
             data.Append("agent=" + Agent + "\n");
             data.Append("bot=" + Client + "\n");
             data.Append("owner=" + Owner + "\n");

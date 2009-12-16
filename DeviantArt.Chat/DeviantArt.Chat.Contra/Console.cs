@@ -11,8 +11,6 @@ namespace DeviantArt.Chat.Contra
         private ILog Logger = LogManager.GetLogger(typeof(Console));
         private string Format = "HH:mm:ss";
 
-        public string Session { get; set; }
-
         public string Time() { return Time(DateTime.Now); }
         public string Time(DateTime ts) { return ts.ToString(Format); }
 
@@ -47,6 +45,17 @@ namespace DeviantArt.Chat.Contra
         public void Log(string message)
         {
             Logger.InfoFormat(message);
+        }
+
+        public string GetValue(string message)
+        {
+            while (true)
+            {
+                System.Console.Write("> " + message);
+                string userInput = System.Console.ReadLine();
+                if (!string.IsNullOrEmpty(userInput))
+                    return userInput;
+            }
         }
     }
 }
