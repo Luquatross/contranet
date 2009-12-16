@@ -8,6 +8,7 @@ using System.Security.Cryptography;
 using System.Xml.Linq;
 using System.Threading;
 using DeviantArt.Chat.Library;
+using System.Security.Authentication;
 
 namespace DeviantArt.Chat.Contra
 {
@@ -30,9 +31,9 @@ namespace DeviantArt.Chat.Contra
         public string[] AutoJoin { get; private set; }
         public HttpCookie AuthCookie { get; private set; }
         public Console Console { get; private set; }
-        public string SystemString { get; private set; }
-        public Timer Timer { get; private set; }
+        public string SystemString { get; private set; }        
         public string Session { get; private set; }
+        public bool IsDebug { get; private set; }
 
         public string[] ShutDownString = new string[]
         {
@@ -47,12 +48,13 @@ namespace DeviantArt.Chat.Contra
         {
             get
             {
-                string currentDirectory = System.Reflection.Assembly.GetExecutingAssembly().Location;
-                return System.IO.Path.Combine(currentDirectory, "\\Config\\Bot.config");
+                string currentDirectory = System.IO.Path.GetDirectoryName(
+                    System.Reflection.Assembly.GetExecutingAssembly().Location);
+                return System.IO.Path.Combine(currentDirectory, "Config\\Bot.config");
             }
         }
 
-        public Bot(bool debugMode)
+        public Bot()
         {
             // Generate a session ID code.
             this.Session = Security.SHA1(DateTime.Now.Ticks.ToString());
@@ -66,9 +68,6 @@ namespace DeviantArt.Chat.Contra
             // Get a new console interface
             this.Console = new Console();
 
-            // Tell the console the session code for logging purposes.
-            this.Console.Session = this.Session;
-
             // Some introduction messages! We've already done quite a bit but only introduce things here...
             this.Console.Notice("Hey thar!");
             this.Console.Notice(string.Format("Loading {0} {1}{2} by {3}",
@@ -76,37 +75,56 @@ namespace DeviantArt.Chat.Contra
                 this.Info["Version"],
                 this.Info["Status"],
                 this.Info["Author"]));
-            if (debugMode)
+            Console.Notice("Loading bot config file.");
+            // Loading the config file
+            bool hasConfig = true;
+            if (!LoadConfig())
+            {
+                hasConfig = false;
+            }
+            // Display debug info
+            if (IsDebug)
             {
                 // This is for when we're running in debug mode.
                 Console.Notice("Running in debug mode!");
                 Console.Notice("Session ID: " + Session);
             }
-
-            if (debugMode) Console.Notice("Loading bot config file.");
-            // Loading the config file
-            LoadConfig();
-            if (debugMode) Console.Notice("Config loaded, loading events system.");
-
-            // Get the server connection
+            
+            // Load the dAmn interface
             dAmn = new dAmnNET();
+
+            // get cookie information if needed
+            if (!hasConfig)
+            {
+                // get basic config data
+                GetConfigDataFromUser();
+                // get cookie information
+                HttpCookie authCookie = dAmn.GetAuthCookie(Username, Password);
+                if (authCookie == null)
+                {
+                    Console.Warning("Login information was invalid! Shutting down.");
+                    throw new AuthenticationException(string.Format("The usernamae '{0}' and password '{1}' were invalid. Login was unsuccessful.", Username, Password));
+                }
+                // otherwise, save it!
+                AuthCookie = authCookie;
+
+                // save the config for next run
+                SaveConfig();
+            }
+
             // load cookie if it exists
             if (AuthCookie != null)
                 dAmn.AuthCookie = AuthCookie;
+
+            // Now we're ready to get some work done!
+            Console.Notice("Ready!");
         }
 
-        public void LoadConfig(string username, string password, string[] channels)
-        {
-            Username = username;
-            Password = password;
-            AutoJoin = channels;
-        }
-
-        public void LoadConfig()
+        public bool LoadConfig()
         {
             // if file doesn't exist
             if (!System.IO.File.Exists(ConfigPath))
-                return;
+                return false;
 
             // create xml document
             XmlDocument configDoc = new XmlDocument();
@@ -120,6 +138,7 @@ namespace DeviantArt.Chat.Contra
             Password = root.SelectSingleNode("general/add[@key='password']").Attributes["value"].Value;
             Trigger = root.SelectSingleNode("general/add[@key='trigger']").Attributes["value"].Value;
             Owner = root.SelectSingleNode("general/add[@key='owner']").Attributes["value"].Value;
+            IsDebug = Convert.ToBoolean(root.SelectSingleNode("general/add[@key='debug']").Attributes["value"].Value);
 
             // get about string
             AboutString = root.SelectSingleNode("about").InnerText;
@@ -128,18 +147,25 @@ namespace DeviantArt.Chat.Contra
             List<string> autoJoins = new List<string>();
             XmlNodeList autoJoinNodes = root.SelectNodes("autoJoins/add");
             foreach (XmlNode joinNode in autoJoinNodes)
-                autoJoins.Add(joinNode["channel"].Value);
+                autoJoins.Add(joinNode.Attributes["channel"].Value);
             AutoJoin = autoJoins.ToArray();
 
             // get the cookie
             AuthCookie = new HttpCookie("BotCookie");
             XmlNodeList cookieData = root.SelectNodes("cookieData/add");
             foreach (XmlNode data in cookieData)
-                AuthCookie.Values.Add(data["name"].Value, data["value"].Value);
+                AuthCookie.Values.Add(data.Attributes["key"].Value, data.Attributes["value"].Value);
+
+            return true;
         }
 
         public void SaveConfig()
         {
+            // if directory doesn't exist, create it
+            string configDirectory = System.IO.Path.GetDirectoryName(ConfigPath);
+            if (!System.IO.Directory.Exists(configDirectory))
+                System.IO.Directory.CreateDirectory(configDirectory);
+
             // get auto join channels
             List<XElement> autoJoinsElements = new List<XElement>();
             foreach (string autoJoinChannel in this.AutoJoin)
@@ -153,7 +179,8 @@ namespace DeviantArt.Chat.Contra
                             new XElement("add", new XAttribute("key", "username"), new XAttribute("value", Username)),
                             new XElement("add", new XAttribute("key", "password"), new XAttribute("value", Password)),
                             new XElement("add", new XAttribute("key", "trigger"), new XAttribute("value", Trigger)),
-                            new XElement("add", new XAttribute("key", "owner"), new XAttribute("value", Owner))
+                            new XElement("add", new XAttribute("key", "owner"), new XAttribute("value", Owner)),
+                            new XElement("add", new XAttribute("key", "debug"), new XAttribute("value", IsDebug))
                         ),
                         new XElement("about", new XCData(AboutString)),
                         new XElement("autoJoins", autoJoinsElements.ToArray()),
@@ -167,6 +194,28 @@ namespace DeviantArt.Chat.Contra
                     )
                 );
             botConfig.Save(ConfigPath);
+        }
+
+        protected void GetConfigDataFromUser()
+        {
+            Console.Notice("You don't have a config file! Creating a new one...");
+            Console.Message("Please enter the following information.");
+
+            // get values from the user
+            Username = Console.GetValue("Bot Username: ");
+            Password = Console.GetValue("Bot Password: ");
+            Trigger = Console.GetValue("Bot Trigger: ");
+            Owner = Console.GetValue("Bot Owner: ");
+
+            // get about string
+            AboutString = "This is an about string.";
+
+            // get auto-join channels
+            Console.Message("What channels would you like your bot to join? Separate with commas.");
+            AutoJoin = Console.GetValue("").Split(',');
+
+            // set debug
+            IsDebug = false;
         }
 
         private void Listen()

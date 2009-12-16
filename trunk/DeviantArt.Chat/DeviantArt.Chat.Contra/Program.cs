@@ -14,8 +14,7 @@ namespace DeviantArt.Chat.Contra
         {
             try
             {
-                Bot bot = new Bot(true);
-                bot.LoadConfig("bigmanhaywood", "batman", new string[] { "Botdom" });
+                Bot bot = new Bot();
                 bot.Run();
             }
             catch (Exception ex)
