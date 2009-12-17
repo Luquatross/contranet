@@ -68,6 +68,7 @@ namespace DeviantArt.Chat.Library
         private string _cmd = "";
         private string _param = "";
         private dAmnArgs argsAndBody = new dAmnArgs();
+        private string _raw = "";
         #endregion
 
         #region Public Properties
@@ -93,6 +94,12 @@ namespace DeviantArt.Chat.Library
         {
             get { return argsAndBody.args; }
             set { argsAndBody.args = value; }
+        }
+
+        public string raw
+        {
+            get { return _raw; }
+            set { _raw = value; }
         }
         #endregion
 
@@ -142,6 +149,7 @@ namespace DeviantArt.Chat.Library
                 if (j > 0)
                     p.param = tmp.Substring(j + 1);
                 p.argsAndBody = dAmnArgs.getArgsNData(data.Substring(i + 1));
+                p.raw = data;
                 return p;
             }
             catch (Exception e)
