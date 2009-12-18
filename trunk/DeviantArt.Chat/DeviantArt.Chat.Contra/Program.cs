@@ -14,7 +14,7 @@ namespace DeviantArt.Chat.Oberon
         {
             try
             {
-                Bot bot = new Bot();
+                Bot bot = Bot.Instance;
                 bot.Run();
             }
             catch (Exception ex)

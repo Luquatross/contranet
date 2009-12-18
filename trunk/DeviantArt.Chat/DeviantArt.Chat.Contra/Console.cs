@@ -3,14 +3,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using log4net;
+using System.IO;
 
 namespace DeviantArt.Chat.Oberon
 {
     public class Console
     {
+        #region Private Variables
         private ILog Logger = LogManager.GetLogger(typeof(Console));
         private string Format = "HH:mm:ss";
+        private TextWriter Output;
+        #endregion
 
+        #region Constructors
+        public Console() : this(System.Console.Out) { }
+
+        public Console(TextWriter output)
+        {
+            Output = output;
+        }
+        #endregion
+
+        #region Public Methods
         public string Time() { return Time(DateTime.Now); }
         public string Time(DateTime ts) { return ts.ToString(Format); }
 
@@ -37,8 +51,8 @@ namespace DeviantArt.Chat.Oberon
 
         public void Write(string data)
         {
-            data = data.Replace("\n", "\n>>");
-            System.Console.WriteLine(">>" + data);
+            data = data.Replace("\n", "\n>>");        
+            Output.WriteLine(">>" + data);
             Log(">>" + data);
         }
 
@@ -47,7 +61,7 @@ namespace DeviantArt.Chat.Oberon
             Logger.InfoFormat(message);
         }
 
-        public string GetValue(string message)
+        public string GetValueFromConsole(string message)
         {
             while (true)
             {
@@ -57,5 +71,6 @@ namespace DeviantArt.Chat.Oberon
                     return userInput;
             }
         }
+        #endregion
     }
 }
