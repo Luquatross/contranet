@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Xml;
-using System.Web;
-using System.Security.Cryptography;
-using System.Linq;
-using System.Xml.Linq;
-using System.Threading;
-using DeviantArt.Chat.Library;
-using System.Security.Authentication;
-using System.Reflection;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Security.Authentication;
+using System.Threading;
+using System.Web;
+using System.Xml;
+using System.Xml.Linq;
+using DeviantArt.Chat.Library;
 
 namespace DeviantArt.Chat.Oberon
 {
@@ -60,7 +57,7 @@ namespace DeviantArt.Chat.Oberon
         public string[] AutoJoin { get; private set; }
         public HttpCookie AuthCookie { get; private set; }
         public Console Console { get; private set; }
-        public string SystemString { get; private set; }        
+        public string SystemString { get; private set; }
         public string Session { get; private set; }
         public bool IsDebug { get; private set; }
 
@@ -164,7 +161,7 @@ namespace DeviantArt.Chat.Oberon
                 Console.Notice("Session ID: " + Session);
                 Console.Notice("Bot config file loaded successfully.");
             }
-            
+
             // Load the dAmn interface
             dAmn = new dAmnNET();
 
@@ -194,7 +191,7 @@ namespace DeviantArt.Chat.Oberon
             // initialize event map values      
             if (IsDebug)
                 Console.Notice("Initializing event map.");
-            InitializeEventMap();                            
+            InitializeEventMap();
 
             // Now we're ready to get some work done!
             Console.Notice("Ready!");
@@ -357,7 +354,7 @@ namespace DeviantArt.Chat.Oberon
         /// <param name="plugin">Plugin assocaited with the method.</param>
         /// <param name="command">Method to execute.</param>
         public void AddCommandListener(string commandName, Plugin plugin, BotCommandEvent commandMethod)
-        {            
+        {
             // make sure command is free
             if (commandMap.ContainsKey(commandName))
             {
@@ -378,7 +375,7 @@ namespace DeviantArt.Chat.Oberon
         /// </summary>
         /// <param name="commandName">Command name to trigger.</param>
         public void TriggerCommand(string commandName, dAmnServerPacket packet)
-        {            
+        {
             if (commandMap.ContainsKey(commandName))
             {
                 Plugin plugin = commandMap[commandName].Key;
@@ -505,7 +502,7 @@ namespace DeviantArt.Chat.Oberon
         /// Executed when the plugin directory has been modified.
         /// </summary>
         private void PluginDirectoryChanged(object sender, FileSystemEventArgs e)
-        { 
+        {
             if (IsDebug)
                 Console.Notice(string.Format("The plugin '{0}' was created/modified/deleted.", e.Name));
         }
@@ -539,7 +536,7 @@ namespace DeviantArt.Chat.Oberon
                             return;
                         }
                     }
-                                        
+
                     // process packet if it exists
                     if (packet != null)
                         ProcessPacket(packet);
@@ -591,7 +588,7 @@ namespace DeviantArt.Chat.Oberon
 
             // try to connect!
             if (dAmn.Connect(Username, Password))
-            {                
+            {
                 // start listening for packets
                 listenThread.Start();
 
