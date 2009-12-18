@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Security.Cryptography;
+using System.IO;
 
 namespace DeviantArt.Chat.Oberon
 {
@@ -77,6 +78,22 @@ namespace DeviantArt.Chat.Oberon
             }
 
             return osName + ", " + os.Version.ToString();
+        }
+
+        /// <summary>
+        /// Get all files in directory recursively.
+        /// </summary>
+        /// <param name="dirInfo">Directory to search.</param>
+        /// <param name="searchPattern">Search pattern to use.</param>
+        /// <returns>Files found.</returns>
+        public static IEnumerable<FileInfo> GetFilesRecursive(DirectoryInfo dirInfo, string searchPattern)
+        {
+            foreach (DirectoryInfo di in dirInfo.GetDirectories())
+                foreach (FileInfo fi in GetFilesRecursive(di, searchPattern))
+                    yield return fi;
+
+            foreach (FileInfo fi in dirInfo.GetFiles(searchPattern))
+                yield return fi;
         }
     }
 }
