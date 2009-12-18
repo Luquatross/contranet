@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviantArt.Chat.Oberon", "DeviantArt.Chat.Contra\DeviantArt.Chat.Oberon.csproj", "{61781D7F-3E2F-4B3B-A5F0-7106F3921A3E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviantArt.Chat.Oberon", "DeviantArt.Chat.Oberon\DeviantArt.Chat.Oberon.csproj", "{61781D7F-3E2F-4B3B-A5F0-7106F3921A3E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviantArt.Chat.Library", "DeviantArt.Chat.Library\DeviantArt.Chat.Library.csproj", "{A419A260-3C55-43A5-8EC7-82C0608769BC}"
 EndProject
