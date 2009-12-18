@@ -6,7 +6,7 @@ using DeviantArt.Chat.Library;
 using System.Web;
 using System.Collections;
 
-namespace DeviantArt.Chat.Contra
+namespace DeviantArt.Chat.Oberon
 {
     class Program
     {

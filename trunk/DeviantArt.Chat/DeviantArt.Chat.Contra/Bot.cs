@@ -10,7 +10,7 @@ using System.Threading;
 using DeviantArt.Chat.Library;
 using System.Security.Authentication;
 
-namespace DeviantArt.Chat.Contra
+namespace DeviantArt.Chat.Oberon
 {
     public class Bot
     {
@@ -58,13 +58,13 @@ namespace DeviantArt.Chat.Contra
         public Bot()
         {
             // Generate a session ID code.
-            this.Session = Security.SHA1(DateTime.Now.Ticks.ToString());
+            this.Session = Utility.SHA1(DateTime.Now.Ticks.ToString());
 
             // Our start time is here.
             this.Start = DateTime.Now;
 
             // System information string
-            this.SystemString = Security.GetOperatingSystemVersion();
+            this.SystemString = Utility.GetOperatingSystemVersion();
 
             // Get a new console interface
             this.Console = new Console();

@@ -4,15 +4,27 @@ using System.Linq;
 using System.Text;
 using System.Security.Cryptography;
 
-namespace DeviantArt.Chat.Contra
+namespace DeviantArt.Chat.Oberon
 {
-    public static class Security
+    /// <summary>
+    /// Utility class to hold static functions that don't belong to any particular object.
+    /// </summary>
+    public static class Utility
     {
+        /// <summary>
+        /// SHA Encrypts a string.
+        /// </summary>
+        /// <param name="str">String to encrypt.</param>
+        /// <returns></returns>
         public static string SHA1(string str)
         {
             return BitConverter.ToString(SHA1Managed.Create().ComputeHash(Encoding.Default.GetBytes(str))).Replace("-", "");
         }
 
+        /// <summary>
+        /// Gets the operating system full version as a string.
+        /// </summary>
+        /// <returns>OS version.</returns>
         public static string GetOperatingSystemVersion()
         {
             System.OperatingSystem os = System.Environment.OSVersion;
