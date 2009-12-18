@@ -161,7 +161,7 @@ namespace DeviantArt.Chat.Library
             if (string.IsNullOrEmpty(rawPacket))
                 return null;
             else
-                return dAmnPacket.Parse(rawPacket);
+                return new dAmnServerPacket(dAmnPacket.Parse(rawPacket));
         }
         #endregion
 

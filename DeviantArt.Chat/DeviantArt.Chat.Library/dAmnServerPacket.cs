@@ -5,6 +5,9 @@ using System.Text;
 
 namespace DeviantArt.Chat.Library
 {
+    /// <summary>
+    /// The types of packets that can be received from the dAmn servers.
+    /// </summary>
     public enum dAmnPacketType
     {
         Unknown,
