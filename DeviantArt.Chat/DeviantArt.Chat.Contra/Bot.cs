@@ -43,6 +43,7 @@ namespace DeviantArt.Chat.Contra
 
         private dAmnNET dAmn;
         private Thread listenThread;
+        private bool authTokenFromConfig = true;
 
         private string ConfigPath
         {
@@ -77,10 +78,9 @@ namespace DeviantArt.Chat.Contra
                 this.Info["Author"]));
             Console.Notice("Loading bot config file.");
             // Loading the config file
-            bool hasConfig = true;
             if (!LoadConfig())
             {
-                hasConfig = false;
+                authTokenFromConfig = false;
             }
             // Display debug info
             if (IsDebug)
@@ -94,7 +94,7 @@ namespace DeviantArt.Chat.Contra
             dAmn = new dAmnNET();
 
             // get cookie information if needed
-            if (!hasConfig)
+            if (!authTokenFromConfig)
             {
                 // get basic config data
                 GetConfigDataFromUser();
@@ -242,6 +242,8 @@ namespace DeviantArt.Chat.Contra
                     }
                     // raise event
                     // process packet
+                    if (!string.IsNullOrEmpty(packet))
+                        Console.Notice(packet);
                 }
             }
             catch (ThreadAbortException ex)
@@ -253,6 +255,7 @@ namespace DeviantArt.Chat.Contra
         public void Run()
         {
             listenThread = new Thread(new ThreadStart(Listen));
+            // try to connect!
             if (dAmn.Connect(Username, Password))
             {
                 foreach (string channel in AutoJoin)
@@ -262,6 +265,25 @@ namespace DeviantArt.Chat.Contra
                     dAmn.Action(channel, "is happy the bot is coming along nicely.");
                 }
                 listenThread.Start();
+            }
+            else
+            {
+                if (authTokenFromConfig)
+                {
+                    // if we got the auth token from the config it may have expired.
+                    // in that case, get a new one.
+                    AuthCookie = dAmn.GetAuthCookie(Username, Password);
+                    dAmn.AuthCookie = AuthCookie;
+                    authTokenFromConfig = false;
+
+                    // try connecting again.
+                    Run();
+                }
+                else
+                {
+                    Console.Warning("Unable to connect to dAmn server!");
+                    return;
+                }
             }
         }
     }
