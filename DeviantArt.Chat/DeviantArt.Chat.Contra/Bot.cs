@@ -5,10 +5,13 @@ using System.Text;
 using System.Xml;
 using System.Web;
 using System.Security.Cryptography;
+using System.Linq;
 using System.Xml.Linq;
 using System.Threading;
 using DeviantArt.Chat.Library;
 using System.Security.Authentication;
+using System.Reflection;
+using System.IO;
 
 namespace DeviantArt.Chat.Oberon
 {
@@ -20,12 +23,12 @@ namespace DeviantArt.Chat.Oberon
     public delegate void BotServerPacketEvent(string ns, dAmnServerPacket packet);
 
     /// <summary>
-    /// 
+    /// Event that is executed when a command is issued by a user.
     /// </summary>
-    /// <param name="ns"></param>
-    /// <param name="from"></param>
-    /// <param name="message"></param>
-    /// <param name="target"></param>
+    /// <param name="ns">Chatroom command applies to if applicable.</param>
+    /// <param name="from">User who issued the command.</param>
+    /// <param name="message">Contents of the command.</param>
+    /// <param name="target">Whom the command is targeted for if applicable.</param>
     public delegate void BotCommandEvent(string ns, string from, string message, string target);
 
     /// <summary>
@@ -66,12 +69,45 @@ namespace DeviantArt.Chat.Oberon
             "Bot has quit.",
             "Bye bye!"
         };
+
+        /// <summary>
+        /// Path to the bot config file.
+        /// </summary>
+        public string ConfigPath
+        {
+            get { return System.IO.Path.Combine(currentDirectory, "Config\\Bot.config"); }
+        }
+
+        /// <summary>
+        /// Path to plugin directory.
+        /// </summary>
+        public string PluginPath
+        {
+            get { return System.IO.Path.Combine(currentDirectory, "Plugins"); }
+        }
         #endregion
 
         #region Private Variables
+        /// <summary>
+        /// Reference to dAmn library.
+        /// </summary>
         private dAmnNET dAmn;
+
+        /// <summary>
+        /// Thread that listens to open socket.
+        /// </summary>
         private Thread listenThread;
+
+        /// <summary>
+        /// Boolean determining if our authtoken was taken from the bot config or not.
+        /// </summary>
         private bool authTokenFromConfig = true;
+
+        /// <summary>
+        /// The current directory for the executing assembly.
+        /// </summary>
+        private string currentDirectory = System.IO.Path.GetDirectoryName(
+                    System.Reflection.Assembly.GetExecutingAssembly().Location);
 
         /// <summary>
         /// Variable to hold mapping of packet types to a BotEventList. This way, one packet type
@@ -83,21 +119,11 @@ namespace DeviantArt.Chat.Oberon
         /// Variable to hold mapping of one command to one plugin and method.
         /// </summary>
         private Dictionary<string, KeyValuePair<Plugin, BotCommandEvent>> commandMap = new Dictionary<string, KeyValuePair<Plugin, BotCommandEvent>>();
-        #endregion
 
-        #region Private Properties
         /// <summary>
-        /// Path to the bot config file.
+        /// Private list of all variables that are loaded.
         /// </summary>
-        private string ConfigPath
-        {
-            get
-            {
-                string currentDirectory = System.IO.Path.GetDirectoryName(
-                    System.Reflection.Assembly.GetExecutingAssembly().Location);
-                return System.IO.Path.Combine(currentDirectory, "Config\\Bot.config");
-            }
-        }
+        private Dictionary<string, Plugin> botPlugins = new Dictionary<string, Plugin>();
         #endregion
 
         #region Constructor and Singleton Methods
@@ -134,9 +160,9 @@ namespace DeviantArt.Chat.Oberon
             // Display debug info
             if (IsDebug)
             {
-                // This is for when we're running in debug mode.
                 Console.Notice("Running in debug mode!");
                 Console.Notice("Session ID: " + Session);
+                Console.Notice("Bot config file loaded successfully.");
             }
             
             // Load the dAmn interface
@@ -165,8 +191,10 @@ namespace DeviantArt.Chat.Oberon
             if (AuthCookie != null)
                 dAmn.AuthCookie = AuthCookie;
 
-            // initialize event map values
-            InitializeEventMap();
+            // initialize event map values      
+            if (IsDebug)
+                Console.Notice("Initializing event map.");
+            InitializeEventMap();                            
 
             // Now we're ready to get some work done!
             Console.Notice("Ready!");
@@ -317,6 +345,9 @@ namespace DeviantArt.Chat.Oberon
         {
             eventMap[packetType].Add(
                 new KeyValuePair<Plugin, BotServerPacketEvent>(plugin, method));
+
+            // register plugin so we have a reference to it
+            RegisterPlugin(plugin);
         }
 
         /// <summary>
@@ -327,8 +358,19 @@ namespace DeviantArt.Chat.Oberon
         /// <param name="command">Method to execute.</param>
         public void AddCommandListener(string commandName, Plugin plugin, BotCommandEvent commandMethod)
         {            
+            // make sure command is free
+            if (commandMap.ContainsKey(commandName))
+            {
+                Console.Warning(string.Format(plugin.PluginName + " error. The command '{0}' is already taken."));
+                return;
+            }
+
+            // add mapping
             commandMap.Add(commandName,
                 new KeyValuePair<Plugin, BotCommandEvent>(plugin, commandMethod));
+
+            // register plugin so we have a reference to it
+            RegisterPlugin(plugin);
         }
 
         /// <summary>
@@ -373,6 +415,99 @@ namespace DeviantArt.Chat.Oberon
         private void ConvertPacketIntoCommand(dAmnServerPacket packet, out string from, out string message, out string target)
         {
             throw new NotImplementedException();
+        }
+        #endregion
+
+        #region Plugin Methods
+        /// <summary>
+        /// Finds all plugin in the plugin directory and sub-directories.
+        /// </summary>
+        /// <returns>List of found plugins</returns>
+        private Plugin[] FindPlugins()
+        {
+            List<Plugin> plugins = new List<Plugin>();
+
+            // get all assemblies in the plugin folder structure
+            string[] assemblies = (from file in Utility.GetFilesRecursive(new DirectoryInfo(PluginPath), "*.dll")
+                                   select file.FullName).ToArray();
+
+            // find all assemblies that are plugins
+            foreach (string assembly in assemblies)
+            {
+                Assembly a = Assembly.LoadFile(assembly);
+                Type[] assemblyTypes = a.GetTypes();
+                foreach (Type t in assemblyTypes)
+                {
+                    // check to see if this type inherits from the plugin class
+                    if (typeof(Plugin).IsAssignableFrom(t))
+                    {
+                        Plugin p = (Plugin)Activator.CreateInstance(t);
+                        plugins.Add(p);
+                    }
+                }
+            }
+            return plugins.ToArray();
+        }
+
+        /// <summary>
+        /// Registers plugin so we can reference any time by it's name.
+        /// </summary>
+        /// <param name="plugin"></param>
+        private void RegisterPlugin(Plugin plugin)
+        {
+            if (!botPlugins.ContainsKey(plugin.PluginName))
+            {
+                botPlugins.Add(plugin.PluginName, plugin);
+                if (IsDebug)
+                    Console.Notice("Plugin registered: " + plugin.PluginName);
+            }
+        }
+
+        /// <summary>
+        /// Load all of our plugins
+        /// </summary>
+        private void LoadPlugins()
+        {
+            Plugin[] allPlugins = FindPlugins();
+            if (IsDebug)
+                Console.Notice("Starting plugin loading.");
+
+            // load all plugins
+            int pluginsLoaded = 0;
+            foreach (Plugin p in allPlugins)
+            {
+                try
+                {
+                    p.Load();
+                    pluginsLoaded++;
+                }
+                catch (Exception ex)
+                {
+                    Console.Log("Error loading plugin.\n" + ex.ToString());
+                }
+            }
+            if (IsDebug)
+                Console.Notice(string.Format(
+                    "Plugin loading completed. {0} of {1} plugins are running.",
+                    pluginsLoaded,
+                    allPlugins.Length
+                ));
+
+            // add file watcher for plugin directory
+            FileSystemWatcher pluginWatcher = new FileSystemWatcher();
+            pluginWatcher.Filter = "*.dll"; // only watch for assemblies
+            pluginWatcher.Path = PluginPath;
+            pluginWatcher.EnableRaisingEvents = true;
+            pluginWatcher.Changed += new FileSystemEventHandler(PluginDirectoryChanged);
+        }
+
+        /// <summary>
+        /// Executed when the plugin directory has been modified.
+        /// </summary>
+        private void PluginDirectoryChanged(object sender, FileSystemEventArgs e)
+        { 
+            if (IsDebug)
+                Console.Notice(string.Format("The plugin '{0}' was created/modified/deleted.", e.Name));
         }
         #endregion
 
@@ -448,17 +583,23 @@ namespace DeviantArt.Chat.Oberon
         /// </summary>
         public void Run()
         {
+            // load listening thread
             listenThread = new Thread(new ThreadStart(Listen));
+
+            // load all of our plugins for the system
+            LoadPlugins();
+
             // try to connect!
             if (dAmn.Connect(Username, Password))
-            {
+            {                
+                // start listening for packets
+                listenThread.Start();
+
                 // if connected auto join all associated channels
                 foreach (string channel in AutoJoin)
                 {
                     dAmn.Join(channel);
                 }
-                // start listening for packets
-                listenThread.Start();
             }
             else
             {

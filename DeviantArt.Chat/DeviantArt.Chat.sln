@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviantArt.Chat.Oberon", "D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviantArt.Chat.Library", "DeviantArt.Chat.Library\DeviantArt.Chat.Library.csproj", "{A419A260-3C55-43A5-8EC7-82C0608769BC}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{4678E941-DDB9-46E4-89A4-D527CDCF79C0}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
