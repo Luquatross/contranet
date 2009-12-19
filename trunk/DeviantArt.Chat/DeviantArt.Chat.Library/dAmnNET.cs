@@ -159,9 +159,15 @@ namespace DeviantArt.Chat.Library
         {
             string rawPacket = Read();
             if (string.IsNullOrEmpty(rawPacket))
+            {
                 return null;
+            }
             else
-                return new dAmnServerPacket(dAmnPacket.Parse(rawPacket));
+            {
+                dAmnServerPacket p = new dAmnServerPacket(dAmnPacket.Parse(rawPacket));
+                p.raw = rawPacket;
+                return p;
+            }
         }
         #endregion
 

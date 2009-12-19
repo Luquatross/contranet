@@ -25,16 +25,50 @@ namespace DeviantArt.Chat.Oberon
     /// </summary>
     /// <param name="ns">Chatroom command applies to if applicable.</param>
     /// <param name="from">User who issued the command.</param>
-    /// <param name="message">Contents of the command.</param>
-    /// <param name="target">Whom the command is targeted for if applicable.</param>
-    /// <param name="eventResponse">Response to an event on the server.</param>
-    public delegate void BotCommandEvent(string ns, string from, string message, string target, string eventResponse);
+    /// <param name="message">Contents of the command.</param>    
+    public delegate void BotCommandEvent(string ns, string from, string message);
 
     /// <summary>
     /// Custom object made to simplify code syntax. This is a list of KeyValue pairs.
     /// The key/value being the plugin and the method. 
     /// </summary>
     public class BotEventList : List<KeyValuePair<Plugin, BotServerPacketEvent>> { }
+
+    /// <summary>
+    /// Represents a user in a chatroom.
+    /// </summary>
+    public struct ChatUser
+    {
+        public string Symbol;
+        public string PrivClass;
+
+        public ChatUser(string symbol, string privClass)
+        {
+            Symbol = symbol;
+            PrivClass = privClass;
+        }
+    }
+
+    /// <summary>
+    /// Represents properties of a chatroom.
+    /// </summary>
+    public struct ChatRoom
+    {
+        public string Title;
+        public string Topic;
+        public List<string> PrivClasses;
+        public List<ChatUser> Members;
+        public DateTime TimeJoined;
+
+        public ChatRoom(string title)
+        {
+            Title = title;
+            Topic = "";
+            PrivClasses = new List<string>();
+            Members = new List<ChatUser>();
+            TimeJoined = DateTime.Now;
+        }
+    }
 
     /// <summary>
     /// The core of the system, the bot that runs all processes.
@@ -61,7 +95,7 @@ namespace DeviantArt.Chat.Oberon
         public Console Console { get; private set; }
         public string SystemString { get; private set; }
         public string Session { get; private set; }
-        public bool IsDebug { get; private set; }
+        public bool IsDebug { get; private set; }        
 
         public string[] ShutDownString = new string[]
         {
@@ -83,7 +117,7 @@ namespace DeviantArt.Chat.Oberon
         public string PluginPath
         {
             get { return System.IO.Path.Combine(currentDirectory, "Plugins"); }
-        }
+        }        
         #endregion
 
         #region Private Variables
@@ -123,6 +157,11 @@ namespace DeviantArt.Chat.Oberon
         /// Private list of all variables that are loaded.
         /// </summary>
         private Dictionary<string, Plugin> botPlugins = new Dictionary<string, Plugin>();
+
+        /// <summary>
+        /// A list of chatrooms currently joined.
+        /// </summary>
+        private Dictionary<string, ChatRoom> Chats = new Dictionary<string, ChatRoom>();
         #endregion
 
         #region Constructor and Singleton Methods
@@ -376,7 +415,10 @@ namespace DeviantArt.Chat.Oberon
         /// Triggers the command provided by invoking its listener.
         /// </summary>
         /// <param name="commandName">Command name to trigger.</param>
-        public void TriggerCommand(string commandName, dAmnServerPacket packet)
+        /// <param name="ns">Chatroom.</param>
+        /// <param name="from">Who issued the command.</param>
+        /// <param name="message">Contents of the command.</param>        
+        public void TriggerCommand(string commandName, string ns, string from, string message)
         {
             if (commandMap.ContainsKey(commandName))
             {
@@ -386,114 +428,10 @@ namespace DeviantArt.Chat.Oberon
                 // only trigger command if plugin is activated
                 if (plugin.Status == PluginStatus.On)
                 {
-                    string ns = null;
-                    string from;
-                    string message;
-                    string target;
-                    string eventResponse;
-
-                    // convert packet into command                    
-                    ConvertPacketIntoCommand(packet, out from, out message, out target, out eventResponse);
-
-                    // get chat room if it exists
-                    if (!string.IsNullOrEmpty(packet.param))
-                        ns = dAmn.DeformatChat(packet.param);
-
-                    // send to listener
-                    method(ns, from, message, target, eventResponse);
+                    method(ns, from, message);
                 }
             }
-        }
-
-        /// <summary>
-        /// Converts a packet into a usable command by the plugin system.
-        /// </summary>
-        /// <param name="packet">Packet to convert.</param>
-        /// <param name="from">User who generated this event.</param>
-        /// <param name="message">Content of packet.</param>
-        /// <param name="target">Target of the packet command.</param>
-        /// <param name="eventResponse">Response to event.</param>
-        private void ConvertPacketIntoCommand(dAmnServerPacket packet, out string from, out string message, out string target, out string eventResponse)
-        {
-            // initialize variables
-            from = null;
-            message = null;
-            target = null;
-            eventResponse = null;
-
-            switch (packet.PacketType)
-            {
-                case dAmnPacketType.Handshake:
-                    // nothing to do
-                    break;
-                case dAmnPacketType.Login:
-                    eventResponse = packet.args["e"];
-                    break;
-                case dAmnPacketType.Join:
-                case dAmnPacketType.Part:
-                    eventResponse = packet.args["e"];
-                    if (packet.args.ContainsKey("r"))
-                        message = packet.args["r"];
-                    break;
-                case dAmnPacketType.Topic:
-                case dAmnPacketType.Title:
-                case dAmnPacketType.PrivClasses:
-                case dAmnPacketType.MemberList:
-                    eventResponse = packet.args["p"];
-                    from = packet.args["by"];
-                    break;
-                case dAmnPacketType.Chat:
-                    // get sub packet
-                    dAmnPacket subPacket = dAmnPacket.Parse(packet.body);
-                    switch (subPacket.cmd)
-                    {
-                        case "msg":
-                        case "action":
-                            from = subPacket.args["from"];
-                            message = subPacket.body;
-                            break;
-                        case "join":
-                        case "part":
-                            from = subPacket.param;
-                            if (subPacket.args.ContainsKey("r"))
-                                message = subPacket.args["r"];
-                            break;
-                        case "privchg":
-                        case "kicked":
-                            from = subPacket.param;
-                            target = subPacket.args["by"];
-                            if (subPacket.cmd == "privchg")
-                                message = subPacket.args["pc"];
-                            if (!string.IsNullOrEmpty(subPacket.cmd))
-                                message = subPacket.body;
-                            break;
-                        case "admin":
-                            // TODO!
-                            break;
-                    }
-                    break;
-                case dAmnPacketType.Kicked:
-                    from = packet.args["by"];
-                    if (!string.IsNullOrEmpty(packet.body))
-                        message = packet.body;
-                    break;
-                case dAmnPacketType.Ping:
-                    // nothing to do
-                    break;
-                case dAmnPacketType.Disconnect:
-                    eventResponse = packet.args["e"];
-                    break;
-                case dAmnPacketType.ErrorSend:
-                case dAmnPacketType.ErrorKick:
-                case dAmnPacketType.ErrorGet:
-                case dAmnPacketType.ErrorSet:
-                    // TODO!
-                    break;
-                case dAmnPacketType.ErrorKill:
-                    eventResponse = packet.args["e"];
-                    break;                
-            }
-        }
+        }        
         #endregion
 
         #region Plugin Methods
@@ -649,14 +587,17 @@ namespace DeviantArt.Chat.Oberon
                     // only trigger event if plug is activated
                     if (plugin.Status == PluginStatus.On)
                     {
-                        method(dAmn.DeformatChat(packet.param), packet);
+                        string ns = null;
+                        if (!string.IsNullOrEmpty(packet.param))
+                            ns = dAmn.DeformatChat(packet.param);
+                        method(ns, packet);
                     }
                 }
             }
         }
         #endregion
 
-        #region Run
+        #region Run / Restart / Shutdown
         /// <summary>
         /// Starts the bot running. Connects to dAmn server and starts executing.
         /// </summary>
@@ -668,6 +609,15 @@ namespace DeviantArt.Chat.Oberon
             // load all of our plugins for the system
             LoadPlugins();
 
+            // start up the bot
+            StartBot();
+        }
+
+        /// <summary>
+        /// Connects the bot to the dAmns servers and starts the listening thread.
+        /// </summary>
+        private void StartBot()
+        {
             // try to connect!
             if (dAmn.Connect(Username, Password))
             {
@@ -702,6 +652,91 @@ namespace DeviantArt.Chat.Oberon
                     return;
                 }
             }
+        }
+
+        /// <summary>
+        /// Restarts the bot.
+        /// </summary>
+        public void Restart()
+        {
+            // close the listening thread
+            listenThread.Abort();
+
+            // disconnect from the server
+            dAmn.Disconnect();
+
+            // wait a little bit
+            Thread.Sleep(TimeSpan.FromSeconds(1.00));
+
+            // start the bot back up
+            StartBot();
+        }
+
+        /// <summary>
+        /// Stops listening for packets from the server, shuts down the
+        /// thread and closes the connection.
+        /// </summary>
+        public void Shutdown()
+        {
+            Console.Notice("Shutting down bot...");
+
+            // close the listening thread
+            listenThread.Abort();
+            
+            // disconnect from the server
+            dAmn.Disconnect();
+
+            Console.Notice("Shutdown complete.");
+        }
+        #endregion
+
+        #region Chatroom Methods
+        /// <summary>
+        /// Registers chatroom with bot.
+        /// </summary>
+        /// <param name="chatroomName">Chatroom name.</param>
+        /// <param name="room">Chatroom properties.</param>
+        public void RegisterChatroom(string chatroomName, ChatRoom room)
+        {
+            Chats.Add(chatroomName, room);
+        }
+
+        /// <summary>
+        /// Removes chatroom from register list.
+        /// </summary>
+        /// <param name="chatroomName">Chatroom to remove.</param>
+        public void UnregisterChatroom(string chatroomName)
+        {
+            Chats.Remove(chatroomName);
+        }
+
+        /// <summary>
+        /// Get chatroom.
+        /// </summary>
+        /// <param name="ns">Chatroom name.</param>
+        /// <returns>Chatroom.</returns>
+        public ChatRoom GetChatroom(string ns)
+        {
+            return Chats[ns];
+        }
+
+        /// <summary>
+        /// Register user with chatroom.
+        /// </summary>
+        /// <param name="ns">Chatroom user belongs to.</param>
+        /// <param name="user">User to register.</param>
+        public void RegisterUser(string ns, ChatUser user)
+        {
+            Chats[ns].Members.Add(user);
+        }
+
+        /// <summary>
+        /// Gets the number of opened chatrooms.
+        /// </summary>
+        /// <returns>Number of opened chatrooms.</returns>
+        public int ChatroomsOpen()
+        {
+            return Chats.Count;
         }
         #endregion
     }

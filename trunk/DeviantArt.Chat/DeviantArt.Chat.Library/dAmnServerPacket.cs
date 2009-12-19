@@ -194,6 +194,96 @@ namespace DeviantArt.Chat.Library
             }
             return dAmnPacketType.Unknown;
         }
+
+        /// <summary>
+        /// Gets data about the packet that is useful to the plugin system.
+        /// </summary>
+        /// <param name="packet">Packet to convert.</param>
+        /// <param name="from">User who generated this event.</param>
+        /// <param name="message">Content of packet.</param>
+        /// <param name="target">Target of the packet command.</param>
+        /// <param name="eventResponse">Response to event.</param>
+        public static void SortdAmnPacket(dAmnServerPacket packet, out string from, out string message, out string target, out string eventResponse)
+        {
+            // initialize variables
+            from = null;
+            message = null;
+            target = null;
+            eventResponse = null;
+
+            switch (packet.PacketType)
+            {
+                case dAmnPacketType.Handshake:
+                    // nothing to do
+                    break;
+                case dAmnPacketType.Login:
+                    eventResponse = packet.args["e"];
+                    break;
+                case dAmnPacketType.Join:
+                case dAmnPacketType.Part:
+                    eventResponse = packet.args["e"];
+                    if (packet.args.ContainsKey("r"))
+                        message = packet.args["r"];
+                    break;
+                case dAmnPacketType.Topic:
+                case dAmnPacketType.Title:
+                case dAmnPacketType.PrivClasses:
+                case dAmnPacketType.MemberList:
+                    eventResponse = packet.args["p"];
+                    from = packet.args["by"];
+                    break;
+                case dAmnPacketType.Chat:
+                    // get sub packet
+                    dAmnPacket subPacket = dAmnPacket.Parse(packet.body);
+                    switch (subPacket.cmd)
+                    {
+                        case "msg":
+                        case "action":
+                            from = subPacket.args["from"];
+                            message = subPacket.body;
+                            break;
+                        case "join":
+                        case "part":
+                            from = subPacket.param;
+                            if (subPacket.args.ContainsKey("r"))
+                                message = subPacket.args["r"];
+                            break;
+                        case "privchg":
+                        case "kicked":
+                            from = subPacket.param;
+                            target = subPacket.args["by"];
+                            if (subPacket.cmd == "privchg")
+                                message = subPacket.args["pc"];
+                            if (!string.IsNullOrEmpty(subPacket.cmd))
+                                message = subPacket.body;
+                            break;
+                        case "admin":
+                            // TODO!
+                            break;
+                    }
+                    break;
+                case dAmnPacketType.Kicked:
+                    from = packet.args["by"];
+                    if (!string.IsNullOrEmpty(packet.body))
+                        message = packet.body;
+                    break;
+                case dAmnPacketType.Ping:
+                    // nothing to do
+                    break;
+                case dAmnPacketType.Disconnect:
+                    eventResponse = packet.args["e"];
+                    break;
+                case dAmnPacketType.ErrorSend:
+                case dAmnPacketType.ErrorKick:
+                case dAmnPacketType.ErrorGet:
+                case dAmnPacketType.ErrorSet:
+                    // TODO!
+                    break;
+                case dAmnPacketType.ErrorKill:
+                    eventResponse = packet.args["e"];
+                    break;
+            }
+        }
         #endregion
     }
 }
