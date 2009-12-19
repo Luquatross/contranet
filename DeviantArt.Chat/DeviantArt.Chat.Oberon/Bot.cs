@@ -20,13 +20,15 @@ namespace DeviantArt.Chat.Oberon
     public delegate void BotServerPacketEvent(string ns, dAmnServerPacket packet);
 
     /// <summary>
-    /// Event that is executed when a command is issued by a user.
+    /// Event that is executed when a command is issued by a user. All fields can have
+    /// a null value.
     /// </summary>
     /// <param name="ns">Chatroom command applies to if applicable.</param>
     /// <param name="from">User who issued the command.</param>
     /// <param name="message">Contents of the command.</param>
     /// <param name="target">Whom the command is targeted for if applicable.</param>
-    public delegate void BotCommandEvent(string ns, string from, string message, string target);
+    /// <param name="eventResponse">Response to an event on the server.</param>
+    public delegate void BotCommandEvent(string ns, string from, string message, string target, string eventResponse);
 
     /// <summary>
     /// Custom object made to simplify code syntax. This is a list of KeyValue pairs.
@@ -388,16 +390,17 @@ namespace DeviantArt.Chat.Oberon
                     string from;
                     string message;
                     string target;
+                    string eventResponse;
 
                     // convert packet into command                    
-                    ConvertPacketIntoCommand(packet, out from, out message, out target);
+                    ConvertPacketIntoCommand(packet, out from, out message, out target, out eventResponse);
 
                     // get chat room if it exists
                     if (!string.IsNullOrEmpty(packet.param))
                         ns = dAmn.DeformatChat(packet.param);
 
                     // send to listener
-                    method(ns, from, message, target);
+                    method(ns, from, message, target, eventResponse);
                 }
             }
         }
@@ -406,12 +409,90 @@ namespace DeviantArt.Chat.Oberon
         /// Converts a packet into a usable command by the plugin system.
         /// </summary>
         /// <param name="packet">Packet to convert.</param>
-        /// <param name="from"></param>
-        /// <param name="message"></param>
-        /// <param name="target"></param>
-        private void ConvertPacketIntoCommand(dAmnServerPacket packet, out string from, out string message, out string target)
+        /// <param name="from">User who generated this event.</param>
+        /// <param name="message">Content of packet.</param>
+        /// <param name="target">Target of the packet command.</param>
+        /// <param name="eventResponse">Response to event.</param>
+        private void ConvertPacketIntoCommand(dAmnServerPacket packet, out string from, out string message, out string target, out string eventResponse)
         {
-            throw new NotImplementedException();
+            // initialize variables
+            from = null;
+            message = null;
+            target = null;
+            eventResponse = null;
+
+            switch (packet.PacketType)
+            {
+                case dAmnPacketType.Handshake:
+                    // nothing to do
+                    break;
+                case dAmnPacketType.Login:
+                    eventResponse = packet.args["e"];
+                    break;
+                case dAmnPacketType.Join:
+                case dAmnPacketType.Part:
+                    eventResponse = packet.args["e"];
+                    if (packet.args.ContainsKey("r"))
+                        message = packet.args["r"];
+                    break;
+                case dAmnPacketType.Topic:
+                case dAmnPacketType.Title:
+                case dAmnPacketType.PrivClasses:
+                case dAmnPacketType.MemberList:
+                    eventResponse = packet.args["p"];
+                    from = packet.args["by"];
+                    break;
+                case dAmnPacketType.Chat:
+                    // get sub packet
+                    dAmnPacket subPacket = dAmnPacket.Parse(packet.body);
+                    switch (subPacket.cmd)
+                    {
+                        case "msg":
+                        case "action":
+                            from = subPacket.args["from"];
+                            message = subPacket.body;
+                            break;
+                        case "join":
+                        case "part":
+                            from = subPacket.param;
+                            if (subPacket.args.ContainsKey("r"))
+                                message = subPacket.args["r"];
+                            break;
+                        case "privchg":
+                        case "kicked":
+                            from = subPacket.param;
+                            target = subPacket.args["by"];
+                            if (subPacket.cmd == "privchg")
+                                message = subPacket.args["pc"];
+                            if (!string.IsNullOrEmpty(subPacket.cmd))
+                                message = subPacket.body;
+                            break;
+                        case "admin":
+                            // TODO!
+                            break;
+                    }
+                    break;
+                case dAmnPacketType.Kicked:
+                    from = packet.args["by"];
+                    if (!string.IsNullOrEmpty(packet.body))
+                        message = packet.body;
+                    break;
+                case dAmnPacketType.Ping:
+                    // nothing to do
+                    break;
+                case dAmnPacketType.Disconnect:
+                    eventResponse = packet.args["e"];
+                    break;
+                case dAmnPacketType.ErrorSend:
+                case dAmnPacketType.ErrorKick:
+                case dAmnPacketType.ErrorGet:
+                case dAmnPacketType.ErrorSet:
+                    // TODO!
+                    break;
+                case dAmnPacketType.ErrorKill:
+                    eventResponse = packet.args["e"];
+                    break;                
+            }
         }
         #endregion
 
