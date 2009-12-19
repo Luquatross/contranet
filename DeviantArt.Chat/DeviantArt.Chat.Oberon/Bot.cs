@@ -475,7 +475,8 @@ namespace DeviantArt.Chat.Oberon
             {
                 try
                 {
-                    p.Load();
+                    p.dAmn = dAmn;
+                    p.Load();                    
                     pluginsLoaded++;
                 }
                 catch (Exception ex)

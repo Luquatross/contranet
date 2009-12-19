@@ -22,7 +22,7 @@ namespace DeviantArt.Chat.Oberon
         /// <summary>
         /// Reference to the Bot instance that is running
         /// </summary>
-        protected Bot Bot = Bot.Instance;
+        protected Bot Bot = Bot.Instance;        
 
         /// <summary>
         /// Settings for this plugin.
@@ -35,6 +35,15 @@ namespace DeviantArt.Chat.Oberon
         protected string SettingsFile
         {
             get { return System.IO.Path.Combine(Bot.PluginPath, FolderName + "\\" + FolderName + ".dat"); }
+        }
+
+        /// <summary>
+        /// Reference to the dAmn library, so we can send and received from the servers.
+        /// </summary>
+        public dAmnNET dAmn
+        {
+            get;
+            set;
         }
 
         /// <summary>
