@@ -71,6 +71,7 @@ namespace DeviantArt.Chat.Library
         }
         #endregion
 
+        #region Static Methods
         /// <summary>
         /// Parses packet header to determine what the type is.
         /// </summary>
@@ -193,5 +194,6 @@ namespace DeviantArt.Chat.Library
             }
             return dAmnPacketType.Unknown;
         }
+        #endregion
     }
 }
