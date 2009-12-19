@@ -11,6 +11,10 @@ namespace DeviantArt.Chat.Library
     public enum dAmnPacketType
     {
         Unknown,
+        Handshake,
+        Login,
+        Join,
+        Part,
         Chat,
         MemberList,
         Topic,
@@ -20,7 +24,11 @@ namespace DeviantArt.Chat.Library
         Title,
         PrivClasses,
         ErrorSend,
-        ErrorKick        
+        ErrorKick,
+        ErrorSet,
+        ErrorGet,
+        ErrorKill,
+        Whois
     }
 
     /// <summary>
@@ -115,24 +123,40 @@ namespace DeviantArt.Chat.Library
             {                
                 return dAmnPacketType.ErrorKick;
             }
+            else if (tmp[0].ToLower() == "get pchat")
+            {
+                return dAmnPacketType.ErrorGet;
+            }
+            else if (tmp[0].ToLower() == "set pchat")
+            {
+                return dAmnPacketType.ErrorSet;
+            }
+            else if (tmp[0].ToLower() == "kill login")
+            {
+                return dAmnPacketType.ErrorKill;
+            }
+            else if (tmp[0].ToLower() == "property login")
+            {
+                return dAmnPacketType.Whois;
+            }
             else if (tmp[0] == "property chat")
-            {                
-                tmp = lines[1].Split(new char[]{ '=' }, 2);
-                if (tmp[0] == "p" & tmp[1] == "members")
+            {
+                tmp = lines[1].Split(new char[] { '=' }, 2);
+                if (tmp[0] == "p" & tmp[1] == "topic")
                 {
-                    return dAmnPacketType.MemberList;
+                    return dAmnPacketType.Topic;
                 }
                 else if (tmp[0] == "p" & tmp[1] == "title")
                 {
                     return dAmnPacketType.Title;
                 }
-                else if (tmp[0] == "p" & tmp[1] == "topic")
-                {
-                    return dAmnPacketType.Topic;
-                }
                 else if (tmp[0] == "p" & tmp[1] == "privclasses")
                 {
                     return dAmnPacketType.PrivClasses;
+                }
+                else if (tmp[0] == "p" & tmp[1] == "members")
+                {
+                    return dAmnPacketType.MemberList;
                 }
                 else
                 {
@@ -141,7 +165,7 @@ namespace DeviantArt.Chat.Library
             }
             else if (tmp[0] == "property pchat")
             {
-                tmp = lines[1].Split(new char[]{ '=' }, 2);
+                tmp = lines[1].Split(new char[] { '=' }, 2);
                 if (tmp[0] == "p" & tmp[1] == "members")
                 {
                     return dAmnPacketType.MemberList;
