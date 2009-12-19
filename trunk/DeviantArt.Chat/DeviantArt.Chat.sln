@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviantArt.Chat.Library", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{4678E941-DDB9-46E4-89A4-D527CDCF79C0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviantArt.Chat.Oberon.Plugins", "DeviantArt.Chat.Oberon.Plugins\DeviantArt.Chat.Oberon.Plugins.csproj", "{58E93353-BB0A-4238-86EC-501B7D7CE838}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -25,8 +27,15 @@ Global
 		{A419A260-3C55-43A5-8EC7-82C0608769BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A419A260-3C55-43A5-8EC7-82C0608769BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A419A260-3C55-43A5-8EC7-82C0608769BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58E93353-BB0A-4238-86EC-501B7D7CE838}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58E93353-BB0A-4238-86EC-501B7D7CE838}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58E93353-BB0A-4238-86EC-501B7D7CE838}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58E93353-BB0A-4238-86EC-501B7D7CE838}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{58E93353-BB0A-4238-86EC-501B7D7CE838} = {4678E941-DDB9-46E4-89A4-D527CDCF79C0}
 	EndGlobalSection
 EndGlobal
