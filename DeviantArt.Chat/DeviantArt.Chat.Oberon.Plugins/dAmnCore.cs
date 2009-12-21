@@ -7,7 +7,7 @@ using DeviantArt.Chat.Library;
 namespace DeviantArt.Chat.Oberon.Plugins
 {
     /// <summary>
-    /// PLugin that handles the core system events that come from the dAmn server.
+    /// Plugin that handles the core system events that come from the dAmn server.
     /// </summary>
     public class dAmnCore : Plugin
     {
@@ -106,7 +106,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
         {
             if (packet.args["e"] != "ok")
                 return;
-            Bot.Console.Notice(string.Format("*** Bot has joined #{0} *", chatroom));
+            Bot.Console.Notice(string.Format("*** Bot has joined {0} *", chatroom));
             Bot.RegisterChatroom(chatroom, new Chat(chatroom));                
         }
 
@@ -114,7 +114,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
         {
             if (packet.args["e"] != "ok")
                 return;
-            Bot.Console.Notice(string.Format("Left the chatroom {0}.", chatroom));
+            Bot.Console.Notice(string.Format("{0} left the chatroom.", chatroom));
             Bot.UnregisterChatroom(chatroom);
 
             if (Bot.ChatroomsOpen() == 0)
@@ -176,7 +176,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             }
 
             // iterate through each priv class
-            string[] privClasses = packet.body.Split('\n');
+            string[] privClasses = packet.body.TrimEnd('\n').Split('\n');
             foreach (string privClass in privClasses)
             {
                 // get priv class details
@@ -202,6 +202,9 @@ namespace DeviantArt.Chat.Oberon.Plugins
             string[] subPackets = packet.body.Split(new string[] { "\n\n" }, StringSplitOptions.None);
             foreach (string subPacket in subPackets)
             {
+                if (subPacket == "")
+                    continue;
+
                 // get subpacket
                 dAmnPacket p = dAmnPacket.Parse(subPacket);
                 if (chat[p.param] == null)
@@ -212,7 +215,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                         Realname = p.args["realname"],
                         Description = p.args["typename"],
                         PrivClass = p.args["pc"],
-                        ServerPrivClass = p.args["gpc"],
+                        //ServerPrivClass = p.args["gpc"],
                         Symbol = p.args["symbol"]
                     });
                 }
@@ -223,7 +226,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     user.Realname = p.args["realname"];
                     user.Description = p.args["typename"];
                     user.PrivClass = p.args["pc"];
-                    user.ServerPrivClass = p.args["gpc"];
+                    //user.ServerPrivClass = p.args["gpc"];
                     user.Symbol = p.args["symbol"];
                     user.Count++;
                 }

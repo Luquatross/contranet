@@ -63,7 +63,10 @@ namespace DeviantArt.Chat.Oberon
         {
             get
             {
-                return Members[userName];
+                if (Members.ContainsKey(userName))
+                    return Members[userName];
+                else
+                    return null;
             }
         }
 
@@ -73,8 +76,8 @@ namespace DeviantArt.Chat.Oberon
         /// <returns>Log file writer.</returns>
         private StreamWriter GetLogFileWriter()
         {
-            string logFile = string.Format("{0}_{1}.log", Name, DateTime.Now.ToString("yyyy-MM-dd"));
-            string logFilePath = Path.Combine(Bot.Instance.CurrentDirectory, "Logs\\Chat\\" + logFile);
+            string logFile = string.Format("{0}_{1}.log", Name.TrimStart('#'), DateTime.Now.ToString("yyyy-MM-dd"));
+            string logFilePath = Path.Combine(Bot.Instance.CurrentDirectory, "Logs\\Chats\\" + logFile);
             return new StreamWriter(File.Open(logFilePath, FileMode.OpenOrCreate, FileAccess.Write));
         }
 
@@ -84,7 +87,7 @@ namespace DeviantArt.Chat.Oberon
         /// <param name="message">Message to log.</param>
         public void Log(string message)
         {
-            LogFile.WriteLine("[" + DateTime.Now.ToString("T") + "] " + message);
+            Notice("[" + DateTime.Now.ToString("T") + "] " + message);
         }
 
         /// <summary>
@@ -94,6 +97,7 @@ namespace DeviantArt.Chat.Oberon
         public void Notice(string message)
         {
             LogFile.WriteLine(message);
+            LogFile.Flush();
         }
 
         /// <summary>
