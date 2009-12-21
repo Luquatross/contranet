@@ -33,7 +33,14 @@ namespace DeviantArt.Chat.Library
         ErrorSet,
         ErrorGet,
         ErrorKill,
-        Whois
+        Whois,
+        AdminCreate,
+        AdminUpdate,
+        AdminRename,
+        AdminMove,
+        AdminRemove,
+        AdminShow,
+        AdminError
     }
 
     /// <summary>
@@ -136,8 +143,22 @@ namespace DeviantArt.Chat.Library
                 }
                 else if (subPacket.cmd == "admin")
                 {
-                    // TODO - Make a real admin parse
-                    return dAmnPacketType.Unknown;
+                    if (subPacket.param == "create")
+                        return dAmnPacketType.AdminCreate;
+                    else if (subPacket.param == "update")
+                        return dAmnPacketType.AdminUpdate;
+                    else if (subPacket.param == "rename")
+                        return dAmnPacketType.AdminRename;
+                    else if (subPacket.param == "move")
+                        return dAmnPacketType.AdminMove;
+                    else if (subPacket.param == "remove")
+                        return dAmnPacketType.AdminRemove;
+                    else if (subPacket.param == "show")
+                        return dAmnPacketType.AdminShow;
+                    else if (subPacket.param == "privclass")
+                        return dAmnPacketType.AdminError;
+                    else
+                        return dAmnPacketType.Unknown;
                 }
                 else
                 {
