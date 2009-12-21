@@ -41,10 +41,19 @@ namespace DeviantArt.Chat.Oberon.Plugins
             RegisterEvent(dAmnPacketType.Action, new BotServerPacketEvent(LogAction));
             RegisterEvent(dAmnPacketType.Join, new BotServerPacketEvent(Join));
             RegisterEvent(dAmnPacketType.Part, new BotServerPacketEvent(Part));
+            RegisterEvent(dAmnPacketType.MemberJoin, new BotServerPacketEvent(ChatroomJoin));
+            RegisterEvent(dAmnPacketType.MemberPart, new BotServerPacketEvent(ChatroomPart));
             RegisterEvent(dAmnPacketType.Title, new BotServerPacketEvent(ChatroomTitle));
-            RegisterEvent(dAmnPacketType.Topic, new BotServerPacketEvent(ChatroomTopic));
-            RegisterEvent(dAmnPacketType.PrivClasses, new BotServerPacketEvent(ChatroomPrivClasses));
+            RegisterEvent(dAmnPacketType.Topic, new BotServerPacketEvent(ChatroomTopic));            
+            RegisterEvent(dAmnPacketType.PrivClasses, new BotServerPacketEvent(ChatroomPrivClasses));            
             RegisterEvent(dAmnPacketType.MemberList, new BotServerPacketEvent(ChatroomMemberList));
+            RegisterEvent(dAmnPacketType.PrivChange, new BotServerPacketEvent(ChatroomPrivChange));
+            RegisterEvent(dAmnPacketType.AdminCreate, new BotServerPacketEvent(AdminCreate));
+            RegisterEvent(dAmnPacketType.AdminUpdate, new BotServerPacketEvent(AdminUpdate));
+            RegisterEvent(dAmnPacketType.AdminRename, new BotServerPacketEvent(AdminRename));
+            RegisterEvent(dAmnPacketType.AdminMove, new BotServerPacketEvent(AdminMove));
+            RegisterEvent(dAmnPacketType.AdminRemove, new BotServerPacketEvent(AdminRemove));            
+            RegisterEvent(dAmnPacketType.AdminError, new BotServerPacketEvent(AdminError));
         }
         #endregion
 
@@ -171,9 +180,35 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 return;
             }
 
-            string username = packet.body.Split(' ').ElementAt(1);
-            chat.RegisterUser(new User { Username = username });
+            dAmnPacket subPacket = packet.GetSubPacket();
+            string username = subPacket.param;
+            // user may exist already (bot can user can sign on at same time)
+            if (chat[username] == null)
+            {
+                chat.RegisterUser(new User { Username = username });
+            }
             chat.Log(username + " joined.");
+        }
+
+        /// <summary>
+        /// Removes user from chat room.
+        /// </summary>
+        private void ChatroomPart(string chatroom, dAmnServerPacket packet)
+        {
+            Chat chat = Bot.GetChatroom(chatroom);
+            if (chat == null)
+            {
+                Bot.Console.Log("Error: user add for a chatroom which doesn't exist.");
+                return;
+            }
+
+            dAmnPacket subPacket = packet.GetSubPacket();
+            string username = subPacket.param;
+            string reason = "reason unknown";
+            if (subPacket.args.ContainsKey("r"))
+                reason = subPacket.args["r"];
+            chat.UnregisterUser(username);
+            chat.Log(string.Format("** {0} has left. [{1}]", username, reason));
         }
 
         /// <summary>
@@ -299,9 +334,15 @@ namespace DeviantArt.Chat.Oberon.Plugins
             dAmnPacket subPacket = packet.GetSubPacket();
             string username = subPacket.param;
             string privClass = subPacket.args["pc"];
+            string by = subPacket.args["by"];
 
-            // update priv class
-            chat[username].PrivClass = privClass;
+            // update priv class if user is signed on
+            if (chat.ContainsUser(username))
+            {            
+                chat[username].PrivClass = privClass;
+            }
+
+            chat.Log(string.Format("** {0} has been made a member of {1} by {2} *", username, privClass, by));
         }
 
         /// <summary>
@@ -329,7 +370,19 @@ namespace DeviantArt.Chat.Oberon.Plugins
         /// </summary>
         private void AdminUpdate(string chatroom, dAmnServerPacket packet)
         {
-            // TODO !
+            Chat chat = Bot.GetChatroom(chatroom);
+            if (chat == null)
+            {
+                Bot.Console.Log("Error: Priv add for a chatroom which doesn't exist.");
+                return;
+            }
+
+            dAmnPacket subPacket = packet.GetSubPacket();
+            string privClass = subPacket.args["name"];
+            string by = subPacket.args["by"];
+            string privs = subPacket.args["privs"];
+
+            chat.Log(string.Format("** privilege class {0} has been updated  by {1} with {2}", privClass, by, privs));
         }
 
         /// <summary>
