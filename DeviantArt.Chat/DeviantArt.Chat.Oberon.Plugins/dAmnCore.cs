@@ -102,9 +102,27 @@ namespace DeviantArt.Chat.Oberon.Plugins
             {
                 // TODO : check user access!                
 
-                // trim trigger and get command 
-                message = message.Substring(trigger.Length);
-                string command = message.Substring(0, message.IndexOf(' '));
+                string command = "";
+
+                try
+                {
+                    // trim trigger and get command 
+                    message = message.Substring(trigger.Length);
+                    command = message.Substring(0, message.IndexOf(' '));
+
+                    // check that we have a command
+                    if (string.IsNullOrEmpty(command))
+                        throw new ArgumentNullException("Unable to find command.");
+
+                    // trim the command off of the message
+                    message = message.Substring(message.IndexOf(' ') + 1);
+                }
+                catch (Exception ex)
+                {
+                    Bot.Console.Warning("Invalid command. Command: " + message);
+                    dAmn.Say(chatroom, string.Format("{0}: invalid command.", from));
+                    return;
+                }
 
                 // send command!
                 Bot.TriggerCommand(command, chatroom, from, message);
