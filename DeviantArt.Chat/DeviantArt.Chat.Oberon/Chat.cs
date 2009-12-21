@@ -117,5 +117,14 @@ namespace DeviantArt.Chat.Oberon
         {
             Members.Remove(username);
         }
+
+        /// <summary>
+        /// Gets all users in the chatroom.
+        /// </summary>
+        /// <returns>All chatroom memebers.</returns>
+        public User[] GetAllMembers()
+        {
+            return Members.Values.ToArray();
+        }
     }
 }
