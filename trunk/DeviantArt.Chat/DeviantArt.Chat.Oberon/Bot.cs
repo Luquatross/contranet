@@ -667,7 +667,7 @@ namespace DeviantArt.Chat.Oberon
         /// <param name="room">Chatroom.</param>
         public void RegisterChatroom(string chatroomName, Chat room)
         {
-            room.Notice(string.Format("Joined the '{0}' chatroom.", chatroomName));
+            room.Notice(string.Format("** Bot has joined the #{0} *", chatroomName));
             Chats.Add(chatroomName, room);
         }
 

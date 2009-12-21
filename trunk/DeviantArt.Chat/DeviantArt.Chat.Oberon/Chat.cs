@@ -101,6 +101,16 @@ namespace DeviantArt.Chat.Oberon
         }
 
         /// <summary>
+        /// True if user is signed on, otherwise false.
+        /// </summary>
+        /// <param name="username">Username to check.</param>
+        /// <returns>True if user is part of chatroom, otherwise false.</returns>
+        public bool ContainsUser(string username)
+        {
+            return Members.ContainsKey(username);
+        }
+
+        /// <summary>
         /// Adds user to current chat.
         /// </summary>
         /// <param name="user">User to register.</param>
