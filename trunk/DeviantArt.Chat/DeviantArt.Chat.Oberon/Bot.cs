@@ -35,42 +35,6 @@ namespace DeviantArt.Chat.Oberon
     public class BotEventList : List<KeyValuePair<Plugin, BotServerPacketEvent>> { }
 
     /// <summary>
-    /// Represents a user in a chatroom.
-    /// </summary>
-    public struct ChatUser
-    {
-        public string Symbol;
-        public string PrivClass;
-
-        public ChatUser(string symbol, string privClass)
-        {
-            Symbol = symbol;
-            PrivClass = privClass;
-        }
-    }
-
-    /// <summary>
-    /// Represents properties of a chatroom.
-    /// </summary>
-    public struct ChatRoom
-    {
-        public string Title;
-        public string Topic;
-        public List<string> PrivClasses;
-        public List<ChatUser> Members;
-        public DateTime TimeJoined;
-
-        public ChatRoom(string title)
-        {
-            Title = title;
-            Topic = "";
-            PrivClasses = new List<string>();
-            Members = new List<ChatUser>();
-            TimeJoined = DateTime.Now;
-        }
-    }
-
-    /// <summary>
     /// The core of the system, the bot that runs all processes.
     /// </summary>
     public class Bot
@@ -104,11 +68,17 @@ namespace DeviantArt.Chat.Oberon
         };
 
         /// <summary>
+        /// The current directory for the executing assembly.
+        /// </summary>
+        public string CurrentDirectory = System.IO.Path.GetDirectoryName(
+                    System.Reflection.Assembly.GetExecutingAssembly().Location);
+
+        /// <summary>
         /// Path to the bot config file.
         /// </summary>
         public string ConfigPath
         {
-            get { return System.IO.Path.Combine(currentDirectory, "Config\\Bot.config"); }
+            get { return System.IO.Path.Combine(CurrentDirectory, "Config\\Bot.config"); }
         }
 
         /// <summary>
@@ -116,7 +86,7 @@ namespace DeviantArt.Chat.Oberon
         /// </summary>
         public string PluginPath
         {
-            get { return System.IO.Path.Combine(currentDirectory, "Plugins"); }
+            get { return System.IO.Path.Combine(CurrentDirectory, "Plugins"); }
         }        
         #endregion
 
@@ -134,13 +104,7 @@ namespace DeviantArt.Chat.Oberon
         /// <summary>
         /// Boolean determining if our authtoken was taken from the bot config or not.
         /// </summary>
-        private bool authTokenFromConfig = true;
-
-        /// <summary>
-        /// The current directory for the executing assembly.
-        /// </summary>
-        private string currentDirectory = System.IO.Path.GetDirectoryName(
-                    System.Reflection.Assembly.GetExecutingAssembly().Location);
+        private bool authTokenFromConfig = true;        
 
         /// <summary>
         /// Variable to hold mapping of packet types to a BotEventList. This way, one packet type
@@ -161,7 +125,7 @@ namespace DeviantArt.Chat.Oberon
         /// <summary>
         /// A list of chatrooms currently joined.
         /// </summary>
-        private Dictionary<string, ChatRoom> Chats = new Dictionary<string, ChatRoom>();
+        private Dictionary<string, Chat> Chats = new Dictionary<string, Chat>();
         #endregion
 
         #region Constructor and Singleton Methods
@@ -559,7 +523,12 @@ namespace DeviantArt.Chat.Oberon
 
                     // process packet if it exists
                     if (packet != null)
+                    {
+                        // log received packet
+                        if (IsDebug)
+                            Console.Log("Packet received: [" + packet.ToString() + "]");
                         ProcessPacket(packet);
+                    }
                 }
             }
             catch (ThreadAbortException ex)
@@ -695,9 +664,10 @@ namespace DeviantArt.Chat.Oberon
         /// Registers chatroom with bot.
         /// </summary>
         /// <param name="chatroomName">Chatroom name.</param>
-        /// <param name="room">Chatroom properties.</param>
-        public void RegisterChatroom(string chatroomName, ChatRoom room)
+        /// <param name="room">Chatroom.</param>
+        public void RegisterChatroom(string chatroomName, Chat room)
         {
+            room.Notice(string.Format("Joined the '{0}' chatroom.", chatroomName));
             Chats.Add(chatroomName, room);
         }
 
@@ -707,6 +677,7 @@ namespace DeviantArt.Chat.Oberon
         /// <param name="chatroomName">Chatroom to remove.</param>
         public void UnregisterChatroom(string chatroomName)
         {
+            Chats[chatroomName].Notice(string.Format("Joined the '{0}' chatroom.", chatroomName));
             Chats.Remove(chatroomName);
         }
 
@@ -715,20 +686,10 @@ namespace DeviantArt.Chat.Oberon
         /// </summary>
         /// <param name="ns">Chatroom name.</param>
         /// <returns>Chatroom.</returns>
-        public ChatRoom GetChatroom(string ns)
+        public Chat GetChatroom(string ns)
         {
             return Chats[ns];
-        }
-
-        /// <summary>
-        /// Register user with chatroom.
-        /// </summary>
-        /// <param name="ns">Chatroom user belongs to.</param>
-        /// <param name="user">User to register.</param>
-        public void RegisterUser(string ns, ChatUser user)
-        {
-            Chats[ns].Members.Add(user);
-        }
+        }       
 
         /// <summary>
         /// Gets the number of opened chatrooms.

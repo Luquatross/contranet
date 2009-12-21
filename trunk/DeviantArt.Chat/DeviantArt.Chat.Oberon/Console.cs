@@ -1,18 +1,29 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using log4net;
 using System.IO;
+using log4net;
+using log4net.Config;
 
 namespace DeviantArt.Chat.Oberon
 {
+    /// <summary>
+    /// Class that takes care of logging to a log file or writing to the console.
+    /// </summary>
     public class Console
     {
         #region Private Variables
         private ILog Logger = LogManager.GetLogger(typeof(Console));
         private string Format = "HH:mm:ss";
         private TextWriter Output;
+
+        private string LogConfigPath
+        {
+            get
+            {
+                string currentDirectory = System.IO.Path.GetDirectoryName(
+                    System.Reflection.Assembly.GetExecutingAssembly().Location);
+                return System.IO.Path.Combine(currentDirectory, "Config\\Log.config");
+            }
+        }
         #endregion
 
         #region Constructors
@@ -21,6 +32,8 @@ namespace DeviantArt.Chat.Oberon
         public Console(TextWriter output)
         {
             Output = output;
+            // configure logging based on config
+            XmlConfigurator.Configure(new FileInfo(LogConfigPath));
         }
         #endregion
 

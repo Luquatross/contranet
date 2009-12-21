@@ -103,6 +103,7 @@ namespace DeviantArt.Chat.Library
         }
         #endregion
 
+        #region String Manipulation
         /// <summary>
         /// Convers a dAmnPacket into a string.
         /// </summary>
@@ -155,7 +156,8 @@ namespace DeviantArt.Chat.Library
             catch (Exception e)
             {
                 throw e;
-            }            
+            }
         }
+        #endregion
     }
 }

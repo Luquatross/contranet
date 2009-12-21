@@ -15,8 +15,13 @@ namespace DeviantArt.Chat.Library
         Login,
         Join,
         Part,
+        Action,        
         Chat,
+        MemberJoin,
+        MemberPart,
         MemberList,
+        MemberKick,
+        PrivChange,
         Topic,
         Ping,
         Kicked,
@@ -71,6 +76,20 @@ namespace DeviantArt.Chat.Library
         }
         #endregion
 
+        #region Public Methods
+        /// <summary>
+        /// Parses the subpacket for this packet.
+        /// </summary>
+        /// <returns>Parsed packet.</returns>
+        public dAmnPacket GetSubPacket()
+        {
+            if (string.IsNullOrEmpty(this.body))
+                return null;
+            else
+                return Parse(this.body);
+        }
+        #endregion
+
         #region Static Methods
         /// <summary>
         /// Parses packet header to determine what the type is.
@@ -90,7 +109,40 @@ namespace DeviantArt.Chat.Library
             string[] tmp = pktId.Split(new char[]{ ':' }, 2);
             if (tmp[0].ToLower() == "recv chat")
             {
-                return dAmnPacketType.Chat;
+                dAmnPacket subPacket = dAmnServerPacket.Parse(packet.body);
+                if (subPacket.cmd == "msg")
+                {
+                    return dAmnPacketType.Chat;
+                }
+                else if (subPacket.cmd == "action")
+                {
+                    return dAmnPacketType.Action;
+                }
+                else if (subPacket.cmd == "join")
+                {
+                    return dAmnPacketType.MemberJoin;
+                }
+                else if (subPacket.cmd == "part")
+                {
+                    return dAmnPacketType.MemberPart;
+                }
+                else if (subPacket.cmd == "privchg")
+                {
+                    return dAmnPacketType.PrivChange;
+                }
+                else if (subPacket.cmd == "kicked")
+                {
+                    return dAmnPacketType.MemberKick;
+                }
+                else if (subPacket.cmd == "admin")
+                {
+                    // TODO - Make a real admin parse
+                    return dAmnPacketType.Unknown;
+                }
+                else
+                {
+                    return dAmnPacketType.Unknown;
+                }
             }
             else if (tmp[0].ToLower() == "recv pchat")
             {
@@ -99,6 +151,14 @@ namespace DeviantArt.Chat.Library
             else if (tmp[0].ToLower() == "disconnect")
             {
                 return dAmnPacketType.Disconnect;
+            }
+            else if (tmp[0].ToLower() == "join chat")
+            {
+                return dAmnPacketType.Join;
+            }
+            else if (tmp[0].ToLower() == "part chat")
+            {
+                return dAmnPacketType.Part;
             }
             else if (tmp[0].ToLower() == "kicked chat")
             {
