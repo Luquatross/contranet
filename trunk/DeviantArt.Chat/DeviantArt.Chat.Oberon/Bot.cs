@@ -43,8 +43,8 @@ namespace DeviantArt.Chat.Oberon
         public DateTime Start { get; private set; }
         public Dictionary<string, string> Info = new Dictionary<string, string>
         {
-            { "Name", "Contra" },
-            { "Version", "4" },
+            { "Name", "Oberon" },
+            { "Version", "0.2" },
             { "Status", "" },
             { "Release", "public" },
             { "Author", "bigmanhaywood" }
@@ -118,7 +118,12 @@ namespace DeviantArt.Chat.Oberon
         private Dictionary<string, KeyValuePair<Plugin, BotCommandEvent>> commandMap = new Dictionary<string, KeyValuePair<Plugin, BotCommandEvent>>();
 
         /// <summary>
-        /// Private list of all variables that are loaded.
+        /// Variable to hold mapping of command names to their help text.
+        /// </summary>
+        private Dictionary<string, string> commandHelp = new Dictionary<string, string>();
+
+        /// <summary>
+        /// Private list of all plugins that are loaded.
         /// </summary>
         private Dictionary<string, Plugin> botPlugins = new Dictionary<string, Plugin>();
 
@@ -358,7 +363,8 @@ namespace DeviantArt.Chat.Oberon
         /// <param name="commandName">Command to listen for.</param>
         /// <param name="plugin">Plugin assocaited with the method.</param>
         /// <param name="command">Method to execute.</param>
-        public void AddCommandListener(string commandName, Plugin plugin, BotCommandEvent commandMethod)
+        /// <param name="commandHelp">Help text for the command.</param>
+        public void AddCommandListener(string commandName, Plugin plugin, BotCommandEvent commandMethod, string help)
         {
             // make sure command is free
             if (commandMap.ContainsKey(commandName))
@@ -370,6 +376,9 @@ namespace DeviantArt.Chat.Oberon
             // add mapping
             commandMap.Add(commandName,
                 new KeyValuePair<Plugin, BotCommandEvent>(plugin, commandMethod));
+
+            // add help
+            commandHelp.Add(commandName, help);
 
             // register plugin so we have a reference to it
             RegisterPlugin(plugin);
@@ -395,7 +404,20 @@ namespace DeviantArt.Chat.Oberon
                     method(ns, from, message);
                 }
             }
-        }        
+        }
+
+        /// <summary>
+        /// Shows the help text associated with the command.
+        /// </summary>
+        /// <param name="commandName">Command to show help for.</param>
+        /// <param name="ns">Chatroom.</param>
+        public void TriggerHelp(string commandName, string ns, string from)
+        {
+            if (commandHelp.ContainsKey(commandName))
+            {
+                dAmn.Say(ns, from + ": " + commandHelp[commandName]);
+            }
+        }
         #endregion
 
         #region Plugin Methods
@@ -667,6 +689,7 @@ namespace DeviantArt.Chat.Oberon
         /// <param name="room">Chatroom.</param>
         public void RegisterChatroom(string chatroomName, Chat room)
         {
+            chatroomName = chatroomName.ToLower();
             room.Notice(string.Format("** Bot has joined the #{0} *", chatroomName));
             Chats.Add(chatroomName, room);
         }
@@ -677,8 +700,12 @@ namespace DeviantArt.Chat.Oberon
         /// <param name="chatroomName">Chatroom to remove.</param>
         public void UnregisterChatroom(string chatroomName)
         {
-            Chats[chatroomName].Notice(string.Format("Joined the '{0}' chatroom.", chatroomName));
-            Chats.Remove(chatroomName);
+            chatroomName = chatroomName.ToLower();
+            if (Chats.ContainsKey(chatroomName))
+            {
+                Chats[chatroomName].Notice(string.Format("** Bot has left the #{0} *", chatroomName));
+                Chats.Remove(chatroomName);
+            }
         }
 
         /// <summary>
@@ -688,8 +715,21 @@ namespace DeviantArt.Chat.Oberon
         /// <returns>Chatroom.</returns>
         public Chat GetChatroom(string ns)
         {
-            return Chats[ns];
-        }       
+            ns = ns.ToLower();
+            if (Chats.ContainsKey(ns))
+                return Chats[ns];
+            else
+                return null;
+        }
+
+        /// <summary>
+        /// Returns all chatrooms the bot is currently signed into.
+        /// </summary>
+        /// <returns>Array of all chatrooms.</returns>
+        public Chat[] GetAllChatrooms()
+        {
+            return Chats.Values.ToArray();
+        }
 
         /// <summary>
         /// Gets the number of opened chatrooms.
@@ -698,6 +738,35 @@ namespace DeviantArt.Chat.Oberon
         public int ChatroomsOpen()
         {
             return Chats.Count;
+        }
+
+        /// <summary>
+        /// Adds a chatroom to be autojoined.
+        /// </summary>
+        /// <param name="chatroom">Chatroom to add.</param>
+        public void AddAutoJoinChatroom(string chatroom)
+        {
+            chatroom = chatroom.ToLower();
+            if (!AutoJoin.Contains(chatroom))
+            {
+                AutoJoin.SetValue(chatroom, AutoJoin.Length);
+                SaveConfig();
+            }
+        }
+
+        /// <summary>
+        /// Removes a chatroom from the autojoin.
+        /// </summary>
+        /// <param name="chatroom">Chatroom to remove.</param>
+        public void RemoveAutoJoinChatroom(string chatroom)
+        {
+            chatroom = chatroom.ToLower();
+            if (AutoJoin.Contains(chatroom))
+            {
+                List<string> temp = new List<string>(AutoJoin);
+                temp.Remove(chatroom);
+                AutoJoin = temp.ToArray();
+            }
         }
         #endregion
     }

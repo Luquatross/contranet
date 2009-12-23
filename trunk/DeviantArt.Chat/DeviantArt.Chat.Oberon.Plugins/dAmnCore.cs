@@ -108,24 +108,37 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 {
                     // trim trigger and get command 
                     message = message.Substring(trigger.Length);
-                    command = message.Substring(0, message.IndexOf(' '));
+                    int firstSpace = message.IndexOf(' ');
+                    // there is no space
+                    if (firstSpace == -1)
+                        firstSpace = message.Length;
+                    command = message.Substring(0, firstSpace);
 
                     // check that we have a command
                     if (string.IsNullOrEmpty(command))
                         throw new ArgumentNullException("Unable to find command.");
 
-                    // trim the command off of the message
-                    message = message.Substring(message.IndexOf(' ') + 1);
+                    // trim the command off of the message. may have a trailing space
+                    message = message.Replace(command + " ", "");
+                    message = message.Replace(command, "");                    
                 }
-                catch (Exception ex)
+                catch
                 {
                     Bot.Console.Warning("Invalid command. Command: " + message);
                     dAmn.Say(chatroom, string.Format("{0}: invalid command.", from));
                     return;
                 }
 
-                // send command!
-                Bot.TriggerCommand(command, chatroom, from, message);
+                // get the last string in the args to determine if help command
+                string lastString = message.Trim().Split(' ').LastOrDefault();
+                if (lastString == "?")
+                {
+                    Bot.TriggerHelp(command, chatroom, from);
+                }
+                else
+                {
+                    Bot.TriggerCommand(command, chatroom, from, message);
+                }
             }
         }
 
@@ -205,6 +218,10 @@ namespace DeviantArt.Chat.Oberon.Plugins
             {
                 chat.RegisterUser(new User { Username = username });
             }
+            else
+            {
+                chat[username].Count++;
+            }
             chat.Log(username + " joined.");
         }
 
@@ -225,7 +242,16 @@ namespace DeviantArt.Chat.Oberon.Plugins
             string reason = "reason unknown";
             if (subPacket.args.ContainsKey("r"))
                 reason = subPacket.args["r"];
-            chat.UnregisterUser(username);
+            // if more than one user is signed in with same user name, only unregister
+            // them if it is the last one
+            if (chat[username].Count == 0)
+            {
+                chat.UnregisterUser(username);
+            }
+            else
+            {
+                chat[username].Count--;
+            }
             chat.Log(string.Format("** {0} has left. [{1}]", username, reason));
         }
 
