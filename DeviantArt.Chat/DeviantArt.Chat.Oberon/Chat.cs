@@ -44,6 +44,14 @@ namespace DeviantArt.Chat.Oberon
         private StreamWriter LogFile;
 
         /// <summary>
+        /// The number of users currently in the chatroom.
+        /// </summary>
+        public int UserCount
+        {
+            get { return Members.Count; }
+        }
+
+        /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="chatroomName">Name of the chatroom.</param>
@@ -76,9 +84,20 @@ namespace DeviantArt.Chat.Oberon
         /// <returns>Log file writer.</returns>
         private StreamWriter GetLogFileWriter()
         {
-            string logFile = string.Format("{0}_{1}.log", Name.TrimStart('#'), DateTime.Now.ToString("yyyy-MM-dd"));
-            string logFilePath = Path.Combine(Bot.Instance.CurrentDirectory, "Logs\\Chats\\" + logFile);
-            return new StreamWriter(File.Open(logFilePath, FileMode.OpenOrCreate, FileAccess.Write));
+            try
+            {
+                string logFile = string.Format("{0}_{1}.log", Name.TrimStart('#'), DateTime.Now.ToString("yyyy-MM-dd"));
+                string logFilePath = Path.Combine(Bot.Instance.CurrentDirectory, "Logs\\Chats\\" + logFile);
+                return File.AppendText(logFilePath);
+            }
+            catch (IOException ex)
+            {
+                Bot.Instance.Console.Warning(string.Format(
+                    "Error writing to the log file for the chatroom {0}. See bot log file for more information.",
+                    Name));
+                Bot.Instance.Console.Log("Error writing to chat room log file. " + ex.ToString());
+                return null;
+            }
         }
 
         /// <summary>
@@ -96,8 +115,11 @@ namespace DeviantArt.Chat.Oberon
         /// <param name="message"></param>
         public void Notice(string message)
         {
-            LogFile.WriteLine(message);
-            LogFile.Flush();
+            if (LogFile != null)
+            {
+                LogFile.WriteLine(message);
+                LogFile.Flush();
+            }
         }
 
         /// <summary>

@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Command.cs" />
     <Compile Include="dAmnCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

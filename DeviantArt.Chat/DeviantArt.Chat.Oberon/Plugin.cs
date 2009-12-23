@@ -17,6 +17,9 @@ namespace DeviantArt.Chat.Oberon
         On, Off
     }
 
+    /// <summary>
+    /// Base class for all plugins.
+    /// </summary>
     public abstract class Plugin
     {
         /// <summary>
@@ -78,15 +81,38 @@ namespace DeviantArt.Chat.Oberon
         public abstract void Load();
 
         /// <summary>
+        /// Converts the provided string into an array of arguments.
+        /// The delimiter is a space.
+        /// </summary>
+        /// <param name="data">Data to convert.</param>
+        /// <returns>Array of arguments.</returns>
+        protected string[] GetArgs(string data)
+        {
+            return data.Trim().Split(' ');
+        }
+
+        /// <summary>
+        /// Send a response to a user.
+        /// </summary>
+        /// <param name="ns">Chatroom.</param>
+        /// <param name="user">User to respond to.</param>
+        /// <param name="message">Message to send.</param>
+        protected void Respond(string ns, string user, string message)
+        {
+            dAmn.Say(ns, user + ": " + message);
+        }
+
+        /// <summary>
         /// This method lets you tie into a command that is received from a user. There are no
         /// preset commands. Any new commands are registered with this method. Only one method
         /// can be mapped for one command.
         /// </summary>
         /// <param name="commandName">Command name to registere for.</param>
         /// <param name="commandMethod">Method that will be executed when command is encountered.</param>
-        protected void RegisterCommand(string commandName, BotCommandEvent commandMethod)
+        /// <param name="help">Help text for command.</param>
+        protected void RegisterCommand(string commandName, BotCommandEvent commandMethod, string help)
         {
-            Bot.AddCommandListener(commandName, this, commandMethod);
+            Bot.AddCommandListener(commandName, this, commandMethod, help);
         }
 
         /// <summary>
