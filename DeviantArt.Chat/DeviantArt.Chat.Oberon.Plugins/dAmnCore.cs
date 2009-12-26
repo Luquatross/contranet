@@ -129,6 +129,14 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     return;
                 }
 
+                // check user authorization
+                bool isAuthorized = Bot.Access.UserHasAccess(from, command);
+                if (!isAuthorized)
+                {
+                    dAmn.Say(chatroom, string.Format("Access for {0} to the command {1} is denied.", from, command));
+                    return;
+                }
+
                 // get the last string in the args to determine if help command
                 string lastString = message.Trim().Split(' ').LastOrDefault();
                 if (lastString == "?")

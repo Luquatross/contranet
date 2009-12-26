@@ -50,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AccessLevel.cs" />
     <Compile Include="Bot.cs" />
     <Compile Include="Chat.cs" />
     <Compile Include="Console.cs" />

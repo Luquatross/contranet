@@ -9,6 +9,7 @@ using System.Web;
 using System.Xml;
 using System.Xml.Linq;
 using DeviantArt.Chat.Library;
+using System.Text;
 
 namespace DeviantArt.Chat.Oberon
 {
@@ -33,6 +34,53 @@ namespace DeviantArt.Chat.Oberon
     /// The key/value being the plugin and the method. 
     /// </summary>
     public class BotEventList : List<KeyValuePair<Plugin, BotServerPacketEvent>> { }
+
+    /// <summary>
+    /// Command help data.
+    /// </summary>
+    public class CommandHelp
+    {
+        /// <summary>
+        /// Short description of the command.
+        /// </summary>
+        public string Summary { get; set; }
+
+        /// <summary>
+        /// Short description of the command.
+        /// </summary>
+        public string Usage { get; set; }
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="summary">Short description of the command.</param>
+        /// <param name="usage">Short description of the command.</param>
+        public CommandHelp(string summary, string usage)
+        {
+            Summary = summary;
+            Usage = usage;
+        }
+
+        /// <summary>
+        /// Returns help text as formatted string.
+        /// </summary>
+        /// <returns>Help text formatted for output.</returns>
+        public override string ToString()
+        {
+            StringBuilder help = new StringBuilder("<ul>");
+
+            // add summary
+            if (!string.IsNullOrEmpty(Summary))
+                help.Append("<li><b><u>Summary:</u></b> " + Summary + "</li>");
+
+            // add usage
+            if (!string.IsNullOrEmpty(Usage))           
+                help.Append("<li><b><u>Usage:</u></b><br />" + Usage + "</li>");            
+
+            help.Append("</ul>");
+            return help.ToString();
+        }
+    }
 
     /// <summary>
     /// The core of the system, the bot that runs all processes.
@@ -68,6 +116,11 @@ namespace DeviantArt.Chat.Oberon
         };
 
         /// <summary>
+        /// Access levels for users and commands.
+        /// </summary>
+        public AccessLevel Access;
+
+        /// <summary>
         /// The current directory for the executing assembly.
         /// </summary>
         public string CurrentDirectory = System.IO.Path.GetDirectoryName(
@@ -87,7 +140,7 @@ namespace DeviantArt.Chat.Oberon
         public string PluginPath
         {
             get { return System.IO.Path.Combine(CurrentDirectory, "Plugins"); }
-        }        
+        }
         #endregion
 
         #region Private Variables
@@ -120,7 +173,7 @@ namespace DeviantArt.Chat.Oberon
         /// <summary>
         /// Variable to hold mapping of command names to their help text.
         /// </summary>
-        private Dictionary<string, string> commandHelp = new Dictionary<string, string>();
+        private Dictionary<string, CommandHelp> commandHelp = new Dictionary<string, CommandHelp>();
 
         /// <summary>
         /// Private list of all plugins that are loaded.
@@ -130,7 +183,7 @@ namespace DeviantArt.Chat.Oberon
         /// <summary>
         /// A list of chatrooms currently joined.
         /// </summary>
-        private Dictionary<string, Chat> Chats = new Dictionary<string, Chat>();
+        private Dictionary<string, Chat> Chats = new Dictionary<string, Chat>();        
         #endregion
 
         #region Constructor and Singleton Methods
@@ -202,6 +255,9 @@ namespace DeviantArt.Chat.Oberon
             if (IsDebug)
                 Console.Notice("Initializing event map.");
             InitializeEventMap();
+
+            // create access level object
+            Access = new AccessLevel(this);
 
             // Now we're ready to get some work done!
             Console.Notice("Ready!");
@@ -364,7 +420,8 @@ namespace DeviantArt.Chat.Oberon
         /// <param name="plugin">Plugin assocaited with the method.</param>
         /// <param name="command">Method to execute.</param>
         /// <param name="commandHelp">Help text for the command.</param>
-        public void AddCommandListener(string commandName, Plugin plugin, BotCommandEvent commandMethod, string help)
+        /// <param name="accessLevel">Default access level for command. Can be changed by admins.</param>
+        public void AddCommandListener(string commandName, Plugin plugin, BotCommandEvent commandMethod, CommandHelp help, int accessLevel)
         {
             // make sure command is free
             if (commandMap.ContainsKey(commandName))
@@ -378,7 +435,11 @@ namespace DeviantArt.Chat.Oberon
                 new KeyValuePair<Plugin, BotCommandEvent>(plugin, commandMethod));
 
             // add help
-            commandHelp.Add(commandName, help);
+            if (commandHelp != null)
+                commandHelp.Add(commandName, help);
+
+            // add access level
+            Access.SetCommandLevel(commandName, accessLevel);
 
             // register plugin so we have a reference to it
             RegisterPlugin(plugin);
@@ -395,8 +456,9 @@ namespace DeviantArt.Chat.Oberon
         {
             if (commandMap.ContainsKey(commandName))
             {
+                // get plugin info for the command
                 Plugin plugin = commandMap[commandName].Key;
-                BotCommandEvent method = commandMap[commandName].Value;
+                BotCommandEvent method = commandMap[commandName].Value;                
 
                 // only trigger command if plugin is activated
                 if (plugin.Status == PluginStatus.On)
@@ -415,7 +477,33 @@ namespace DeviantArt.Chat.Oberon
         {
             if (commandHelp.ContainsKey(commandName))
             {
-                dAmn.Say(ns, from + ": " + commandHelp[commandName]);
+                dAmn.Say(ns, from + ": " + commandHelp[commandName].ToString());
+            }
+            else
+            {
+                dAmn.Say(ns, from + ": help text does not exist for this command.");
+            }
+        }
+
+        /// <summary>
+        /// Updates command help text.
+        /// </summary>
+        /// <param name="commandName">Command to update.</param>
+        /// <param name="help">New help text.</param>
+        public void UpdateCommandHelp(string commandName, CommandHelp help)
+        {
+            // make sure command exists
+            if (!commandMap.ContainsKey(commandName))
+                return;
+
+            // add or update key
+            if (commandHelp.ContainsKey(commandName))
+            {
+                commandHelp[commandName] = help;
+            }
+            else
+            {
+                commandHelp.Add(commandName, help);
             }
         }
         #endregion
@@ -599,6 +687,9 @@ namespace DeviantArt.Chat.Oberon
 
             // load all of our plugins for the system
             LoadPlugins();
+
+            // load saved access levels from file if there is one
+            Access.LoadAccessLevels();
 
             // start up the bot
             StartBot();

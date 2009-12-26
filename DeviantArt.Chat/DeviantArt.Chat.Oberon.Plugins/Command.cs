@@ -26,27 +26,47 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
         public override void Load()
         {
-            RegisterCommand("help", new BotCommandEvent(Help), "Displays help information about a particular command.");
-            RegisterCommand("time", new BotCommandEvent(Time), "Displays the current bot time.");
-            RegisterCommand("about", new BotCommandEvent(About), "Displays information about the bot.");
-            RegisterCommand("autojoin", new BotCommandEvent(AutoJoin), "Adds or removes a chatroom from the auto join list.");
-            RegisterCommand("join", new BotCommandEvent(Join), "Makes the bot join the provided chatroom.");
-            RegisterCommand("part", new BotCommandEvent(Part), "Makes the bot leave the provided chatroom.");
-            RegisterCommand("list", new BotCommandEvent(List), "List the users in a chatroom.");
-            RegisterCommand("chats", new BotCommandEvent(Chats), "The chat rooms that the bot is currently signed into.");
+            // register comamnds
+            RegisterCommand("help", new BotCommandEvent(Help), null, (int)PrivClassDefaults.Guests);
+            RegisterCommand("time", new BotCommandEvent(Time), null, (int)PrivClassDefaults.Guests);
+            RegisterCommand("about", new BotCommandEvent(About), null, (int)PrivClassDefaults.Guests);
+            RegisterCommand("autojoin", new BotCommandEvent(AutoJoin), null, (int)PrivClassDefaults.Operators);
+            RegisterCommand("join", new BotCommandEvent(Join), null, (int)PrivClassDefaults.Operators);
+            RegisterCommand("part", new BotCommandEvent(Part), null, (int)PrivClassDefaults.Operators);
+            RegisterCommand("list", new BotCommandEvent(List), null, (int)PrivClassDefaults.Operators);
+            RegisterCommand("chats", new BotCommandEvent(Chats), null, (int)PrivClassDefaults.Operators);
+            RegisterCommand("access", new BotCommandEvent(Access), null, (int)PrivClassDefaults.Operators);
+            RegisterCommand("user", new BotCommandEvent(User), null, (int)PrivClassDefaults.Operators);
+            RegisterCommand("priv", new BotCommandEvent(Priv), null, (int)PrivClassDefaults.Operators);
+
+            // register command help (could have done it above, but would make the code
+            // pretty unreadable
+            RegisterCommandHelp("help", new CommandHelp("Displays help information about a particular command.", "help [command]"));
+            RegisterCommandHelp("time", new CommandHelp("Displays the current bot time.", "time"));
+            RegisterCommandHelp("about", new CommandHelp("Displays information about the bot.", "about<br />about system<br />about upttime"));
+            RegisterCommandHelp("autojoin", new CommandHelp("Adds or removes a chatroom from the auto join list.", "autojoin add [room]<br/>autojoin remove [room]"));
+            RegisterCommandHelp("join", new CommandHelp("Makes the bot join the provided chatroom.", "join [room]"));
+            RegisterCommandHelp("part", new CommandHelp("Makes the bot leave the provided chatroom.", "part [room]"));
+            RegisterCommandHelp("list", new CommandHelp("List the users in a chatroom.", "list [room]"));
+            RegisterCommandHelp("chats", new CommandHelp("The chat rooms that the bot is currently signed into.", "chats"));
+            RegisterCommandHelp("access", new CommandHelp("Changes the access level prileges for a command.", "access [command] (Range 0 through 100)<br />access [command] default<br />" + 
+                "<b>Example:</b> !access ping 0</br>Example: !access ping 100"));
+            RegisterCommandHelp("user", new CommandHelp("Manage users registered to the bot.", "add [user] [level]<br />edit [user] [level]<br />list<br />del [user]<br />addprivclass [name] [level]<br />delprivclass [name]<br />" +
+                "<b>Example:</b> !user add devartuser 50"));
+            RegisterCommandHelp("priv", new CommandHelp("Manage bot priv class access levels.", "priv [priv class] [level]<br /><b>Example:</b> !priv guest 1"));
         }
 
         private void Help(string ns, string from, string message)
         {
             string[] args = GetArgs(message);
-            if (args.Length > 1)
-            {
-                Respond(ns, from, "Invalid help request.");
-                return; // invalid help
+            if (args.Length != 1)
+            {                
+                ShowHelp(ns, from, "help");
+                return; 
             }
 
-            // display appropriate help
-            Bot.TriggerHelp(args[0], ns, from);
+            // display appropriate help            
+            ShowHelp(ns, from, args[0]);
         }
 
         private void Time(string ns, string from, string message)
@@ -57,10 +77,15 @@ namespace DeviantArt.Chat.Oberon.Plugins
         private void About(string ns, string from, string message)
         {
             string[] args = GetArgs(message);
+
+            // get command
             string command = string.Empty;
             if (args.Length > 0)
                 command = args[0];
+
+            // about string
             string about;
+
             switch (command.ToLower())
             {
                 case "system":
@@ -69,7 +94,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     break;
                 case "uptime":
                     TimeSpan diff = DateTime.Now.Subtract(Bot.Start);
-                    about = string.Format("<abbr title=\"{0}\"></abbr>Uptime: {1} hours, {2} minutes, and {3} seconds.", from, diff.Hours, diff.Minutes, diff.Seconds);
+                    about = string.Format("<b><u>Bot Uptime</b><br />Bot running {0} days, {1} hours, {2} minutes, and {3} seconds.", diff.Days, diff.Hours, diff.Minutes, diff.Seconds);
                     dAmn.Say(ns, about);
                     break;
                 case "":
@@ -81,6 +106,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     about = about.Replace("%R%", Bot.Info["Release"]);
                     about = about.Replace("%O%", Bot.Owner);
                     about = about.Replace("%A%", Bot.Info["Author"]);
+                    about = about.Replace("%T%", Bot.Trigger);
                     about = about.Replace("%R%", Bot.Info["Release"]);
                     about = about.Replace("%D%", Bot.IsDebug ? "Running in debug mode." : "");
                     dAmn.Say(ns, about);
@@ -92,8 +118,8 @@ namespace DeviantArt.Chat.Oberon.Plugins
         {
             string[] args = GetArgs(message);
             if (args.Length != 2)
-            {
-                dAmn.Say(ns, "Invalid command format.");
+            {                
+                ShowHelp(ns, from, "autojoin");
                 return;
             }
 
@@ -109,27 +135,42 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     Bot.RemoveAutoJoinChatroom(chatroom);
                     dAmn.Say(ns, string.Format("{0} chatroom removed from auto join list.", chatroom));
                     break;
+                default:
+                    ShowHelp(ns, from, "autojoin");
+                    break;
             }
         }
 
         private void Join(string ns, string from, string message)
         {
             string[] args = GetArgs(message);
-            string room = ns;
-            if (args.Length == 1)
-                room = args[0];
+            if (args.Length != 1)
+            {                
+                ShowHelp(ns, from, "join");
+                return;
+            }
 
-            dAmn.Join(room);
+            dAmn.Join(args[0]);
         }
 
         private void Part(string ns, string from, string message)
         {
             string[] args = GetArgs(message);
-            string room = ns;
-            if (args.Length == 1)
-                room = args[0];
-
-            dAmn.Part(room);
+            
+            // leave provided rooms
+            if (args.Length == 0)
+            {
+                dAmn.Part(ns);
+            }
+            else if (args.Length == 1)
+            {
+                dAmn.Part(args[0]);
+            }
+            else if (args.Length > 1)
+            {
+                foreach (string room in args)
+                    dAmn.Part(room);
+            }
         }
 
         private void List(string ns, string from, string message)
@@ -176,6 +217,183 @@ namespace DeviantArt.Chat.Oberon.Plugins
             }
 
             dAmn.Say(ns, list.ToString());
+        }
+
+        private void Access(string ns, string from, string message)
+        {
+            bool showUsage = false;
+            string[] args = GetArgs(message);
+            int accessLevel = 0;
+            string command = args[0];
+
+            // parse command args
+            if (args.Length == 2)
+            {
+                if (!int.TryParse(args[1], out accessLevel))
+                    showUsage = true;
+            }
+            else
+            {
+                showUsage = true;
+            }
+            
+            // show usage if necessary
+            if (showUsage)
+            {                
+                ShowHelp(ns, from, "access");
+                return;
+            }
+
+            // set level
+            Bot.Access.SetCommandLevel(command, accessLevel);
+            dAmn.Say(ns, string.Format(
+                "** Access level for command '{0}' was set to {1} *", command, accessLevel));
+            Bot.Access.SaveAccessLevels();
+        }
+
+        private void User(string ns, string from, string message)
+        {
+            string[] args = GetArgs(message);            
+            bool showUsage = false;
+            string command = string.Empty;
+            string user;
+            string name;
+            int level;
+
+            if (args.Length >= 1)
+                command = args[0];
+
+            switch (command)
+            {
+                case "add":
+                case "edit":
+                    if (args.Length == 3)
+                    {
+                        user = args[1];
+                        // if level is an int pass it, otherwise use priv class
+                        if (int.TryParse(args[2], out level))
+                        {
+                            Bot.Access.SetUserLevel(user, level);
+                            dAmn.Say(ns, string.Format(
+                                "** :dev{0}: has been given access level privilege {1} by {2} *",
+                                user,
+                                level,
+                                from));
+                        }
+                        else
+                        {
+                            string privClass = args[2];
+                            if (Bot.Access.HasUserLevel(privClass))
+                            {
+                                Bot.Access.SetUserLevel(user, privClass);
+                                dAmn.Say(ns, string.Format(
+                                    "** :dev{0}: has been made a member of bot privclass {1} by {2} *",
+                                    user,
+                                    privClass,
+                                    from));
+                            }
+                            else
+                            {
+                                dAmn.Say(ns, string.Format("<b>Error:</b> bot privclass {0} does not exist.", privClass));
+                            }
+                        }
+                    }
+                    else
+                    {
+                        showUsage = true;
+                    }
+                    break;
+                case "list":
+                    StringBuilder output = new StringBuilder("<b><u>Bot User list:</u></b><br />");
+                    Dictionary<string, int> userList = Bot.Access.GetAllUserAccessLevels();
+                    // order them by access level
+                    var sortedList = from u in userList
+                                     orderby u.Value descending
+                                     select u;
+
+                    foreach (var u in sortedList)
+                    {
+                        output.Append(string.Format(":dev{0}: <sub>(Access level: {1})</sub><br />", u.Key, u.Value)); 
+                    }                    
+                    dAmn.Say(ns, output.ToString());
+                    break;
+                case "del":
+                    if (args.Length == 2)
+                    {
+                        user = args[1];
+                        Bot.Access.RemoveUserLevel(user);
+                    }
+                    else
+                    {
+                        showUsage = true;
+                    }
+                    break;
+                case "addprivclass":
+                    if (args.Length == 2)
+                    {
+                        name = args[1];
+                        level = Convert.ToInt32(args[2]);
+                        Bot.Access.AddPrivClass(PrivClass.Create(name, level));
+                    }
+                    else
+                    {
+                        showUsage = true;
+                    }
+                    break;
+                case "delprivclass":
+                    if (args.Length == 1)
+                    {
+                        name = args[1];
+                        Bot.Access.RemovePrivClass(name);
+                    }
+                    else
+                    {
+                        showUsage = true;
+                    }
+                    break;
+            }
+
+            if (showUsage)
+            {                
+                ShowHelp(ns, from, "user");
+                return;
+            }
+            else
+            {
+                // save all changes
+                Bot.Access.SaveAccessLevels();
+            }
+        }
+
+        private void Priv(string ns, string from, string message)
+        {
+            string[] args = GetArgs(message);
+            bool showUsage = false;
+            if (args.Length == 2)
+            {
+                string privClass = args[0];
+                int level;
+                if (!int.TryParse(args[1], out level))
+                {
+                    showUsage = true;
+                }
+                else
+                {
+                    Bot.Access.UpdatePrivClassAccessLevel(privClass, level);
+                    dAmn.Say(ns, string.Format(
+                        "** Priv class {0} was changed to access level {1} by {2} *",
+                        privClass, 
+                        level,
+                        from));
+                    Bot.Access.SaveAccessLevels();
+                }
+            }
+
+            if (showUsage)
+            {                
+                ShowHelp(ns, from, "priv");
+                return;
+            }
         }
     }
 }
