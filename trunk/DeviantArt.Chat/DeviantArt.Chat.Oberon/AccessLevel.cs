@@ -277,18 +277,30 @@ namespace DeviantArt.Chat.Oberon
             // load user data
             XmlNodeList userDataNodes = root.SelectNodes("userData/add");
             foreach (XmlNode userNode in userDataNodes)
-                UserAccessLevel.Add(
-                    userNode.Attributes["key"].Value,
-                    Convert.ToInt32(userNode.Attributes["value"].Value
-                ));
+            {
+                string username = userNode.Attributes["key"].Value;
+                if (UserAccessLevel.ContainsKey(username))
+                    UserAccessLevel[username] = Convert.ToInt32(userNode.Attributes["value"].Value);
+                else
+                    UserAccessLevel.Add(
+                        username,
+                        Convert.ToInt32(userNode.Attributes["value"].Value
+                    ));
+            }
 
             // load command data
             XmlNodeList commandDataNodes = root.SelectNodes("commandData/add");
             foreach (XmlNode commandNode in commandDataNodes)
-                CommandAccessLevel.Add(
-                    commandNode.Attributes["key"].Value,
-                    Convert.ToInt32(commandNode.Attributes["value"].Value
-                ));
+            {
+                string command = commandNode.Attributes["key"].Value;
+                if (CommandAccessLevel.ContainsKey(command))
+                    CommandAccessLevel[command] = Convert.ToInt32(commandNode.Attributes["value"].Value);
+                else
+                    CommandAccessLevel.Add(
+                        command,
+                        Convert.ToInt32(commandNode.Attributes["value"].Value
+                    ));
+            }
         }
 
         /// <summary>
