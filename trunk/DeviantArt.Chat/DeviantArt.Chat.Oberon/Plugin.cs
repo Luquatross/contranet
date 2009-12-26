@@ -88,7 +88,21 @@ namespace DeviantArt.Chat.Oberon
         /// <returns>Array of arguments.</returns>
         protected string[] GetArgs(string data)
         {
-            return data.Trim().Split(' ');
+            if (string.IsNullOrEmpty(data))
+                return new string[]{};
+            else
+                return data.Trim().Split(' ');
+        }
+
+        /// <summary>
+        /// Show help message to the user for a particular command.
+        /// </summary>
+        /// <param name="ns">Chatroom.</param>
+        /// <param name="from">User to send message to.</param>
+        /// <param name="command">Command to show help for.</param>
+        protected void ShowHelp(string ns, string from, string command)
+        {
+            Bot.TriggerHelp(command, ns, from);
         }
 
         /// <summary>
@@ -107,12 +121,23 @@ namespace DeviantArt.Chat.Oberon
         /// preset commands. Any new commands are registered with this method. Only one method
         /// can be mapped for one command.
         /// </summary>
-        /// <param name="commandName">Command name to registere for.</param>
+        /// <param name="commandName">Command name to register for.</param>
         /// <param name="commandMethod">Method that will be executed when command is encountered.</param>
         /// <param name="help">Help text for command.</param>
-        protected void RegisterCommand(string commandName, BotCommandEvent commandMethod, string help)
+        /// <param name="defaultAccessLevel">Default access level for this command.</param>
+        protected void RegisterCommand(string commandName, BotCommandEvent commandMethod, CommandHelp help, int defaultAccessLevel)
         {
-            Bot.AddCommandListener(commandName, this, commandMethod, help);
+            Bot.AddCommandListener(commandName, this, commandMethod, help, defaultAccessLevel);
+        }
+
+        /// <summary>
+        /// Updates the help text for a registered command.
+        /// </summary>
+        /// <param name="commandName">Command name to update.</param>
+        /// <param name="help">Help text for the command.</param>
+        protected void RegisterCommandHelp(string commandName, CommandHelp help)
+        {
+            Bot.UpdateCommandHelp(commandName, help);
         }
 
         /// <summary>

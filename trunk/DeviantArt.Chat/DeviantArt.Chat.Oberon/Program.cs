@@ -21,6 +21,7 @@ namespace DeviantArt.Chat.Oberon
             {
                 System.Console.WriteLine(ex);
             }
+            System.Console.ReadLine();
         }
     }
 }

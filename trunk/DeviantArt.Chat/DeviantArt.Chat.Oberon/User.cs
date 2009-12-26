@@ -45,5 +45,27 @@ namespace DeviantArt.Chat.Oberon
         /// Number of users in chatroom of the same username.
         /// </summary>
         public int Count = 0;
+
+        /// <summary>
+        /// Access level for this user. If not set, returns the default user 
+        /// access level.
+        /// </summary>
+        public int AccessLevel
+        {
+            get
+            {
+                return Bot.Instance.Access.GetUserLevel(Username);
+            }
+        }
+
+        /// <summary>
+        /// Returns true if the user as access to the command. Otherwise false.
+        /// </summary>
+        /// <param name="command">Command to test access to.</param>
+        /// <returns>True if authorized, otherwise false.</returns>
+        public bool HasAccess(string command)
+        {
+            return (AccessLevel >= Bot.Instance.Access.GetCommandLevel(command));
+        }
     }
 }
