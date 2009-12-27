@@ -616,6 +616,36 @@ namespace DeviantArt.Chat.Oberon
             if (IsDebug)
                 Console.Notice(string.Format("The plugin '{0}' was created/modified/deleted.", e.Name));
         }
+
+        /// <summary>
+        /// Reloads all the plugins for the bot.
+        /// </summary>
+        public void ReloadPlugins()
+        {
+            // clear all variables holding commands and events
+            commandHelp.Clear();
+            commandMap.Clear();
+            eventMap.Clear();
+
+            // clear all plugins
+            botPlugins.Clear();
+
+            // load plugins again
+            LoadPlugins();
+
+            // reload access levels for everything
+            Access.LoadAccessLevels();
+        }
+
+        /// <summary>
+        /// Set the plugin status on or off.
+        /// </summary>
+        /// <param name="pluginName">Plugin to change.</param>
+        /// <param name="status">Plugin status.</param>
+        public void SetPluginStatus(string pluginName, PluginStatus status)
+        {
+            botPlugins[pluginName].Status = status;
+        }
         #endregion
 
         #region Listen / Process Packets
@@ -891,6 +921,16 @@ namespace DeviantArt.Chat.Oberon
         public void ChangeTrigger(string newTrigger)
         {
             Trigger = newTrigger;
+        }
+
+        /// <summary>
+        /// Gets all bot plugins. Careful with the plugins! Modifying their settings
+        /// could make the system unstable.
+        /// </summary>
+        /// <returns>Plugin list.</returns>
+        public List<Plugin> GetPlugins()
+        {
+            return botPlugins.Values.ToList();
         }
         #endregion
     }

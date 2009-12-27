@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Resources;
 
 namespace DeviantArt.Chat.Oberon.Plugins
 {
     public class Command : Plugin
     {
         #region Private Variables
-        private string _PluginName = "Oberon System Commands Plugin";
+        private string _PluginName = "Oberon Commands Plugin";
         private string _FolderName = "System";
         #endregion
 
@@ -24,43 +25,56 @@ namespace DeviantArt.Chat.Oberon.Plugins
         }
         #endregion
 
+        protected override ResourceManager GetResourceManager()
+        {
+            return PluginResource.ResourceManager;
+        }
+
         public override void Load()
         {
             // register comamnds
-            RegisterCommand("help", new BotCommandEvent(Help), null, (int)PrivClassDefaults.Guests);
-            RegisterCommand("time", new BotCommandEvent(Time), null, (int)PrivClassDefaults.Guests);
-            RegisterCommand("about", new BotCommandEvent(About), null, (int)PrivClassDefaults.Guests);
-            RegisterCommand("autojoin", new BotCommandEvent(AutoJoin), null, (int)PrivClassDefaults.Operators);
-            RegisterCommand("join", new BotCommandEvent(Join), null, (int)PrivClassDefaults.Operators);
-            RegisterCommand("part", new BotCommandEvent(Part), null, (int)PrivClassDefaults.Operators);
-            RegisterCommand("list", new BotCommandEvent(List), null, (int)PrivClassDefaults.Operators);
-            RegisterCommand("chats", new BotCommandEvent(Chats), null, (int)PrivClassDefaults.Operators);
-            RegisterCommand("access", new BotCommandEvent(Access), null, (int)PrivClassDefaults.Operators);
-            RegisterCommand("user", new BotCommandEvent(User), null, (int)PrivClassDefaults.Operators);
-            RegisterCommand("priv", new BotCommandEvent(Priv), null, (int)PrivClassDefaults.Operators);
-            RegisterCommand("commands", new BotCommandEvent(Commands), null, (int)PrivClassDefaults.Guests);
-            RegisterCommand("credits", new BotCommandEvent(Credits), new CommandHelp("Displays credits.", "credits"), (int)PrivClassDefaults.Guests);
-            RegisterCommand("ctrig", new BotCommandEvent(CTrig), null, (int)PrivClassDefaults.Operators);
+            RegisterCommand("help", new BotCommandEvent(Help), GetCommandHelp("Help.Summary", "Help.Usage"), (int)PrivClassDefaults.Guests);
+            RegisterCommand("time", new BotCommandEvent(Time), GetCommandHelp("Time.Summary", "Time.Usage"), (int)PrivClassDefaults.Guests);
+            RegisterCommand("about", new BotCommandEvent(About), GetCommandHelp("About.Summary", "About.Usage"), (int)PrivClassDefaults.Guests);
+            RegisterCommand("autojoin", new BotCommandEvent(AutoJoin), GetCommandHelp("Autojoin.Summary", "Autojoin.Usage"), (int)PrivClassDefaults.Operators);
+            RegisterCommand("join", new BotCommandEvent(Join), GetCommandHelp("Join.Summary", "Join.Usage"), (int)PrivClassDefaults.Operators);
+            RegisterCommand("part", new BotCommandEvent(Part), GetCommandHelp("Part.Summary", "Part.Usage"), (int)PrivClassDefaults.Operators);
+            RegisterCommand("list", new BotCommandEvent(List), GetCommandHelp("List.Summary", "List.Usage"), (int)PrivClassDefaults.Operators);
+            RegisterCommand("chats", new BotCommandEvent(Chats), GetCommandHelp("Chats.Summary", "Chats.Usage"), (int)PrivClassDefaults.Operators);
+            RegisterCommand("access", new BotCommandEvent(Access), GetCommandHelp("Access.Summary", "Access.Usage"), (int)PrivClassDefaults.Operators);
+            RegisterCommand("user", new BotCommandEvent(User), GetCommandHelp("User.Summary", "User.Usage"), (int)PrivClassDefaults.Operators);
+            RegisterCommand("priv", new BotCommandEvent(Priv), GetCommandHelp("Priv.Summary", "Priv.Usage"), (int)PrivClassDefaults.Operators);
+            RegisterCommand("commands", new BotCommandEvent(Commands), GetCommandHelp("Commands.Summary", "Commands.Usage"), (int)PrivClassDefaults.Guests);
+            RegisterCommand("credits", new BotCommandEvent(Credits), GetCommandHelp("Credits.Summary", "Credits.Usage"), (int)PrivClassDefaults.Guests);
+            RegisterCommand("ctrig", new BotCommandEvent(CTrig), GetCommandHelp("CTrig.Summary", "CTrig.Usage"), (int)PrivClassDefaults.Operators);
+            RegisterCommand("kick", new BotCommandEvent(Kick), GetCommandHelp("Kick.Summary", "Kick.Usage"), (int)PrivClassDefaults.Operators);
+            RegisterCommand("plugins", new BotCommandEvent(Plugins), GetCommandHelp("Plugins.Summary", "Plugins.Usage"), (int)PrivClassDefaults.Operators);
+            RegisterCommand("ping", new BotCommandEvent(Ping), GetCommandHelp("Ping.Summary", "Ping.Usage"), (int)PrivClassDefaults.Members);
+            RegisterCommand("quit", new BotCommandEvent(Quit), GetCommandHelp("Quit.Summary", "Quit.Usage"), (int)PrivClassDefaults.Owner);
+            RegisterCommand("restart", new BotCommandEvent(Restart), GetCommandHelp("Restart.Summary", "Restart.Usage"), (int)PrivClassDefaults.Owner);
+            RegisterCommand("say", new BotCommandEvent(Say), GetCommandHelp("Say.Summary", "Say.Usage"), (int)PrivClassDefaults.Members);
 
             // register command help (could have done it above, but would make the code
             // pretty unreadable
-            RegisterCommandHelp("help", new CommandHelp("Displays help information about a particular command.", "help [command]"));
-            RegisterCommandHelp("time", new CommandHelp("Displays the current bot time.", "time"));
-            RegisterCommandHelp("about", new CommandHelp("Displays information about the bot.", "about<br />about system<br />about upttime"));
-            RegisterCommandHelp("autojoin", new CommandHelp("Adds or removes a chatroom from the auto join list.", "autojoin add [room]<br/>autojoin remove [room]<br />autojoin list"));
-            RegisterCommandHelp("join", new CommandHelp("Makes the bot join the provided chatroom.", "join [room]"));
-            RegisterCommandHelp("part", new CommandHelp("Makes the bot leave the provided chatroom.", "part [room]"));
-            RegisterCommandHelp("list", new CommandHelp("List the users in a chatroom.", "list [room]"));
-            RegisterCommandHelp("chats", new CommandHelp("The chat rooms that the bot is currently signed into.", "chats"));
-            RegisterCommandHelp("access", new CommandHelp("Changes the access level prileges for a command.", "access [command] (Range 0 through 100)<br />access [command] default<br />" + 
-                "<b>Example:</b> !access ping 0</br>Example: !access ping 100"));
-            RegisterCommandHelp("user", new CommandHelp("Manage users registered to the bot.", "add [user] [level]<br />edit [user] [level]<br />list<br />del [user]<br />addprivclass [name] [level]<br />delprivclass [name]<br />" +
-                "<b>Example:</b> !user add devartuser 50"));
-            RegisterCommandHelp("priv", new CommandHelp("Manage bot priv class access levels.", "priv [priv class] [level]<br /><b>Example:</b> !priv guest 1"));
-            RegisterCommandHelp("commands", new CommandHelp("List of available commands and their access levels.", "commands - list of commands you have access to<br />commands all - list all commands<br />" +
-                "commands details - list all commands and show modules"));
-            RegisterCommandHelp("ctrig", new CommandHelp("Temporarily change the bot's trigger.", "ctrig [trigger]<br />" +
-                "<b>Example:</b> !ctrig #"));
+            //RegisterCommandHelp("help", new CommandHelp("Displays help information about a particular command.", "help [command]"));
+            //RegisterCommandHelp("time", new CommandHelp("Displays the current bot time.", "time"));
+            //RegisterCommandHelp("about", new CommandHelp("Displays information about the bot.", "about<br />about system<br />about upttime"));
+            //RegisterCommandHelp("autojoin", new CommandHelp("Adds or removes a chatroom from the auto join list.", "autojoin add [room]<br/>autojoin remove [room]<br />autojoin list"));
+            //RegisterCommandHelp("join", new CommandHelp("Makes the bot join the provided chatroom.", "join [room]"));
+            //RegisterCommandHelp("part", new CommandHelp("Makes the bot leave the provided chatroom.", "part [room]"));
+            //RegisterCommandHelp("list", new CommandHelp("List the users in a chatroom.", "list [room]"));
+            //RegisterCommandHelp("chats", new CommandHelp("The chat rooms that the bot is currently signed into.", "chats"));
+            //RegisterCommandHelp("access", new CommandHelp("Changes the access level prileges for a command.", "access [command] (Range 0 through 100)<br />access [command] default<br />" + 
+            //    "<b>Example:</b> !access ping 0</br>Example: !access ping 100"));
+            //RegisterCommandHelp("user", new CommandHelp("Manage users registered to the bot.", "add [user] [level]<br />edit [user] [level]<br />list<br />del [user]<br />addprivclass [name] [level]<br />delprivclass [name]<br />" +
+            //    "<b>Example:</b> !user add devartuser 50"));
+            //RegisterCommandHelp("priv", new CommandHelp("Manage bot priv class access levels.", "priv [priv class] [level]<br /><b>Example:</b> !priv guest 1"));
+            //RegisterCommandHelp("commands", new CommandHelp("List of available commands and their access levels.", "commands - list of commands you have access to<br />commands all - list all commands<br />" +
+            //    "commands details - list all commands and show modules"));
+            //RegisterCommandHelp("ctrig", new CommandHelp("Temporarily change the bot's trigger.", "ctrig [trigger]<br />" +
+            //    "<b>Example:</b> !ctrig #"));
+            //RegisterCommandHelp("kick", new CommandHelp("Kicks a user from a chatroom.", "kick (room) [user]<br />" +
+            //    "<b>Example:</b> !kick botdom devartuser"));            
         }
 
         private void Help(string ns, string from, string message)
@@ -536,6 +550,154 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
             Bot.ChangeTrigger(trigger);
             dAmn.Say(ns, string.Format("** bot trigger changed to {0} by {1} *", trigger, from));
+        }
+
+        private void Kick(string ns, string from, string message)
+        {
+            string[] args = GetArgs(message);
+            string room;
+            string user;
+
+            if (args.Length == 2)
+            {
+                room = args[0];
+                user = args[1];
+            }
+            else if (args.Length == 1)
+            {
+                room = ns;
+                user = args[0];
+            }
+            else
+            {
+                ShowHelp(ns, from, "kick");
+                return;
+            }
+
+            dAmn.Kick(room, user);
+            if (room != ns)
+                dAmn.Say(ns, string.Format("** :dev{0}: kicked from #{1} by {2} *", user, room, from));
+        }
+
+        private void Plugins(string ns, string from, string message)
+        {
+            string[] args = GetArgs(message);
+            string command = string.Empty;
+            string pluginKey = string.Empty;
+            string status = string.Empty; ;
+            Plugin plugin;
+
+            // get args
+            if (args.Length == 1)
+            {
+                command = args[0];
+            }
+            else if (args.Length == 2)
+            {
+                command = args[1];
+                pluginKey = args[0];
+            }
+            else if (args.Length == 3)
+            {
+                command = args[1];
+                pluginKey = args[0];
+                status = args[2];
+            }
+            else
+            {
+                ShowHelp(ns, from, "plugins");
+                return;
+            }
+
+            StringBuilder output = new StringBuilder();
+            switch (command)
+            {
+                case "list":
+                    List<Plugin> plugins = Bot.GetPlugins();
+                    output.Append("<b><u>All plugins loaded</u></b>:<ul>");                    
+                    foreach (Plugin p in plugins)
+                        output.Append(string.Format("<li>{0} <sub>(Status: {1}, Key: {2})</li>",
+                            p.PluginName,
+                            p.Status.ToString("G"),
+                            p.GetPluginKey()));
+                    output.Append("</ul>");
+                    break;
+                case "reload":
+                    Bot.ReloadPlugins();
+                    output.Append("** all plugins reloaded *");
+                    break;
+                case "info":
+                    plugin = (from p in Bot.GetPlugins()
+                              where p.GetPluginKey() == pluginKey
+                              select p).SingleOrDefault();
+                    if (plugin == null)
+                    {
+                        Respond(ns, from, "** the plugin with key " + pluginKey + " does not exist *");
+                        return;
+                    }
+                    output.Append("<b><u>Plugin Details</u></b>:<br />");
+                    output.Append(plugin.PluginName + "<br />");
+                    output.Append("<b>Key</b>: " + plugin.GetPluginKey() + "<br />");
+                    output.Append("<b>Commands</b>:<ul>");
+
+                    // get commands for this plugin
+                    var commands = from c in Bot.GetCommandsDetails()
+                                   where c.Value == plugin.PluginName
+                                   select c;
+                    foreach (var cmd in commands)
+                        output.Append(string.Format("<li><sub>{0}</sub></li>", cmd.Key));
+                    output.Append("</ul>");
+                    break;
+                case "turn":
+                    plugin = (from p in Bot.GetPlugins()
+                              where p.GetPluginKey() == pluginKey
+                              select p).SingleOrDefault();
+                    if (plugin == null)
+                    {
+                        Respond(ns, from, "** the plugin with key " + pluginKey + " does not exist *");
+                        return;
+                    }
+
+                    // set status
+                    PluginStatus pluginStatus = (status == "on") ? PluginStatus.On : PluginStatus.Off;
+                    Bot.SetPluginStatus(plugin.PluginName, pluginStatus);
+                    output.Append(string.Format("** status for plugin '{0}' was set to {1} *", pluginKey, pluginStatus.ToString("G")));
+                    break;
+                default:
+                    ShowHelp(ns, from, "plugins");
+                    return;
+            }
+
+            dAmn.Say(ns, output.ToString());
+        }
+
+        private void Ping(string ns, string from, string message)
+        {
+            Respond(ns, from, "Pong?");
+        }
+
+        private void Quit(string ns, string from, string message)
+        {
+            Bot.Shutdown();
+        }
+
+        private void Restart(string ns, string from, string message)
+        {
+            Bot.Restart();
+        }
+
+        private void Say(string ns, string from, string message)
+        {
+            string[] args = GetArgs(message);
+            string room = ns;
+
+            if (args.Length > 2 && args[0].StartsWith("#"))
+            {
+                room = args[0];
+                message = message.Substring(message.IndexOf(args[1]));
+            }
+
+            dAmn.Say(room, message);
         }
     }
 }

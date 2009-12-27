@@ -6,6 +6,7 @@ using System.Collections;
 using DeviantArt.Chat.Library;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Resources;
 
 namespace DeviantArt.Chat.Oberon
 {
@@ -23,6 +24,11 @@ namespace DeviantArt.Chat.Oberon
     public abstract class Plugin
     {
         /// <summary>
+        /// Resource Manager for this plugin.
+        /// </summary>
+        private ResourceManager ResourceManager;
+
+        /// <summary>
         /// Reference to the Bot instance that is running
         /// </summary>
         protected Bot Bot = Bot.Instance;        
@@ -30,7 +36,7 @@ namespace DeviantArt.Chat.Oberon
         /// <summary>
         /// Settings for this plugin.
         /// </summary>
-        protected Hashtable Settings = new Hashtable();
+        protected Hashtable Settings = new Hashtable();        
 
         /// <summary>
         /// Gets the file that the settings are saved and retrieved from.
@@ -72,7 +78,16 @@ namespace DeviantArt.Chat.Oberon
         public abstract string FolderName
         {
             get;
-        }        
+        }
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        public Plugin()
+        {
+            // load the resource manager
+            ResourceManager = GetResourceManager();
+        }
 
         /// <summary>
         /// Method that is called once the plugin is loaded. Most of the plugin's initialization
@@ -92,6 +107,16 @@ namespace DeviantArt.Chat.Oberon
                 return new string[]{};
             else
                 return data.Trim().Split(' ');
+        }
+
+        /// <summary>
+        /// Get a unique key for this plugin. Is the plugin name with all spaces and special 
+        /// characters removed.
+        /// </summary>
+        /// <returns>Plugin key.</returns>
+        public string GetPluginKey()
+        {
+            return System.Text.RegularExpressions.Regex.Replace(PluginName, "[^a-zA-Z_]", "");
         }
 
         /// <summary>
@@ -186,6 +211,32 @@ namespace DeviantArt.Chat.Oberon
             {
                 fs.Close();
             }
+        }
+
+        /// <summary>
+        /// Gets the resource manager for this plugin. Override in plugin class to return
+        /// the actual resource manager. Default method returns null.
+        /// </summary>
+        /// <returns>Resource Manager.</returns>
+        protected virtual ResourceManager GetResourceManager()
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Gets the command help from the Resource file using the provided keys.
+        /// </summary>
+        /// <param name="summaryKey">Key for the summary string.</param>
+        /// <param name="usageKey">Key for the usage string.</param>
+        /// <returns>CommandHelp object filled from the resource file.</returns>
+        protected CommandHelp GetCommandHelp(string summaryKey, string usageKey)
+        {
+            if (ResourceManager == null)
+                return null;
+
+            return new CommandHelp(
+                ResourceManager.GetString(summaryKey),
+                ResourceManager.GetString(usageKey));
         }
     }
 }
