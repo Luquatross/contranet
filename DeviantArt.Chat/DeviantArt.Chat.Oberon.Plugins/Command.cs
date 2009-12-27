@@ -38,13 +38,16 @@ namespace DeviantArt.Chat.Oberon.Plugins
             RegisterCommand("access", new BotCommandEvent(Access), null, (int)PrivClassDefaults.Operators);
             RegisterCommand("user", new BotCommandEvent(User), null, (int)PrivClassDefaults.Operators);
             RegisterCommand("priv", new BotCommandEvent(Priv), null, (int)PrivClassDefaults.Operators);
+            RegisterCommand("commands", new BotCommandEvent(Commands), null, (int)PrivClassDefaults.Guests);
+            RegisterCommand("credits", new BotCommandEvent(Credits), new CommandHelp("Displays credits.", "credits"), (int)PrivClassDefaults.Guests);
+            RegisterCommand("ctrig", new BotCommandEvent(CTrig), null, (int)PrivClassDefaults.Operators);
 
             // register command help (could have done it above, but would make the code
             // pretty unreadable
             RegisterCommandHelp("help", new CommandHelp("Displays help information about a particular command.", "help [command]"));
             RegisterCommandHelp("time", new CommandHelp("Displays the current bot time.", "time"));
             RegisterCommandHelp("about", new CommandHelp("Displays information about the bot.", "about<br />about system<br />about upttime"));
-            RegisterCommandHelp("autojoin", new CommandHelp("Adds or removes a chatroom from the auto join list.", "autojoin add [room]<br/>autojoin remove [room]"));
+            RegisterCommandHelp("autojoin", new CommandHelp("Adds or removes a chatroom from the auto join list.", "autojoin add [room]<br/>autojoin remove [room]<br />autojoin list"));
             RegisterCommandHelp("join", new CommandHelp("Makes the bot join the provided chatroom.", "join [room]"));
             RegisterCommandHelp("part", new CommandHelp("Makes the bot leave the provided chatroom.", "part [room]"));
             RegisterCommandHelp("list", new CommandHelp("List the users in a chatroom.", "list [room]"));
@@ -54,6 +57,10 @@ namespace DeviantArt.Chat.Oberon.Plugins
             RegisterCommandHelp("user", new CommandHelp("Manage users registered to the bot.", "add [user] [level]<br />edit [user] [level]<br />list<br />del [user]<br />addprivclass [name] [level]<br />delprivclass [name]<br />" +
                 "<b>Example:</b> !user add devartuser 50"));
             RegisterCommandHelp("priv", new CommandHelp("Manage bot priv class access levels.", "priv [priv class] [level]<br /><b>Example:</b> !priv guest 1"));
+            RegisterCommandHelp("commands", new CommandHelp("List of available commands and their access levels.", "commands - list of commands you have access to<br />commands all - list all commands<br />" +
+                "commands details - list all commands and show modules"));
+            RegisterCommandHelp("ctrig", new CommandHelp("Temporarily change the bot's trigger.", "ctrig [trigger]<br />" +
+                "<b>Example:</b> !ctrig #"));
         }
 
         private void Help(string ns, string from, string message)
@@ -117,27 +124,57 @@ namespace DeviantArt.Chat.Oberon.Plugins
         private void AutoJoin(string ns, string from, string message)
         {
             string[] args = GetArgs(message);
-            if (args.Length != 2)
-            {                
-                ShowHelp(ns, from, "autojoin");
-                return;
-            }
+            bool showUsage = false;
+            string chatroom;
+            string command = string.Empty;
 
-            // get chatroom name
-            string chatroom = args[1];
-            switch(args[0])
+            // get command if available
+            if (args.Length > 0)
+                command = args[0];
+         
+            switch(command)
             {
                 case "add":
-                    Bot.AddAutoJoinChatroom(chatroom);
-                    dAmn.Say(ns, string.Format("{0} chatroom added to auto join list.", chatroom));
+                    if (args.Length == 2)
+                    {
+                        chatroom = args[1];
+                        Bot.AddAutoJoinChatroom(chatroom);
+                        dAmn.Say(ns, string.Format("** #{0} chatroom added to auto join list *", chatroom));
+                    }
+                    else
+                        showUsage = true;
                     break;
                 case "remove":
-                    Bot.RemoveAutoJoinChatroom(chatroom);
-                    dAmn.Say(ns, string.Format("{0} chatroom removed from auto join list.", chatroom));
+                    if (args.Length == 2)
+                    {
+                        chatroom = args[1];
+                        Bot.RemoveAutoJoinChatroom(chatroom);
+                        dAmn.Say(ns, string.Format("** #{0} chatroom removed from auto join list *", chatroom));
+                    }
+                    else
+                        showUsage = true;
+                    break;
+                case "list":
+                    if (args.Length == 1)
+                    {
+                        StringBuilder list = new StringBuilder("<b><u>Auto-join list</u></b>:<ul>");
+                        foreach (string room in Bot.AutoJoin)
+                            list.Append("<li>#" + room + "</li>");
+                        list.Append("</ul>");
+                        dAmn.Say(ns, list.ToString());
+                    }
+                    else
+                        showUsage = true;
                     break;
                 default:
-                    ShowHelp(ns, from, "autojoin");
+                    showUsage = true;
                     break;
+            }
+
+            if (showUsage)
+            {
+                ShowHelp(ns, from, "autojoin");
+                return;
             }
         }
 
@@ -151,6 +188,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             }
 
             dAmn.Join(args[0]);
+            dAmn.Say(ns, string.Format("** joined the chatroom #{0} *", args[0]));
         }
 
         private void Part(string ns, string from, string message)
@@ -160,17 +198,19 @@ namespace DeviantArt.Chat.Oberon.Plugins
             // leave provided rooms
             if (args.Length == 0)
             {
-                dAmn.Part(ns);
+                dAmn.Part(ns);                
             }
             else if (args.Length == 1)
             {
                 dAmn.Part(args[0]);
+                dAmn.Say(ns, string.Format("** left the chatroom #{0} *", args[0]));
             }
             else if (args.Length > 1)
             {
                 foreach (string room in args)
                     dAmn.Part(room);
-            }
+                dAmn.Say(ns, string.Format("** left the chatrooms {0} *", message));
+            }            
         }
 
         private void List(string ns, string from, string message)
@@ -210,12 +250,12 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
         private void Chats(string ns, string from, string message)
         {
-            StringBuilder list = new StringBuilder("Chatrooms currently signed into:<br />");
+            StringBuilder list = new StringBuilder("<b><u>Chatrooms signed into</u></b>:<ul>");
             foreach (Chat c in Bot.GetAllChatrooms())
             {
-                list.Append(string.Format("{0} <sub>({1} users)</sub><br />", c.Name, c.UserCount));
+                list.Append(string.Format("<li>{0} <sub>({1} users)</sub></li>", c.Name, c.UserCount));
             }
-
+            list.Append("</ul>");
             dAmn.Say(ns, list.ToString());
         }
 
@@ -224,11 +264,12 @@ namespace DeviantArt.Chat.Oberon.Plugins
             bool showUsage = false;
             string[] args = GetArgs(message);
             int accessLevel = 0;
-            string command = args[0];
+            string command = string.Empty;
 
             // parse command args
             if (args.Length == 2)
             {
+                command = args[0];
                 if (!int.TryParse(args[1], out accessLevel))
                     showUsage = true;
             }
@@ -394,6 +435,107 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 ShowHelp(ns, from, "priv");
                 return;
             }
+        }
+
+        private void Commands(string ns, string from, string message)
+        {
+            string[] args = GetArgs(message);
+            bool showUsage = false;
+            string command = string.Empty;
+
+            // get the command
+            if (args.Length > 0)
+                command = args[0];
+
+            Dictionary<string, string> commands = Bot.GetCommandsDetails();
+            StringBuilder output = new StringBuilder();
+
+            switch (command)
+            {
+                case "all":
+                    // list all commands
+                    output.Append("<b><u>All commands</u></b>:<ul>");
+                    foreach (KeyValuePair<string, string> cmd in commands)
+                    {
+                        output.Append(string.Format(
+                            "<li>{0} <sub>(Access level: {1})</sub></li>",
+                            cmd.Key,
+                            Bot.Access.GetCommandLevel(cmd.Key)
+                        ));
+                    }
+                    output.Append("</ul>");
+                    break;
+                case "details":
+                    // list all commands and show modules
+                    output.Append("<b><u>All commands and modules</u></b>:<ul>");
+                    foreach (KeyValuePair<string, string> cmd in commands)
+                    {
+                        output.Append(string.Format(
+                            "<li>{0} <sub>(Access level: {1}, Module: {2})</sub></li>",
+                            cmd.Key,
+                            Bot.Access.GetCommandLevel(cmd.Key),
+                            cmd.Value
+                        ));
+                    }
+                    output.Append("</ul>");
+                    break;
+                default:                    
+                    // show list of commands user has access to
+                    output.Append("<b><u>Available commands</u></b>:<ul>");
+                    foreach (KeyValuePair<string, string> cmd in commands)
+                    {
+                        if (Bot.Access.UserHasAccess(from, cmd.Key))
+                        {
+                            output.Append(string.Format(
+                                "<li>{0} <sub>(Access level: {1})</sub></li>",
+                                cmd.Key,
+                                Bot.Access.GetCommandLevel(cmd.Key)
+                            ));
+                        }
+                    }
+                    output.Append("</ul>");
+                    break;
+            }
+
+            if (showUsage)
+            {
+                ShowHelp(ns, from, "commands");
+                return;
+            }
+            else
+            {
+                dAmn.Say(ns, output.ToString());
+            }
+        }
+
+        private void Credits(string ns, string from, string message)
+        {
+            string credit = "Oberon is a bot by :devbigmanhaywood:<br /><sub>"
+                + "&middot; Inspired by Contra 4 and and Dante 0.10<br />"
+                + "&middot; Module system created from scratch. Uses dynamic assembly loading.<br />"
+                + "&middot; Configuration system uses standard .NET config files<br />" 
+                + "&middot; Ideas stolen from anywhere and everywhere.</sub>";
+            dAmn.Say(ns, "<b><u>:bow: Credits</u></b>:<br />" + credit);
+        }
+
+        private void CTrig(string ns, string from, string message)
+        {
+            string[] args = GetArgs(message);
+            if (args.Length != 1)
+            {
+                ShowHelp(ns, from, "ctrig");
+                return;
+            }
+
+            string trigger = args[0];
+            if (trigger.Length > 1)
+            {
+                dAmn.Say(ns, from + ": bot trigger can only be one character.");
+                return;
+            }
+
+            Bot.ChangeTrigger(trigger);
+            dAmn.Say(ns, string.Format("** bot trigger changed to {0} by {1} *", trigger, from));
         }
     }
 }

@@ -71,11 +71,11 @@ namespace DeviantArt.Chat.Oberon
 
             // add summary
             if (!string.IsNullOrEmpty(Summary))
-                help.Append("<li><b><u>Summary:</u></b> " + Summary + "</li>");
+                help.Append("<li><b><u>Summary</u></b>: " + Summary + "</li>");
 
             // add usage
             if (!string.IsNullOrEmpty(Usage))           
-                help.Append("<li><b><u>Usage:</u></b><br />" + Usage + "</li>");            
+                help.Append("<li><b><u>Usage</u></b>:<br />" + Usage + "</li>");            
 
             help.Append("</ul>");
             return help.ToString();
@@ -506,6 +506,22 @@ namespace DeviantArt.Chat.Oberon
                 commandHelp.Add(commandName, help);
             }
         }
+
+        /// <summary>
+        /// Gets a dictionary of all bot commands that have been mapped.
+        /// The key is the command name and the value is the name of the plugin
+        /// that contains the command.
+        /// </summary>
+        /// <returns>Dictionary of all commands. The key is the command name and the value is the name of the plugin.</returns>
+        public Dictionary<string, string> GetCommandsDetails()
+        {
+            Dictionary<string, string> commandDetails = new Dictionary<string, string>();
+            foreach (string key in commandMap.Keys.ToArray())
+            {
+                commandDetails.Add(key, commandMap[key].Key.PluginName);
+            }
+            return commandDetails;
+        }
         #endregion
 
         #region Plugin Methods
@@ -839,8 +855,11 @@ namespace DeviantArt.Chat.Oberon
         {
             chatroom = chatroom.ToLower();
             if (!AutoJoin.Contains(chatroom))
-            {
-                AutoJoin.SetValue(chatroom, AutoJoin.Length);
+            {                
+                List<string> temp = new List<string>(AutoJoin);
+                temp.Add(chatroom);
+                AutoJoin = temp.ToArray();                
+
                 SaveConfig();
             }
         }
@@ -857,7 +876,21 @@ namespace DeviantArt.Chat.Oberon
                 List<string> temp = new List<string>(AutoJoin);
                 temp.Remove(chatroom);
                 AutoJoin = temp.ToArray();
+
+                SaveConfig();
             }
+        }
+        #endregion
+
+        #region Helper Methods
+        /// <summary>
+        /// Changes the bot trigger to the new trigger. Is not permanent - config
+        /// file must be changed to make permanent.
+        /// </summary>
+        /// <param name="newTrigger">New trigger to use.</param>
+        public void ChangeTrigger(string newTrigger)
+        {
+            Trigger = newTrigger;
         }
         #endregion
     }

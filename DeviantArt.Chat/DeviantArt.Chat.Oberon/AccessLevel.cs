@@ -270,10 +270,6 @@ namespace DeviantArt.Chat.Oberon
             // get root element
             XmlNode root = configDoc.DocumentElement;
 
-            // clear current data
-            UserAccessLevel.Clear();
-            CommandAccessLevel.Clear();
-
             // load user data
             XmlNodeList userDataNodes = root.SelectNodes("userData/add");
             foreach (XmlNode userNode in userDataNodes)
