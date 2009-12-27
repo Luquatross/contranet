@@ -52,29 +52,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             RegisterCommand("ping", new BotCommandEvent(Ping), GetCommandHelp("Ping.Summary", "Ping.Usage"), (int)PrivClassDefaults.Members);
             RegisterCommand("quit", new BotCommandEvent(Quit), GetCommandHelp("Quit.Summary", "Quit.Usage"), (int)PrivClassDefaults.Owner);
             RegisterCommand("restart", new BotCommandEvent(Restart), GetCommandHelp("Restart.Summary", "Restart.Usage"), (int)PrivClassDefaults.Owner);
-            RegisterCommand("say", new BotCommandEvent(Say), GetCommandHelp("Say.Summary", "Say.Usage"), (int)PrivClassDefaults.Members);
-
-            // register command help (could have done it above, but would make the code
-            // pretty unreadable
-            //RegisterCommandHelp("help", new CommandHelp("Displays help information about a particular command.", "help [command]"));
-            //RegisterCommandHelp("time", new CommandHelp("Displays the current bot time.", "time"));
-            //RegisterCommandHelp("about", new CommandHelp("Displays information about the bot.", "about<br />about system<br />about upttime"));
-            //RegisterCommandHelp("autojoin", new CommandHelp("Adds or removes a chatroom from the auto join list.", "autojoin add [room]<br/>autojoin remove [room]<br />autojoin list"));
-            //RegisterCommandHelp("join", new CommandHelp("Makes the bot join the provided chatroom.", "join [room]"));
-            //RegisterCommandHelp("part", new CommandHelp("Makes the bot leave the provided chatroom.", "part [room]"));
-            //RegisterCommandHelp("list", new CommandHelp("List the users in a chatroom.", "list [room]"));
-            //RegisterCommandHelp("chats", new CommandHelp("The chat rooms that the bot is currently signed into.", "chats"));
-            //RegisterCommandHelp("access", new CommandHelp("Changes the access level prileges for a command.", "access [command] (Range 0 through 100)<br />access [command] default<br />" + 
-            //    "<b>Example:</b> !access ping 0</br>Example: !access ping 100"));
-            //RegisterCommandHelp("user", new CommandHelp("Manage users registered to the bot.", "add [user] [level]<br />edit [user] [level]<br />list<br />del [user]<br />addprivclass [name] [level]<br />delprivclass [name]<br />" +
-            //    "<b>Example:</b> !user add devartuser 50"));
-            //RegisterCommandHelp("priv", new CommandHelp("Manage bot priv class access levels.", "priv [priv class] [level]<br /><b>Example:</b> !priv guest 1"));
-            //RegisterCommandHelp("commands", new CommandHelp("List of available commands and their access levels.", "commands - list of commands you have access to<br />commands all - list all commands<br />" +
-            //    "commands details - list all commands and show modules"));
-            //RegisterCommandHelp("ctrig", new CommandHelp("Temporarily change the bot's trigger.", "ctrig [trigger]<br />" +
-            //    "<b>Example:</b> !ctrig #"));
-            //RegisterCommandHelp("kick", new CommandHelp("Kicks a user from a chatroom.", "kick (room) [user]<br />" +
-            //    "<b>Example:</b> !kick botdom devartuser"));            
+            RegisterCommand("say", new BotCommandEvent(Say), GetCommandHelp("Say.Summary", "Say.Usage"), (int)PrivClassDefaults.Members);        
         }
 
         private void Help(string ns, string from, string message)
