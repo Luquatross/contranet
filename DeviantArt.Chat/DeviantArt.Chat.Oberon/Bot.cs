@@ -540,7 +540,7 @@ namespace DeviantArt.Chat.Oberon
             // find all assemblies that are plugins
             foreach (string assembly in assemblies)
             {
-                Assembly a = Assembly.LoadFile(assembly);
+                Assembly a = Assembly.LoadFrom(assembly);
                 Type[] assemblyTypes = a.GetTypes();
                 foreach (Type t in assemblyTypes)
                 {
