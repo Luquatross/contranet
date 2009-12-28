@@ -13,6 +13,7 @@ using System.Text;
 
 namespace DeviantArt.Chat.Oberon
 {
+    #region Bot Delegates
     /// <summary>
     /// An event that represents a packet received from the dAmn servers.
     /// </summary>
@@ -28,7 +29,9 @@ namespace DeviantArt.Chat.Oberon
     /// <param name="from">User who issued the command.</param>
     /// <param name="message">Contents of the command.</param>    
     public delegate void BotCommandEvent(string ns, string from, string message);
+    #endregion
 
+    #region Bot Helper Classes
     /// <summary>
     /// Custom object made to simplify code syntax. This is a list of KeyValue pairs.
     /// The key/value being the plugin and the method. 
@@ -36,7 +39,7 @@ namespace DeviantArt.Chat.Oberon
     public class BotEventList : List<KeyValuePair<Plugin, BotServerPacketEvent>> { }
 
     /// <summary>
-    /// Command help data.
+    /// Class that encapsulates the summary and usage notes for a command.
     /// </summary>
     public class CommandHelp
     {
@@ -81,6 +84,7 @@ namespace DeviantArt.Chat.Oberon
             return help.ToString();
         }
     }
+    #endregion
 
     /// <summary>
     /// The core of the system, the bot that runs all processes.
@@ -690,9 +694,6 @@ namespace DeviantArt.Chat.Oberon
                     // process packet if it exists
                     if (packet != null)
                     {
-                        // log received packet
-                        if (IsDebug)
-                            Console.Log("Packet received: [" + packet.ToString() + "]");
                         ProcessPacket(packet);
                     }
                 }
