@@ -100,10 +100,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             string trigger = Bot.Trigger;
             if (!string.IsNullOrEmpty(message) && message.StartsWith(trigger))
             {
-                // TODO : check user access!                
-
                 string command = "";
-
                 try
                 {
                     // trim trigger and get command 
@@ -133,7 +130,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 bool isAuthorized = Bot.Access.UserHasAccess(from, command);
                 if (!isAuthorized)
                 {
-                    dAmn.Say(chatroom, string.Format("Access for {0} to the command {1} is denied.", from, command));
+                    dAmn.Say(chatroom, string.Format("{0}: access to the command {1} is denied.", from, command));
                     return;
                 }
 
@@ -241,7 +238,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             Chat chat = Bot.GetChatroom(chatroom);
             if (chat == null)
             {
-                Bot.Console.Log("Error: user add for a chatroom which doesn't exist.");
+                Bot.Console.Log("Error: user part for a chatroom which doesn't exist.");
                 return;
             }
 
