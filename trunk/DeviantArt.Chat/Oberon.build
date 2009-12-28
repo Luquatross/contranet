@@ -1,0 +1,113 @@
+<?xml version="1.0"?>
+<!-- targets to be executed, when omitted from command line default is run -->
+<project name="DeviantArt.Chat" default="BuildAll" xmlns="http://nant.sf.net/release/0.86-beta1/nant.xsd">
+  <!-- Initialize the build process -->
+  <target name="init">
+    <property name="nant.settings.currentframework" value="net-3.5" />
+    
+    <!-- Project settings -->
+    <property name="bot.name" value="Oberon"/>
+
+    <!-- General settings -->
+    <property name="verbose" value="true" />
+    <property name="optimize" value="true" />
+    <property name="debug" value="true" overwrite="false" />
+    <property name="config" value="Debug" if="${debug}" />
+    <property name="config" value="Release" unless="${debug}" />
+
+    <!-- Project directories -->
+    <property name="library.dir" value="${project::get-name()}.Library" />
+    <property name="console.dir" value="${project::get-name()}.${bot.name}" />
+    <property name="plugin.dir" value="${project::get-name()}.${bot.name}.Plugins" />
+    <property name="build.dir" value="bin\${config}" />
+    <property name="out.dir" value="Executables" />
+    
+    <!-- Assembly names -->
+    <property name="library.dll" value="${library.dir}\${build.dir}\${project::get-name()}.Library.dll" />
+    <property name="console.exe" value="${console.dir}\${build.dir}\${bot.name}.exe" />
+
+    <sysinfo />
+
+    <if test="${verbose}">
+      <echo message="solutionName: ${project::get-name()}" />
+      <echo message="debug:        ${debug}" />
+      <echo message="config:       ${config}" />
+      <echo message="plugindir:    ${plugin.dir}" />
+    </if>
+  </target>
+
+  <!-- Cleans the compile directories -->
+  <target name="CleanCompile">
+    <delete dir="${library.dir}\${build.dir}" if="${directory::exists('$(library.dir)\$(build.dir)')}" />    
+    <delete dir="${console.dir}\${build.dir}" if="${directory::exists('$(console.dir)\$(build.dir)')}" />
+  </target>
+
+  <!-- Compiles the solution -->
+  <target name="Compile" depends="init CleanCompile">
+    <exec program="${sys.env.windir}\Microsoft.NET\Framework\v3.5\msbuild.exe" failonerror="true" verbose="${verbose}">
+      <arg value="${project::get-name()}.sln" />
+      <arg value="/p:Configuration=${config}" />
+      <arg value="/p:Platform=&quot;Any CPU&quot;" />
+      <arg value="/p:OutputPath=${build.dir}" />
+    </exec>
+  </target>
+
+  <!-- It is important that this target does not run before the Compile target since it will lock the assembly -->
+  <target name="VersionInfo" depends="init">
+    <property name="version" value="${assemblyname::get-version(assembly::get-name(assembly::load-from-file(console.exe)))}" />
+
+    <!-- Get the invidual version -->
+    <property name="majorVersion" value="${version::get-major(assemblyname::get-version(assemblyname::get-assembly-name(console.exe)))}" />
+    <property name="minorVersion" value="${version::get-minor(assemblyname::get-version(assemblyname::get-assembly-name(console.exe)))}" />
+    <property name="buildVersion" value="${version::get-build(assemblyname::get-version(assemblyname::get-assembly-name(console.exe)))}" />
+
+    <!--  Get the short versions-->
+    <property name="shortVersion" value="${string::pad-left(majorVersion,2,'0')}.${string::pad-left(minorVersion,2,'0')}.${string::pad-left(buildVersion,2,'0')}" />
+
+    <if test="${verbose}">
+      <echo message="console shortVersion: ${shortVersion}" />
+      <echo message="console version: ${version}" />      
+    </if>
+  </target>
+  
+  <!-- Being area for creating executable package -->
+  <target name="CreatePackage" depends="VersionInfo">
+    <!-- Copy core assemblies -->
+    <copy todir="${out.dir}" flatten="true" overwrite="true">
+      <fileset>
+        <include name="**/${library.dll}" />
+        <include name="**/${library.dir}.pdb" if="${debug}" />
+        <include name="**/${console.exe}" />
+        <include name="**/${bot.name}.pdb" if="${debug}" />
+        <include name="**/ThirdPartyDlls/*.dll" />        
+      </fileset>
+    </copy>
+
+    <!-- Make needed directories -->
+    <mkdir dir="${out.dir}\Config" unless="${directory::exists('${out.dir}\Config')}" />
+    <mkdir dir="${out.dir}\Logs\Chats" unless="${directory::exists('${out.dir}\Logs\Chats')}" />
+    <mkdir dir="${out.dir}\Logs\Core" unless="${directory::exists('${out.dir}\Logs\Core')}" />
+    <mkdir dir="${out.dir}\Plugins" unless="${directory::exists('${out.dir}\Plugins')}" />
+
+    <!-- Copy config files -->
+    <copy todir="${out.dir}\Config" overwrite="true" flatten="true">
+      <fileset>
+        <include name="${console.dir}/Config/*.config" />
+      </fileset>
+    </copy>
+    
+    <!-- Now call plugin build files  -->
+    <nant>
+      <buildfiles>
+        <include name="${plugin.dir}/**/*.build" />
+      </buildfiles>
+    </nant>
+  </target>
+
+  <!--
+      Below are the main targets to use when building this solution.
+                
+      BuildAll : builds both. And puts the resulting zip files in the output directory.
+  -->
+  <target name="BuildAll" depends="Compile CreatePackage" description="This target compiles the application" />
+</project>

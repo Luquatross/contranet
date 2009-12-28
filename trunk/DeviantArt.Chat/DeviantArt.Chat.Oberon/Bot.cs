@@ -547,8 +547,18 @@ namespace DeviantArt.Chat.Oberon
                     // check to see if this type inherits from the plugin class
                     if (typeof(Plugin).IsAssignableFrom(t))
                     {
-                        Plugin p = (Plugin)Activator.CreateInstance(t);
-                        plugins.Add(p);
+                        try
+                        {
+                            Plugin p = (Plugin)Activator.CreateInstance(t);
+                            plugins.Add(p);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.Notice(string.Format(
+                                "Error loading plugin of type '{0}'. See bot log for error details",
+                                t.ToString()));
+                            Console.Log(ex.ToString());
+                        }
                     }
                 }
             }
