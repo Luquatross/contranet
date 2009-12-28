@@ -47,6 +47,14 @@ namespace DeviantArt.Chat.Oberon
         }
 
         /// <summary>
+        /// The path to the folder where this plugin resides.
+        /// </summary>
+        protected string PluginPath
+        {
+            get { return Path.Combine(Bot.PluginPath, FolderName); }
+        }
+
+        /// <summary>
         /// Reference to the dAmn library, so we can send and received from the servers.
         /// </summary>
         public dAmnNET dAmn
