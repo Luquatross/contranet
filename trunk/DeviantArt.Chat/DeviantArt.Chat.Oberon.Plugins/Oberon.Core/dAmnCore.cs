@@ -8,6 +8,8 @@ namespace DeviantArt.Chat.Oberon.Plugins
 {
     /// <summary>
     /// Plugin that handles the core system events that come from the dAmn server.
+    /// Enables basic functionality for the Bot (chatroom handling, users joining / leaving,
+    /// chatroom logging, etc).
     /// </summary>
     public class dAmnCore : Plugin
     {
