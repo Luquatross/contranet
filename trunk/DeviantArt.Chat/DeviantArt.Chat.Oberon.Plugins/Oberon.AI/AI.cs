@@ -6,6 +6,10 @@ using DeviantArt.Chat.Library;
 
 namespace DeviantArt.Chat.Oberon.Plugins
 {
+    /// <summary>
+    /// Class that allows interaction with the AIMLBot. See http://aimlbot.sourceforge.net/ for
+    /// details about how to use and configure this bot.
+    /// </summary>
     public class AI : Plugin
     {
         #region Private Variables
@@ -24,12 +28,13 @@ namespace DeviantArt.Chat.Oberon.Plugins
         private string OwnerString;
 
         /// <summary>
-        /// Local cache of AIMLBot users.
+        /// Local cache of AIMLBot users. Kept so we don't have to create them from scratch each time
+        /// and so the bot remembers info about the user.
         /// </summary>
         private Dictionary<string, AIMLbot.User> Users = new Dictionary<string, AIMLbot.User>();
 
         /// <summary>
-        /// Path to the setting files.
+        /// Path to the aimlbot settings file.
         /// </summary>
         private string BotSettingsFilePath
         {
@@ -49,8 +54,9 @@ namespace DeviantArt.Chat.Oberon.Plugins
         }
         #endregion
 
+        #region Constructor
         /// <summary>
-        /// Constructor;
+        /// Constructor.
         /// </summary>
         public AI()
         {
@@ -66,7 +72,9 @@ namespace DeviantArt.Chat.Oberon.Plugins
             // get owner string
             OwnerString = Bot.Owner + ":";
         }
+        #endregion
 
+        #region Helper Methods
         /// <summary>
         /// Gets string with the username stripped from the front.
         /// </summary>
@@ -95,14 +103,26 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 return u;
             }
         }
+        #endregion
 
+        #region Plugin Methods
         public override void Load()
         {
+            // tie into the chat event so we can detect messages sent to us
             RegisterEvent(dAmnPacketType.Chat, new BotServerPacketEvent(ChatReceived));
         }
+        #endregion
 
+        #region AI Message Processing
+        /// <summary>
+        /// Process the chat packet from the dAmn server and decide whether or not
+        /// to have the AI respond to it.
+        /// </summary>
+        /// <param name="chatroom">Chatroom.</param>
+        /// <param name="packet">Packet received.</param>
         private void ChatReceived(string chatroom, dAmnServerPacket packet)
         {
+            // init variables
             string from;
             string message;
             string target;
@@ -121,10 +141,10 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
             // determine if the message was directed at us
             toBot = (message.StartsWith(owner + ":"));
-            if (!chat.ContainsUser(Bot.Owner) && toBot)
+            if (chat.ContainsUser(Bot.Owner) && toBot)
             {
                 // ensure that the real use isn't signed on
-                if (chat[owner].Count != 1)
+                if (chat[owner].Count != 0)
                     return;
 
                 string input = GetInput(message);
@@ -141,5 +161,6 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 Respond(chatroom, from, reply.Output);
             }
         }
+        #endregion
     }
 }
