@@ -6,6 +6,10 @@ using System.Resources;
 
 namespace DeviantArt.Chat.Oberon.Plugins
 {
+    /// <summary>
+    /// This class encapsulates all internal Oberon commands. Whereas the dAmnCore.cs class allows 
+    /// basic functionality in the bot, this class enables non-built-in dAmn functionality.
+    /// </summary>
     public class Command : Plugin
     {
         #region Private Variables
@@ -25,11 +29,20 @@ namespace DeviantArt.Chat.Oberon.Plugins
         }
         #endregion
 
+        #region Plugin Methods
+        /// <summary>
+        /// Returns our Resource Manager so that we can can use the GetCommandHelp method for 
+        /// retrieving help strings from our resource file.
+        /// </summary>
+        /// <returns></returns>
         protected override ResourceManager GetResourceManager()
         {
             return PluginResource.ResourceManager;
         }
 
+        /// <summary>
+        /// Registers all our internal commands, their help texts, and their default privileges.
+        /// </summary>
         public override void Load()
         {
             // register comamnds
@@ -52,9 +65,11 @@ namespace DeviantArt.Chat.Oberon.Plugins
             RegisterCommand("ping", new BotCommandEvent(Ping), GetCommandHelp("Ping.Summary", "Ping.Usage"), (int)PrivClassDefaults.Members);
             RegisterCommand("quit", new BotCommandEvent(Quit), GetCommandHelp("Quit.Summary", "Quit.Usage"), (int)PrivClassDefaults.Owner);
             RegisterCommand("restart", new BotCommandEvent(Restart), GetCommandHelp("Restart.Summary", "Restart.Usage"), (int)PrivClassDefaults.Owner);
-            RegisterCommand("say", new BotCommandEvent(Say), GetCommandHelp("Say.Summary", "Say.Usage"), (int)PrivClassDefaults.Members);        
+            RegisterCommand("say", new BotCommandEvent(Say), GetCommandHelp("Say.Summary", "Say.Usage"), (int)PrivClassDefaults.Members);
         }
+        #endregion
 
+        #region Command Event Handlers
         private void Help(string ns, string from, string message)
         {
             string[] args = GetArgs(message);
@@ -677,5 +692,6 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
             dAmn.Say(room, message);
         }
+        #endregion
     }
 }
