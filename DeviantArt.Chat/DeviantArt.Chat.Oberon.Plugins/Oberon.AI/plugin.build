@@ -16,5 +16,13 @@
         <include name="**/AIMLbot.dll" />
       </fileset>
     </copy>
+    
+    <!-- Copy config files and aiml files -->
+    <copy todir="../../${out.dir}/Plugins/${folder.name}" flatten="false" overwrite="true">
+      <fileset>
+        <include name="**/*.xml"/>
+        <include name="**/*.aiml"/>
+      </fileset>
+    </copy>
   </target>
 </project>

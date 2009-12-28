@@ -9,11 +9,32 @@ namespace DeviantArt.Chat.Oberon.Plugins
     public class AI : Plugin
     {
         #region Private Variables
+        // Plugin variables
         private string _PluginName = "Oberon AI";
         private string _FolderName = "AI";
+
+        /// <summary>
+        /// Instance of AIMLBot.
+        /// </summary>
         private AIMLbot.Bot AimlBot;
+
+        /// <summary>
+        /// String representing owner plug ":".
+        /// </summary>
         private string OwnerString;
+
+        /// <summary>
+        /// Local cache of AIMLBot users.
+        /// </summary>
         private Dictionary<string, AIMLbot.User> Users = new Dictionary<string, AIMLbot.User>();
+
+        /// <summary>
+        /// Path to the setting files.
+        /// </summary>
+        private string BotSettingsFilePath
+        {
+            get { return System.IO.Path.Combine(PluginPath, "config\\Settings.xml"); }
+        }
         #endregion
 
         #region Public Properties
@@ -33,9 +54,13 @@ namespace DeviantArt.Chat.Oberon.Plugins
         /// </summary>
         public AI()
         {
+            // this has an unexpected value - must set to aimlbot can find
+            // it's path correctly.
+            Environment.CurrentDirectory = PluginPath;
+
             // init chatbot
             AimlBot = new AIMLbot.Bot();
-            AimlBot.loadSettings();
+            AimlBot.loadSettings(BotSettingsFilePath);
             AimlBot.loadAIMLFromFiles();
 
             // get owner string
