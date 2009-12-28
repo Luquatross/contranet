@@ -467,7 +467,18 @@ namespace DeviantArt.Chat.Oberon
                 // only trigger command if plugin is activated
                 if (plugin.Status == PluginStatus.On)
                 {
-                    method(ns, from, message);
+                    // anything could happen when calling a plugin method. if it blows up, 
+                    // handle it gracefully and let the bot continue to run.
+                    try
+                    {
+                        method(ns, from, message);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Notice(string.Format("Error executing the command '{0}'. See bot log for details.", commandName));
+                        Console.Log(ex.ToString());
+                        dAmn.Say(ns, string.Format("{0}: error occured executing the command '{1}'. Notify the bot admin.", from, commandName));
+                    }
                 }
             }
         }
@@ -559,9 +570,9 @@ namespace DeviantArt.Chat.Oberon
                         catch (Exception ex)
                         {
                             Console.Notice(string.Format(
-                                "Error loading plugin of type '{0}'. See bot log for error details",
+                                "Error creating plugin '{0}'. See bot log for details.",
                                 t.ToString()));
-                            Console.Log(ex.ToString());
+                            Console.Log("Error creating plugin.\n" + ex.ToString());
                         }
                     }
                 }
@@ -588,9 +599,11 @@ namespace DeviantArt.Chat.Oberon
         /// </summary>
         private void LoadPlugins()
         {
-            Plugin[] allPlugins = FindPlugins();
             if (IsDebug)
                 Console.Notice("Starting plugin loading.");
+
+            // find and instantiate all plugins
+            Plugin[] allPlugins = FindPlugins();            
 
             // load all plugins
             int pluginsLoaded = 0;
@@ -604,6 +617,7 @@ namespace DeviantArt.Chat.Oberon
                 }
                 catch (Exception ex)
                 {
+                    Console.Notice(string.Format("Error loading plugin '{0}'. See bot log for details.", p.PluginName));
                     Console.Log("Error loading plugin.\n" + ex.ToString());
                 }
             }
@@ -726,7 +740,23 @@ namespace DeviantArt.Chat.Oberon
                         string ns = null;
                         if (!string.IsNullOrEmpty(packet.param))
                             ns = dAmn.DeformatChat(packet.param);
-                        method(ns, packet);
+
+                        // anything could happen when calling the plugin method. if it blows
+                        // up handle it gracefully and let the bot continue to run.
+                        try
+                        {
+                            method(ns, packet);
+                        }
+                        catch (Exception ex)
+                        {
+                            // log error to console and log
+                            Console.Notice(string.Format(
+                                "Error occurred during packet processing in plugin '{0}'. See bot log for details.",
+                                plugin.PluginName));
+                            Console.Log(string.Format("Error processing packet in plugin '{0}'.\n{1}",
+                                plugin.PluginName,
+                                ex.ToString()));
+                        }
                     }
                 }
             }
@@ -838,7 +868,7 @@ namespace DeviantArt.Chat.Oberon
         public void RegisterChatroom(string chatroomName, Chat room)
         {
             chatroomName = chatroomName.ToLower();
-            room.Notice(string.Format("** Bot has joined the #{0} *", chatroomName));
+            room.Notice(string.Format("** Bot has joined the {0} *", chatroomName));
             Chats.Add(chatroomName, room);
         }
 
@@ -851,7 +881,7 @@ namespace DeviantArt.Chat.Oberon
             chatroomName = chatroomName.ToLower();
             if (Chats.ContainsKey(chatroomName))
             {
-                Chats[chatroomName].Notice(string.Format("** Bot has left the #{0} *", chatroomName));
+                Chats[chatroomName].Notice(string.Format("** Bot has left the {0} *", chatroomName));
                 Chats.Remove(chatroomName);
             }
         }
