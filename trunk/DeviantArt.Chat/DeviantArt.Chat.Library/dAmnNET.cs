@@ -134,6 +134,12 @@ namespace DeviantArt.Chat.Library
                         sb.Append((char)tmp);
                 }
             }
+            catch (ThreadAbortException ex)
+            {
+                // caller might call this method in a thread. if so
+                // don't report as error. just report a disconnect.
+                return "disconnect\ne=socket closed\n";
+            }
             catch (Exception ex)
             {
                 Logger.Warn("Unable to read from connection.", ex);
