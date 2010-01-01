@@ -96,7 +96,7 @@ namespace DeviantArt.Chat.Oberon
         public Dictionary<string, string> Info = new Dictionary<string, string>
         {
             { "Name", "Oberon" },
-            { "Version", "0.2" },
+            { "Version", Assembly.GetExecutingAssembly().GetName().Version.ToString() },
             { "Status", "" },
             { "Release", "public" },
             { "Author", "bigmanhaywood" }
@@ -113,11 +113,19 @@ namespace DeviantArt.Chat.Oberon
         public string Session { get; private set; }
         public bool IsDebug { get; private set; }        
 
+        /// <summary>
+        /// Strings to display when shutting down.
+        /// </summary>
         public string[] ShutDownString = new string[]
         {
-            "Bot has quit.",
+            "Bot has shutdown.",
             "Bye bye!"
-        };
+        };        
+
+        /// <summary>
+        /// This is only true once the bot has completely shut down.
+        /// </summary>
+        public bool IsAlive = true;
 
         /// <summary>
         /// Access levels for users and commands.
@@ -187,7 +195,22 @@ namespace DeviantArt.Chat.Oberon
         /// <summary>
         /// A list of chatrooms currently joined.
         /// </summary>
-        private Dictionary<string, Chat> Chats = new Dictionary<string, Chat>();        
+        private Dictionary<string, Chat> Chats = new Dictionary<string, Chat>();
+
+        /// <summary>
+        /// Variable that determines if the listening thread should keep listening.
+        /// </summary>
+        private volatile bool KeepListening = true;
+
+        /// <summary>
+        /// Event that indicates the the bot has stopped listening to the dAmn server.
+        /// </summary>
+        private ManualResetEvent ListeningStoppedEvent = new ManualResetEvent(false);
+
+        /// <summary>
+        /// Should be set to true if restart has been called. Otherwise false.
+        /// </summary>
+        private volatile bool IsRestarting = false;
         #endregion
 
         #region Constructor and Singleton Methods
@@ -265,6 +288,9 @@ namespace DeviantArt.Chat.Oberon
 
             // Now we're ready to get some work done!
             Console.Notice("Ready!");
+
+            // set up app domain resolve (needed for loading plugins!
+            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
         }
 
         /// <summary>
@@ -430,7 +456,7 @@ namespace DeviantArt.Chat.Oberon
             // make sure command is free
             if (commandMap.ContainsKey(commandName))
             {
-                Console.Warning(string.Format(plugin.PluginName + " error. The command '{0}' is already taken."));
+                Console.Warning(string.Format(plugin.PluginName + " error. The command '{0}' is already taken.", commandName));
                 return;
             }
 
@@ -462,7 +488,7 @@ namespace DeviantArt.Chat.Oberon
             {
                 // get plugin info for the command
                 Plugin plugin = commandMap[commandName].Key;
-                BotCommandEvent method = commandMap[commandName].Value;                
+                BotCommandEvent method = commandMap[commandName].Value;
 
                 // only trigger command if plugin is activated
                 if (plugin.Status == PluginStatus.On)
@@ -480,6 +506,10 @@ namespace DeviantArt.Chat.Oberon
                         dAmn.Say(ns, string.Format("{0}: error occured executing the command '{1}'. Notify the bot admin.", from, commandName));
                     }
                 }
+            }
+            else
+            {
+                dAmn.Say(ns, string.Format("{0}: '{1}' is not a recognized command.", from, commandName));
             }
         }
 
@@ -554,7 +584,7 @@ namespace DeviantArt.Chat.Oberon
 
             // find all assemblies that are plugins
             foreach (string assembly in assemblies)
-            {
+            {                
                 Assembly a = Assembly.LoadFrom(assembly);
                 Type[] assemblyTypes = a.GetTypes();
                 foreach (Type t in assemblyTypes)
@@ -574,7 +604,7 @@ namespace DeviantArt.Chat.Oberon
                                 t.ToString()));
                             Console.Log("Error creating plugin.\n" + ex.ToString());
                         }
-                    }
+                    }                    
                 }
             }
             return plugins.ToArray();
@@ -683,39 +713,35 @@ namespace DeviantArt.Chat.Oberon
         /// </summary>
         private void Listen()
         {
-            try
-            {
-                while (true)
-                {
-                    // packet received from the server
-                    dAmnServerPacket packet = null;
-                    try
-                    {
-                        packet = (dAmnServerPacket)dAmn.ReadPacket();
-                    }
-                    catch
-                    {
-                        try
-                        {
-                            Thread.CurrentThread.Abort();
-                        }
-                        catch
-                        {
-                            return;
-                        }
-                    }
+            ListeningStoppedEvent.Reset();
+            Console.Notice("Bot has started listening for data.");
 
-                    // process packet if it exists
-                    if (packet != null)
-                    {
-                        ProcessPacket(packet);
-                    }
-                }
-            }
-            catch (ThreadAbortException ex)
+            while (KeepListening == true)
             {
-                return;
+                // packet received from the server
+                dAmnServerPacket packet = null;
+                try
+                {
+                    packet = (dAmnServerPacket)dAmn.ReadPacket();
+                }
+                catch (Exception ex)
+                {
+                    Console.Warning("Fatal error occured while reading packet. Aborting.");
+                    Console.Log(ex.ToString());
+                }
+
+                // process packet if it exists
+                if (packet != null)
+                {
+                    ProcessPacket(packet);
+                }
+
+                // sleep for a second (in case loop needs to be interrupted)
+                Thread.Sleep(1);
             }
+            
+            ListeningStoppedEvent.Set();
+            Console.Notice("Bot has stopped listening.");
         }
 
         /// <summary>
@@ -747,6 +773,11 @@ namespace DeviantArt.Chat.Oberon
                         {
                             method(ns, packet);
                         }
+                        catch (ThreadInterruptedException ex)
+                        {
+                            // read loop was interrupted
+                            return;
+                        }
                         catch (Exception ex)
                         {
                             // log error to console and log
@@ -768,18 +799,47 @@ namespace DeviantArt.Chat.Oberon
         /// Starts the bot running. Connects to dAmn server and starts executing.
         /// </summary>
         public void Run()
-        {
-            // load listening thread
-            listenThread = new Thread(new ThreadStart(Listen));
-
+        {            
             // load all of our plugins for the system
             LoadPlugins();
 
             // load saved access levels from file if there is one
             Access.LoadAccessLevels();
+            
+            // The listening thread will keep running until
+            // the shutdown or restart command is called at which
+            // point the ListeningStoppedEvent will release. If
+            // it was a restart command, start the bot all over
+            // again. Otherwise, proceed to shut down.
+            do
+            {
+                if (IsRestarting)
+                {
+                    // disconnect and wait a bit for the dAmn
+                    // servers to register that we've left.
+                    dAmn.Disconnect();
+                    Thread.Sleep(300);
+                }
 
-            // start up the bot
-            StartBot();
+                // start up the bot
+                StartBot();
+                
+                // reset the restart flag
+                IsRestarting = false;
+
+                // run until we the listening thread has stopped
+                if (listenThread.IsAlive)
+                {
+                    // listening thread has exited
+                    ListeningStoppedEvent.WaitOne();
+                    // wait until thread has been disposed & releases resources
+                    listenThread.Join();
+                }
+            }
+            while (IsRestarting == true);
+
+            // shut it down
+            ShutdownBot();
         }
 
         /// <summary>
@@ -790,8 +850,11 @@ namespace DeviantArt.Chat.Oberon
             // try to connect!
             if (dAmn.Connect(Username, Password))
             {
-                // start listening for packets
-                listenThread.Start();
+                KeepListening = true;
+
+                // load listening thread and start listening for packets     
+                listenThread = new Thread(new ThreadStart(Listen));
+                listenThread.Start();                
 
                 // if connected auto join all associated channels
                 foreach (string channel in AutoJoin)
@@ -813,7 +876,7 @@ namespace DeviantArt.Chat.Oberon
                     SaveConfig();
 
                     // try connecting again.
-                    Run();
+                    StartBot();
                 }
                 else
                 {
@@ -828,34 +891,58 @@ namespace DeviantArt.Chat.Oberon
         /// </summary>
         public void Restart()
         {
-            // close the listening thread
-            listenThread.Abort();
-
-            // disconnect from the server
-            dAmn.Disconnect();
-
-            // wait a little bit
-            Thread.Sleep(TimeSpan.FromSeconds(1.00));
-
-            // start the bot back up
-            StartBot();
+            Console.Notice("Restarting bot...");  
+            IsRestarting = true;
+            KeepListening = false;
         }
 
         /// <summary>
-        /// Stops listening for packets from the server, shuts down the
-        /// thread and closes the connection.
+        /// Shuts down the bot.
         /// </summary>
         public void Shutdown()
-        {
-            Console.Notice("Shutting down bot...");
+        {            
+            KeepListening = false; 
+        }
 
-            // close the listening thread
-            listenThread.Abort();
-            
+        /// <summary>
+        /// Disconnects from server, saves files and closes plugins.
+        /// </summary>
+        private void ShutdownBot()
+        {                        
+            Console.Notice("Shutting down bot...");            
+
             // disconnect from the server
             dAmn.Disconnect();
 
-            Console.Notice("Shutdown complete.");
+            // save our master config
+            SaveConfig();
+
+            // save access levels
+            Access.SaveAccessLevels();
+
+            // call the close method on each of our plugins
+            Console.Notice("Shutting down plugins...");
+            foreach (Plugin plugin in botPlugins.Values.ToArray())
+            {
+                try
+                {
+                    plugin.Close();
+                }
+                catch (Exception ex)
+                {
+                    // log the exception
+                    Console.Log(string.Format("Error occurred during plugin shutdown.\nPlugin Name: {0}\nException: {1}", 
+                        plugin.PluginName,
+                        ex.ToString()));
+                }
+            }
+
+            // display parting message
+            foreach (string str in ShutDownString)
+                Console.Notice(str);
+
+            // show that we're not running any more
+            IsAlive = false;
         }
         #endregion
 
@@ -972,6 +1059,28 @@ namespace DeviantArt.Chat.Oberon
         public List<Plugin> GetPlugins()
         {
             return botPlugins.Values.ToList();
+        }
+
+        /// <summary>
+        /// When loading plugin assemblies often the .NET loader doesn't know where to find assemblies.
+        /// Using this method we will look through each assembly in the current app domain so that 
+        /// we can find the right assembly.
+        /// </summary>        
+        private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            Assembly ayResult = null;
+            string sShortAssemblyName = args.Name.Split(',')[0];
+            Assembly[] ayAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+            foreach (Assembly ayAssembly in ayAssemblies)
+            {
+                if (sShortAssemblyName == ayAssembly.FullName.Split(',')[0])
+                {
+                    ayResult = ayAssembly;
+                    break;
+                }
+            }
+            return ayResult;
         }
         #endregion
     }
