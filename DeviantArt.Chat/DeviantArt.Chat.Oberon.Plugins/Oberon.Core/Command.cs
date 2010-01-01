@@ -671,11 +671,13 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
         private void Quit(string ns, string from, string message)
         {
+            dAmn.Say(ns, "** shutting down the bot... *");
             Bot.Shutdown();
         }
 
         private void Restart(string ns, string from, string message)
         {
+            dAmn.Say(ns, "** restarting the bot... *");
             Bot.Restart();
         }
 
