@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Security.Cryptography;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace DeviantArt.Chat.Oberon
 {
@@ -16,7 +15,7 @@ namespace DeviantArt.Chat.Oberon
         /// SHA Encrypts a string.
         /// </summary>
         /// <param name="str">String to encrypt.</param>
-        /// <returns></returns>
+        /// <returns>SHA1 Encrypted string.</returns>
         public static string SHA1(string str)
         {
             return BitConverter.ToString(SHA1Managed.Create().ComputeHash(Encoding.Default.GetBytes(str))).Replace("-", "");
