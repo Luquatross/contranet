@@ -11,6 +11,7 @@ namespace DeviantArt.Chat.Oberon
     /// </summary>
     public class Chat
     {
+        #region Private Variables & Properties
         /// <summary>
         /// PrivClasses for the room. The key is the privclass name, the value is the 
         /// privclass int value.
@@ -42,7 +43,9 @@ namespace DeviantArt.Chat.Oberon
         /// Log file writer.
         /// </summary>
         private StreamWriter LogFile;
+        #endregion
 
+        #region Public Properties
         /// <summary>
         /// The number of users currently in the chatroom.
         /// </summary>
@@ -50,7 +53,9 @@ namespace DeviantArt.Chat.Oberon
         {
             get { return Members.Count; }
         }
+        #endregion
 
+        #region Constructor
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -59,9 +64,11 @@ namespace DeviantArt.Chat.Oberon
         {
             // init variables
             Name = chatroomName;
-            LogFile = GetLogFileWriter();            
+            LogFile = GetLogFileWriter();
         }
+        #endregion
 
+        #region Indexers
         /// <summary>
         /// Get user from index.
         /// </summary>
@@ -77,7 +84,9 @@ namespace DeviantArt.Chat.Oberon
                     return null;
             }
         }
+        #endregion
 
+        #region Private Methods
         /// <summary>
         /// Get the file writer for the log file.
         /// </summary>
@@ -99,7 +108,9 @@ namespace DeviantArt.Chat.Oberon
                 return null;
             }
         }
+        #endregion
 
+        #region Public Methods
         /// <summary>
         /// Logs a message to the chatroom log file.
         /// </summary>
@@ -112,14 +123,35 @@ namespace DeviantArt.Chat.Oberon
         /// <summary>
         /// Logs a notice to the chatroom log file. No timestamp is included.
         /// </summary>
-        /// <param name="message"></param>
+        /// <param name="message">Message to log to chatroom log file.</param>
         public void Notice(string message)
         {
-            if (LogFile != null)
+            if (LogFile != null && LogFile.BaseStream.CanWrite)
             {
                 LogFile.WriteLine(message);
                 LogFile.Flush();
             }
+        }
+
+        /// <summary>
+        /// Closes the chat log file.
+        /// </summary>
+        public void CloseLog()
+        {
+            if (LogFile != null)
+            {
+                LogFile.Close();
+                LogFile = null;
+            }
+        }
+
+        /// <summary>
+        /// Opens the chat log file for logging.
+        /// </summary>
+        public void OpenLog()
+        {
+            if (LogFile == null)
+                LogFile = GetLogFileWriter();
         }
 
         /// <summary>
@@ -158,5 +190,6 @@ namespace DeviantArt.Chat.Oberon
         {
             return Members.Values.ToArray();
         }
+        #endregion
     }
 }
