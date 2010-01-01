@@ -23,11 +23,14 @@ namespace DeviantArt.Chat.Oberon
     /// </summary>
     public abstract class Plugin
     {
+        #region Private Variables
         /// <summary>
         /// Resource Manager for this plugin.
         /// </summary>
         private ResourceManager ResourceManager;
+        #endregion
 
+        #region Protected Variables & Properties
         /// <summary>
         /// Reference to the Bot instance that is running
         /// </summary>
@@ -53,7 +56,9 @@ namespace DeviantArt.Chat.Oberon
         {
             get { return Path.Combine(Bot.PluginPath, FolderName); }
         }
+        #endregion
 
+        #region Public Properties
         /// <summary>
         /// Reference to the dAmn library, so we can send and received from the servers.
         /// </summary>
@@ -87,7 +92,9 @@ namespace DeviantArt.Chat.Oberon
         {
             get;
         }
+        #endregion
 
+        #region Constructor
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -96,7 +103,9 @@ namespace DeviantArt.Chat.Oberon
             // load the resource manager
             ResourceManager = GetResourceManager();
         }
+        #endregion
 
+        #region Public Methods
         /// <summary>
         /// Method that is called once the plugin is loaded. Most of the plugin's initialization
         /// is handled here (for example, registering for events and commands).
@@ -110,8 +119,20 @@ namespace DeviantArt.Chat.Oberon
         /// </summary>
         public virtual void Close()
         {
-        }
+        }        
 
+        /// <summary>
+        /// Get a unique key for this plugin. Is the plugin name with all spaces and special 
+        /// characters removed.
+        /// </summary>
+        /// <returns>Plugin key.</returns>
+        public string GetPluginKey()
+        {
+            return System.Text.RegularExpressions.Regex.Replace(PluginName, "[^a-zA-Z_]", "");
+        }
+        #endregion
+
+        #region Prortected Methods
         /// <summary>
         /// Converts the provided string into an array of arguments.
         /// The delimiter is a space.
@@ -129,18 +150,8 @@ namespace DeviantArt.Chat.Oberon
                 // remove empty strings from list if there are any
                 List<string> result = new List<string>(data.Trim().Split(' '));
                 result.RemoveAll(s => string.IsNullOrEmpty(s));
-                return result.ToArray();  
+                return result.ToArray();
             }
-        }
-
-        /// <summary>
-        /// Get a unique key for this plugin. Is the plugin name with all spaces and special 
-        /// characters removed.
-        /// </summary>
-        /// <returns>Plugin key.</returns>
-        public string GetPluginKey()
-        {
-            return System.Text.RegularExpressions.Regex.Replace(PluginName, "[^a-zA-Z_]", "");
         }
 
         /// <summary>
@@ -265,5 +276,6 @@ namespace DeviantArt.Chat.Oberon
                 ResourceManager.GetString(summaryKey),
                 ResourceManager.GetString(usageKey));
         }
+        #endregion
     }
 }
