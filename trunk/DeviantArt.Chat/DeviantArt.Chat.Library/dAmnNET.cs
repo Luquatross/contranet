@@ -12,6 +12,7 @@ using System.Security.Authentication;
 using System.Threading;
 using System.Security.Cryptography.X509Certificates;
 using System.Collections;
+using System.Runtime.Remoting.Messaging;
 
 namespace DeviantArt.Chat.Library
 {
@@ -91,7 +92,8 @@ namespace DeviantArt.Chat.Library
         private TcpClient Socket;
         private StreamReader StreamReader;
         private StreamWriter StreamWriter;
-        private string AuthToken;                
+        private string AuthToken;
+        private byte[] readBuffer = new byte[1024];        
         #endregion
 
         #region Send / Receive Methods
@@ -128,17 +130,11 @@ namespace DeviantArt.Chat.Library
                 while (true)
                 {
                     tmp = StreamReader.Read();
-                    if (tmp == 0)
+                    if (tmp == 0 || tmp == -1)
                         break;
                     else
                         sb.Append((char)tmp);
                 }
-            }
-            catch (ThreadAbortException ex)
-            {
-                // caller might call this method in a thread. if so
-                // don't report as error. just report a disconnect.
-                return "disconnect\ne=socket closed\n";
             }
             catch (Exception ex)
             {
