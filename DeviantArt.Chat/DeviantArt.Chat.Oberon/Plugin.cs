@@ -43,7 +43,7 @@ namespace DeviantArt.Chat.Oberon
         /// </summary>
         protected string SettingsFile
         {
-            get { return System.IO.Path.Combine(Bot.PluginPath, FolderName + "\\" + FolderName + ".dat"); }
+            get { return System.IO.Path.Combine(Bot.PluginPath, FolderName + "\\" + GetPluginKey() + ".dat"); }
         }
 
         /// <summary>
@@ -104,6 +104,15 @@ namespace DeviantArt.Chat.Oberon
         public abstract void Load();
 
         /// <summary>
+        /// This method is called when the bot is shutting down. Override this 
+        /// method to perform logic when during shutdown (for example, saving
+        /// plugin settings to the filesystem).
+        /// </summary>
+        public virtual void Close()
+        {
+        }
+
+        /// <summary>
         /// Converts the provided string into an array of arguments.
         /// The delimiter is a space.
         /// </summary>
@@ -112,9 +121,16 @@ namespace DeviantArt.Chat.Oberon
         protected string[] GetArgs(string data)
         {
             if (string.IsNullOrEmpty(data))
-                return new string[]{};
+            {
+                return new string[] { };
+            }
             else
-                return data.Trim().Split(' ');
+            {
+                // remove empty strings from list if there are any
+                List<string> result = new List<string>(data.Trim().Split(' '));
+                result.RemoveAll(s => string.IsNullOrEmpty(s));
+                return result.ToArray();  
+            }
         }
 
         /// <summary>
@@ -209,6 +225,9 @@ namespace DeviantArt.Chat.Oberon
         /// </summary>
         protected void SaveSettings()
         {
+            if (Settings.Count == 0)
+                return;
+
             FileStream fs = new FileStream(SettingsFile, FileMode.OpenOrCreate, FileAccess.Write);
             try
             {
@@ -229,7 +248,7 @@ namespace DeviantArt.Chat.Oberon
         protected virtual ResourceManager GetResourceManager()
         {
             return null;
-        }
+        }        
 
         /// <summary>
         /// Gets the command help from the Resource file using the provided keys.
