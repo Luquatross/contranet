@@ -172,8 +172,18 @@ namespace DeviantArt.Chat.Oberon
         /// <param name="user">User to respond to.</param>
         /// <param name="message">Message to send.</param>
         protected void Respond(string ns, string user, string message)
+        {            
+            Say(ns, user + ": " + message);
+        }
+
+        /// <summary>
+        /// Sends a message to the dAmn server. 
+        /// </summary>
+        /// <param name="ns">Chatroom.</param>
+        /// <param name="message">Message to send.</param>
+        protected void Say(string ns, string message)
         {
-            dAmn.Say(ns, user + ": " + message);
+            dAmn.Say(ns, message);
         }
 
         /// <summary>
