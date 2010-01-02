@@ -132,7 +132,7 @@ namespace DeviantArt.Chat.Oberon
         }
         #endregion
 
-        #region Prortected Methods
+        #region Protected Methods
         /// <summary>
         /// Converts the provided string into an array of arguments.
         /// The delimiter is a space.
