@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Net.Mail;
 
 using AIMLbot.Utils;
+using System.IO.Compression;
 
 namespace AIMLbot
 {
@@ -928,10 +929,32 @@ namespace AIMLbot
                 fi.Delete();
             }
 
-            FileStream saveFile = File.Create(path);
+            // init variables            
+            MemoryStream ms = new MemoryStream();
+            FileStream saveFile = new FileStream(path, FileMode.OpenOrCreate);
             BinaryFormatter bf = new BinaryFormatter();
-            bf.Serialize(saveFile, this.Graphmaster);
-            saveFile.Close();
+            GZipStream compressedZipStream = new GZipStream(saveFile, CompressionMode.Compress, true);
+
+            try
+            {
+                // serialize to memory stream
+                bf.Serialize(ms, this.Graphmaster);
+
+                // read into buffer
+                byte[] buffer = new byte[ms.Length];
+                ms.Position = 0;
+                ms.Read(buffer, 0, buffer.Length);
+
+                // compress the data and send to disk                
+                compressedZipStream.Write(buffer, 0, buffer.Length);
+            }
+            finally
+            {
+                // close everything
+                compressedZipStream.Close();
+                saveFile.Close();
+                ms.Close();
+            }
         }
 
         /// <summary>
@@ -939,11 +962,20 @@ namespace AIMLbot
         /// </summary>
         /// <param name="path">the path to the dump file</param>
         public void loadFromBinaryFile(string path)
-        {
+        {                       
             FileStream loadFile = File.OpenRead(path);
-            BinaryFormatter bf = new BinaryFormatter();
-            this.Graphmaster = (Node)bf.Deserialize(loadFile);
-            loadFile.Close();
+            GZipStream decompress = new GZipStream(loadFile, CompressionMode.Decompress, true);
+
+            try
+            {
+                BinaryFormatter bf = new BinaryFormatter();
+                this.Graphmaster = (Node)bf.Deserialize(decompress);                
+            }
+            finally
+            {
+                loadFile.Close();
+                decompress.Close();
+            }
         }
 
         #endregion
