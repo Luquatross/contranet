@@ -936,7 +936,7 @@ namespace DeviantArt.Chat.Oberon
             Access.SaveAccessLevels();
 
             // call the close method on each of our plugins
-            Console.Notice("Shutting down plugins. This may take a moment...");
+            Console.Notice("Shutting down plugins. May take up to a few minutes.");
             foreach (Plugin plugin in botPlugins.Values.ToArray())
             {
                 try
