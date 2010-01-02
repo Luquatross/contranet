@@ -211,6 +211,11 @@ namespace DeviantArt.Chat.Oberon
         /// Should be set to true if restart has been called. Otherwise false.
         /// </summary>
         private volatile bool IsRestarting = false;
+
+        /// <summary>
+        /// Threads created by plugins.
+        /// </summary>
+        private List<Thread> pluginThreads = new List<Thread>();
         #endregion
 
         #region Constructor and Singleton Methods
@@ -704,6 +709,16 @@ namespace DeviantArt.Chat.Oberon
         {
             botPlugins[pluginName].Status = status;
         }
+
+        /// <summary>
+        /// Register a plugin thread with the bot. This is so when the
+        /// bot shuts down it can wait for the thread to complete.
+        /// </summary>
+        /// <param name="t">Thread to register.</param>
+        public void RegisterPluginThread(Thread t)
+        {
+            pluginThreads.Add(t);
+        }
         #endregion
 
         #region Listen / Process Packets
@@ -921,7 +936,7 @@ namespace DeviantArt.Chat.Oberon
             Access.SaveAccessLevels();
 
             // call the close method on each of our plugins
-            Console.Notice("Shutting down plugins...");
+            Console.Notice("Shutting down plugins. This may take a moment...");
             foreach (Plugin plugin in botPlugins.Values.ToArray())
             {
                 try
@@ -935,6 +950,15 @@ namespace DeviantArt.Chat.Oberon
                         plugin.PluginName,
                         ex.ToString()));
                 }
+            }
+
+            // wait for any plugin threads to complete
+            if (IsDebug)
+                Console.Notice("Shutting down plugin threads...");
+            foreach (Thread t in pluginThreads)
+            {
+                if (t.IsAlive)
+                    t.Join();
             }
 
             // display parting message
