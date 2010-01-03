@@ -13,19 +13,7 @@
       <fileset>
         <include name="**/${project::get-name()}.dll" />
         <include name="**/${project::get-name()}.pdb" if="${debug}" />
-        <include name="**/AIMLbot.dll" />
       </fileset>
     </copy>
-    
-    <!-- Copy config files and aiml files -->
-    <copy todir="../../${out.dir}/Plugins/${folder.name}" flatten="false" overwrite="true">
-      <fileset>
-        <include name="**/*.xml"/>
-        <include name="**/*.aiml"/>
-      </fileset>
-    </copy>
-
-    <!-- Make the brain dump directory -->
-    <mkdir dir="../../${out.dir}/Plugins/${folder.name}/brain" failonerror="false" />
   </target>
 </project>
