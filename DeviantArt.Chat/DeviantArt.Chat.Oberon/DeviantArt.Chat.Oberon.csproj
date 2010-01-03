@@ -53,7 +53,7 @@
     <Compile Include="AccessLevel.cs" />
     <Compile Include="Bot.cs" />
     <Compile Include="Chat.cs" />
-    <Compile Include="Collections\ChatroomSettingsCollection.cs" />
+    <Compile Include="Collections\RoomSettingCollection.cs" />
     <Compile Include="Console.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Program.cs" />
