@@ -71,7 +71,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 // see if message contains the username
                 if (Common.IsToUser(username, message))
                 {
-                    Say(chatroom, username + " is away: <b>" + away.Value + "</b>");
+                    Say(chatroom, username + "I am currently away. Reason: " + away.Value);
                     return;
                 }
             }
