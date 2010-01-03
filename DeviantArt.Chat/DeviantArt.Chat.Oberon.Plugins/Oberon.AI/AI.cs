@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
+using System.Runtime.Serialization;
 using System.Text;
+using System.Threading;
 using DeviantArt.Chat.Library;
+using DeviantArt.Chat.Oberon.Collections;
 
 namespace DeviantArt.Chat.Oberon.Plugins
 {
@@ -17,13 +20,18 @@ namespace DeviantArt.Chat.Oberon.Plugins
         private string _PluginName = "Oberon AI";
         private string _FolderName = "AI";
 
+        // thread that will load settings
+        private Thread loadSettingsThread;
+        // thread that will save settings
+        private Thread saveSettingsThread;
+
         /// <summary>
         /// Instance of AIMLBot.
         /// </summary>
         private AIMLbot.Bot AimlBot;
 
         /// <summary>
-        /// String representing owner plug ":".
+        /// String representing owner plus ":".
         /// </summary>
         private string OwnerString;
 
@@ -34,11 +42,32 @@ namespace DeviantArt.Chat.Oberon.Plugins
         private Dictionary<string, AIMLbot.User> Users = new Dictionary<string, AIMLbot.User>();
 
         /// <summary>
+        /// If set to true will respond to a tab even if the bot username owner is signed in.        
+        /// </summary>
+        private RoomSettingCollection<bool> Respond
+        {
+            get
+            {
+                if (!Settings.ContainsKey("Respond"))
+                    Settings["Respond"] = new RoomSettingCollection<bool>(false);
+                return (RoomSettingCollection<bool>)Settings["Respond"];             
+            }
+        }
+
+        /// <summary>
         /// Path to the aimlbot settings file.
         /// </summary>
         private string BotSettingsFilePath
         {
             get { return System.IO.Path.Combine(PluginPath, "config\\Settings.xml"); }
+        }
+
+        /// <summary>
+        /// File path to the "brain" of the bot. 
+        /// </summary>
+        private string BotBrainFilePath
+        {
+            get { return System.IO.Path.Combine(PluginPath, "brain\\brain.bin"); }
         }
         #endregion
 
@@ -103,6 +132,86 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 return u;
             }
         }
+
+        /// <summary>
+        /// Loads settings associated with bot.
+        /// </summary>
+        private void LoadBotSettings()
+        {
+            if (System.IO.File.Exists(BotBrainFilePath))
+            {
+                // start a thread to read the file since it is an exepensive
+                // operation (perhaps 1 to 2 min!) and let the console keep
+                // executing. Won't accept user input until file is loaded.
+                loadSettingsThread = new Thread(delegate()
+                {
+                    AimlBot.isAcceptingUserInput = false;
+                    try
+                    {
+                        AimlBot.loadFromBinaryFile(BotBrainFilePath);
+                        AimlBot.isAcceptingUserInput = true;
+                    }
+                    catch (SerializationException ex)
+                    {
+                        // log error
+                        Bot.Console.Warning("Error loading AI settings. File was corrupt.");
+                        Bot.Console.Log("Error laoding AI settings: " + ex.ToString());
+
+                        // try to delete corrupt file
+                        try { File.Delete(BotBrainFilePath); }
+                        catch { }                    
+    
+                        // tell the bot to begin accepting user input again
+                        AimlBot.isAcceptingUserInput = true;
+                        return;
+                    }
+                    Bot.Console.Notice("AI settings loading is complete. Accepting user input.");
+                });
+                
+                // register thread with bot
+                Bot.RegisterPluginThread(loadSettingsThread);
+
+                // fire it up
+                loadSettingsThread.Start();
+            }
+        }
+
+        /// <summary>
+        /// Saves bot settings to the file system.
+        /// </summary>
+        private void SaveBotSettings()
+        {
+            // if the loading thread is still running (perhaps they started the bot
+            // then shut it down immediately), wait until it's finished, so we 
+            // aren't accessing the file at the same time.
+            if (loadSettingsThread != null && loadSettingsThread.IsAlive)
+                loadSettingsThread.Join();
+
+            Bot.Console.Notice("Saving AI settings. This may take a minute...");
+            AimlBot.saveToBinaryFile(BotBrainFilePath);
+        }
+
+        /// <summary>
+        /// Displays ai status to user.
+        /// </summary>
+        /// <param name="ns"></param>
+        private void ShowStatus(string ns)
+        {
+            StringBuilder output = new StringBuilder();
+            output.Append("<b><u>Current Bot status</u></b>:<ul>");
+
+            // get status for each chatroom we're signed into
+            Chat[] chatrooms = Bot.GetAllChatrooms();
+            foreach (Chat chat in chatrooms)
+            {
+                string respond = (Respond.Get(chat.Name) == true) ? "on" : "off";
+                output.Append("<li>" + chat.Name + ". Respond: " + respond + "</li>");
+            }
+            output.Append("</ul>");
+
+            // send status
+            Say(ns, output.ToString());
+        }
         #endregion
 
         #region Plugin Methods
@@ -110,10 +219,29 @@ namespace DeviantArt.Chat.Oberon.Plugins
         {
             // tie into the chat event so we can detect messages sent to us
             RegisterEvent(dAmnPacketType.Chat, new BotServerPacketEvent(ChatReceived));
+
+            // register our commands
+            CommandHelp help = new CommandHelp(
+                "Controls settings for the AI chat bot.",
+                "ai status - lists chatrooms and their ai settings<br />" +
+                "ai (#room | all) respond [on | off]  - responds even when user with same username is present. Is off by default<br />" +                
+                "<b>Example:<b> !ai all respond on - turns respond on for all rooms");
+            RegisterCommand("ai", new BotCommandEvent(AIHandler), help, (int)PrivClassDefaults.Owner);
+
+            // load our settings            
+            LoadSettings(); 
+            LoadBotSettings();                       
+        }
+
+        public override void Close()
+        {
+            // save our settings for next use
+            SaveSettings();
+            SaveBotSettings();
         }
         #endregion
 
-        #region AI Message Processing
+        #region Event Handler
         /// <summary>
         /// Process the chat packet from the dAmn server and decide whether or not
         /// to have the AI respond to it.
@@ -121,30 +249,27 @@ namespace DeviantArt.Chat.Oberon.Plugins
         /// <param name="chatroom">Chatroom.</param>
         /// <param name="packet">Packet received.</param>
         private void ChatReceived(string chatroom, dAmnServerPacket packet)
-        {
-            // init variables
-            string from;
-            string message;
-            string target;
-            string eventResponse;
-            string owner = Bot.Owner;
-            bool toBot;
-
-            // get details about the packet
-            dAmnServerPacket.SortdAmnPacket(packet, out from, out message, out target, out eventResponse);
-
-            // get the chatroom. if null bot isn't signed into this chatroom, 
-            // and we're not sure where this came from
-            Chat chat = Bot.GetChatroom(chatroom);
-            if (chatroom == null)
+        {                        
+            // if we're not set to respond don't bother processing packet
+            bool respond = Respond.Get(chatroom);
+            if (!respond)
                 return;
 
+            // get relevant data about the packet
+            dAmnCommandPacket commandPacket = new dAmnCommandPacket(packet);
+            string from = commandPacket.From.ToLower();
+            string message = commandPacket.Message;
+            string owner = Bot.Username;
+            bool toBot = false; 
+
             // determine if the message was directed at us
-            toBot = (message.StartsWith(owner + ":"));
-            if (chat.ContainsUser(Bot.Owner) && toBot)
+            toBot = (message.ToLower().StartsWith(owner.ToLower() + ":"));
+            if (toBot)
             {
-                // ensure that the real use isn't signed on
-                if (chat[owner].Count != 0)
+                // First let's make sure the owner didn't send it accidently...otherwise
+                // we'll respond and then we'll see the response as a message and try to 
+                // respond...and make one big recursive loop
+                if (from.ToLower() == owner.ToLower())
                     return;
 
                 string input = GetInput(message);
@@ -158,7 +283,72 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 AIMLbot.Result reply = AimlBot.Chat(request);
 
                 // send it to the client!
-                Respond(chatroom, from, reply.Output);
+                base.Respond(chatroom, from, reply.Output);
+            }
+        }
+        #endregion
+
+        #region Command Handlers
+        /// <summary>
+        /// Handles commands for the bot. 
+        /// </summary>        
+        private void AIHandler(string ns, string from, string message)
+        {
+            string[] args = GetArgs(message);
+            
+            // init variables
+            string room = ns;
+            bool isGlobal = false;         
+
+            // if this is a status message show status
+            if (args.Length >= 1 && args[0] == "status")
+            {
+                ShowStatus(ns);
+                return;
+            }
+
+            // get the room to respond to
+            if (args.Length >= 1 && args[0].StartsWith("#"))
+            {
+                room = args[0];
+                // remove the room name from the string and get new args
+                int index = message.IndexOf(room);
+                message = message.Substring(0, index) + message.Substring(index + room.Length + 1);
+                args = GetArgs(message);
+            }
+            // determine if applies to all rooms or not
+            else if (args.Length >= 1 && args[0] == "all")
+            {
+                isGlobal = true;
+
+                // remove the 'all' string from the string and get new args
+                int index = message.IndexOf("all");
+                message = message.Substring(0, index) + message.Substring(index + "all".Length + 1);
+                args = GetArgs(message);
+            }
+
+            // process respond message
+            if (args.Length != 2)
+            {
+                ShowHelp(ns, from, "ai");
+            }
+            else
+            {
+                string value = args[1];
+                bool status = (value == "on") ? true : false;
+                if (isGlobal)
+                {
+                    if (status)
+                        Respond.Set(status);
+
+                    else
+                        Respond.Clear();
+                }
+                else
+                {
+                    Respond.Set(room, status);
+                }
+                Say(ns, string.Format("** AI respond set to '{0}' for {1} by {2} *", value, room, from));
             }
         }
         #endregion

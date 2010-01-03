@@ -24,5 +24,8 @@
         <include name="**/*.aiml"/>
       </fileset>
     </copy>
+
+    <!-- Make the brain dump directory -->
+    <mkdir dir="../../${out.dir}/Plugins/${folder.name}/brain" failonerror="false" />
   </target>
 </project>

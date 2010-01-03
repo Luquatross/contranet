@@ -31,10 +31,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AIMLbot, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\AIMLbot.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -60,6 +56,10 @@
     <ProjectReference Include="..\..\DeviantArt.Chat.Oberon\DeviantArt.Chat.Oberon.csproj">
       <Project>{61781D7F-3E2F-4B3B-A5F0-7106F3921A3E}</Project>
       <Name>DeviantArt.Chat.Oberon</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\HelperProjects\AIMLbot\AIMLbot\AIMLbot.csproj">
+      <Project>{9C87D82C-0E27-4995-A2CB-72BCB84EF2E2}</Project>
+      <Name>AIMLbot</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
