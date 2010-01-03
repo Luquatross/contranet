@@ -186,7 +186,8 @@ namespace DeviantArt.Chat.Oberon.Plugins
             if (packet.args["e"] != "ok")
                 return;
             Bot.Console.Notice(string.Format("*** Bot has joined {0} *", chatroom));
-            Bot.RegisterChatroom(chatroom, new Chat(chatroom));                
+            if (Bot.GetChatroom(chatroom) == null)
+                Bot.RegisterChatroom(chatroom, new Chat(chatroom));                
         }
 
         /// <summary>
@@ -318,7 +319,10 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 int privClassLevel = Convert.ToInt32(tokens[0]);
 
                 // add to room
-                chat.PrivClasses.Add(privClassName, privClassLevel);
+                if (chat.PrivClasses.ContainsKey(privClassName))
+                    chat.PrivClasses[privClassName] = privClassLevel;
+                else 
+                    chat.PrivClasses.Add(privClassName, privClassLevel);
             }
         }
 
