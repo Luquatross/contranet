@@ -187,6 +187,16 @@ namespace DeviantArt.Chat.Oberon
         }
 
         /// <summary>
+        /// Sends an action message to the dAmn server.
+        /// </summary>
+        /// <param name="ns">Chatroom.</param>
+        /// <param name="message">Message to send.</param>
+        protected void Action(string ns, string message)
+        {
+            dAmn.Action(ns, message);
+        }
+
+        /// <summary>
         /// This method lets you tie into a command that is received from a user. There are no
         /// preset commands. Any new commands are registered with this method. Only one method
         /// can be mapped for one command.
