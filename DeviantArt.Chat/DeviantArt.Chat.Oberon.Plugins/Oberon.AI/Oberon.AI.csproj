@@ -35,6 +35,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -57,48 +58,9 @@
       <Project>{61781D7F-3E2F-4B3B-A5F0-7106F3921A3E}</Project>
       <Name>DeviantArt.Chat.Oberon</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\HelperProjects\AIMLbot\AIMLbot\AIMLbot.csproj">
-      <Project>{9C87D82C-0E27-4995-A2CB-72BCB84EF2E2}</Project>
-      <Name>AIMLbot</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="aiml\Adverbs.aiml" />
-    <None Include="aiml\Atomic.aiml" />
-    <None Include="aiml\Biography.aiml" />
-    <None Include="aiml\Bot.aiml" />
-    <None Include="aiml\Client.aiml" />
-    <None Include="aiml\Computers.aiml" />
-    <None Include="aiml\Date.aiml" />
-    <None Include="aiml\Default.aiml" />
-    <None Include="aiml\Emotion.aiml" />
-    <None Include="aiml\Geography.aiml" />
-    <None Include="aiml\Happy.aiml" />
-    <None Include="aiml\Human.aiml" />
-    <None Include="aiml\Inquiry.aiml" />
-    <None Include="aiml\Interjection.aiml" />
-    <None Include="aiml\IU.aiml" />
-    <None Include="aiml\Knowledge.aiml" />
-    <None Include="aiml\Parts.aiml" />
-    <None Include="aiml\Pickup.aiml" />
-    <None Include="aiml\Predicates.aiml" />
-    <None Include="aiml\Reduce.aiml" />
-    <None Include="aiml\Reducer.aiml" />
-    <None Include="aiml\Reductions.aiml" />
-    <None Include="aiml\Salutations.aiml" />
-    <None Include="aiml\Science.aiml" />
-    <None Include="aiml\Stack.aiml" />
-    <None Include="aiml\That.aiml" />
     <None Include="plugin.build" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="config\DefaultPredicates.xml" />
-    <Content Include="config\GenderSubstitutions.xml" />
-    <Content Include="config\Person2Substitutions.xml" />
-    <Content Include="config\PersonSubstitutions.xml" />
-    <Content Include="config\Settings.xml" />
-    <Content Include="config\Splitters.xml" />
-    <Content Include="config\Substitutions.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

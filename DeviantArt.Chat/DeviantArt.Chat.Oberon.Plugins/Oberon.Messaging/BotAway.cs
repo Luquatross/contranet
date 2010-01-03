@@ -113,7 +113,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 string awayMessage = AwayMessages.Get(chatroom, username);
                 if (!string.IsNullOrEmpty(awayMessage))
                 {
-                    Say(chatroom, username + " is away: <b>" + awayMessage + "</b>");
+                    Say(chatroom, username + "I am currently away. Reason: " + awayMessage);
                     return;
                 }
             }

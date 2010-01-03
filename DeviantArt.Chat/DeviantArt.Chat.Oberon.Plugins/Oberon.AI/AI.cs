@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading;
 using DeviantArt.Chat.Library;
 using DeviantArt.Chat.Oberon.Collections;
+using System.Web;
+using System.Net;
 
 namespace DeviantArt.Chat.Oberon.Plugins
 {
@@ -20,26 +22,15 @@ namespace DeviantArt.Chat.Oberon.Plugins
         private string _PluginName = "Oberon AI";
         private string _FolderName = "AI";
 
-        // thread that will load settings
-        private Thread loadSettingsThread;
-        // thread that will save settings
-        private Thread saveSettingsThread;
-
-        /// <summary>
-        /// Instance of AIMLBot.
-        /// </summary>
-        private AIMLbot.Bot AimlBot;
-
         /// <summary>
         /// String representing owner plus ":".
         /// </summary>
         private string OwnerString;
 
         /// <summary>
-        /// Local cache of AIMLBot users. Kept so we don't have to create them from scratch each time
-        /// and so the bot remembers info about the user.
+        /// URL to the bot webservice.
         /// </summary>
-        private Dictionary<string, AIMLbot.User> Users = new Dictionary<string, AIMLbot.User>();
+        private string BotWebService = "http://kato.botdom.com/respond/";
 
         /// <summary>
         /// If set to true will respond to a tab even if the bot username owner is signed in.        
@@ -52,22 +43,6 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     Settings["Respond"] = new RoomSettingCollection<bool>(false);
                 return (RoomSettingCollection<bool>)Settings["Respond"];             
             }
-        }
-
-        /// <summary>
-        /// Path to the aimlbot settings file.
-        /// </summary>
-        private string BotSettingsFilePath
-        {
-            get { return System.IO.Path.Combine(PluginPath, "config\\Settings.xml"); }
-        }
-
-        /// <summary>
-        /// File path to the "brain" of the bot. 
-        /// </summary>
-        private string BotBrainFilePath
-        {
-            get { return System.IO.Path.Combine(PluginPath, "brain\\brain.bin"); }
         }
         #endregion
 
@@ -89,15 +64,6 @@ namespace DeviantArt.Chat.Oberon.Plugins
         /// </summary>
         public AI()
         {
-            // this has an unexpected value - must set to aimlbot can find
-            // it's path correctly.
-            Environment.CurrentDirectory = PluginPath;
-
-            // init chatbot
-            AimlBot = new AIMLbot.Bot();
-            AimlBot.loadSettings(BotSettingsFilePath);
-            AimlBot.loadAIMLFromFiles();
-
             // get owner string
             OwnerString = Bot.Owner + ":";
         }
@@ -112,83 +78,6 @@ namespace DeviantArt.Chat.Oberon.Plugins
         private string GetInput(string message)
         {
             return message.Replace(OwnerString, "").Trim();
-        }
-
-        /// <summary>
-        /// Get AIML user. Cached once created.
-        /// </summary>
-        /// <param name="username">Username of user.</param>
-        /// <returns>AIMLBot user.</returns>
-        private AIMLbot.User GetUser(string username)
-        {
-            if (Users.ContainsKey(username))
-            {
-                return Users[username];
-            }
-            else
-            {
-                AIMLbot.User u = new AIMLbot.User(username, AimlBot);
-                Users.Add(username, u);
-                return u;
-            }
-        }
-
-        /// <summary>
-        /// Loads settings associated with bot.
-        /// </summary>
-        private void LoadBotSettings()
-        {
-            if (System.IO.File.Exists(BotBrainFilePath))
-            {
-                // start a thread to read the file since it is an exepensive
-                // operation (perhaps 1 to 2 min!) and let the console keep
-                // executing. Won't accept user input until file is loaded.
-                loadSettingsThread = new Thread(delegate()
-                {
-                    AimlBot.isAcceptingUserInput = false;
-                    try
-                    {
-                        AimlBot.loadFromBinaryFile(BotBrainFilePath);
-                        AimlBot.isAcceptingUserInput = true;
-                    }
-                    catch (SerializationException ex)
-                    {
-                        // log error
-                        Bot.Console.Warning("Error loading AI settings. File was corrupt.");
-                        Bot.Console.Log("Error laoding AI settings: " + ex.ToString());
-
-                        // try to delete corrupt file
-                        try { File.Delete(BotBrainFilePath); }
-                        catch { }                    
-    
-                        // tell the bot to begin accepting user input again
-                        AimlBot.isAcceptingUserInput = true;
-                        return;
-                    }
-                    Bot.Console.Notice("AI settings loading is complete. Accepting user input.");
-                });
-                
-                // register thread with bot
-                Bot.RegisterPluginThread(loadSettingsThread);
-
-                // fire it up
-                loadSettingsThread.Start();
-            }
-        }
-
-        /// <summary>
-        /// Saves bot settings to the file system.
-        /// </summary>
-        private void SaveBotSettings()
-        {
-            // if the loading thread is still running (perhaps they started the bot
-            // then shut it down immediately), wait until it's finished, so we 
-            // aren't accessing the file at the same time.
-            if (loadSettingsThread != null && loadSettingsThread.IsAlive)
-                loadSettingsThread.Join();
-
-            Bot.Console.Notice("Saving AI settings. This may take a minute...");
-            AimlBot.saveToBinaryFile(BotBrainFilePath);
         }
 
         /// <summary>
@@ -212,6 +101,18 @@ namespace DeviantArt.Chat.Oberon.Plugins
             // send status
             Say(ns, output.ToString());
         }
+
+        /// <summary>
+        /// Returns a string that's base 64 encoded and appropriate for URLs.
+        /// </summary>
+        /// <param name="message">Message to encode.</param>
+        /// <returns>Encoded message.</returns>
+        private string EncodeMessage(string message)
+        {
+            byte[] encbuff = System.Text.Encoding.UTF8.GetBytes("the string");
+            string enc = Convert.ToBase64String(encbuff);
+            return HttpUtility.UrlEncode(enc);
+        }
         #endregion
 
         #region Plugin Methods
@@ -229,15 +130,13 @@ namespace DeviantArt.Chat.Oberon.Plugins
             RegisterCommand("ai", new BotCommandEvent(AIHandler), help, (int)PrivClassDefaults.Owner);
 
             // load our settings            
-            LoadSettings(); 
-            LoadBotSettings();                       
+            LoadSettings();                      
         }
 
         public override void Close()
         {
             // save our settings for next use
             SaveSettings();
-            SaveBotSettings();
         }
         #endregion
 
@@ -275,15 +174,16 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 string input = GetInput(message);
 
                 // form request
-                AIMLbot.Request request = new AIMLbot.Request(
-                    input,
-                    GetUser(from),
-                    AimlBot);
+                WebRequest request = HttpWebRequest.Create(BotWebService + from + "/" + EncodeMessage(input));
                 // get the response
-                AIMLbot.Result reply = AimlBot.Chat(request);
+                WebResponse response = request.GetResponse();
+                StreamReader reader = new StreamReader(response.GetResponseStream());
+
+                // read response into string
+                string reply = reader.ReadToEnd();
 
                 // send it to the client!
-                base.Respond(chatroom, from, reply.Output);
+                base.Respond(chatroom, from, reply);
             }
         }
         #endregion
