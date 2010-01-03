@@ -53,12 +53,12 @@ namespace DeviantArt.Chat.Oberon.Plugins
             RegisterEvent(dAmnPacketType.Chat, new BotServerPacketEvent(ChatReceived));
 
             // register commands
-            RegisterCommand("botaway", new BotCommandEvent(BotAway), new CommandHelp(
+            RegisterCommand("botaway", new BotCommandEvent(BotIsAway), new CommandHelp(
                 "Allows the bot to be used for away messages.",
                 "botaway (#room | all) [away message] - bot will reply with away message when tabbed<br />" +                
                 "<b>Example:<b> !botaway #botdom Browing the interwebs. Be back soon!"), (int)PrivClassDefaults.Owner);
 
-            RegisterCommand("botback", new BotCommandEvent(BotBack), new CommandHelp(
+            RegisterCommand("botback", new BotCommandEvent(BotIsBack), new CommandHelp(
                 "Sets a bot so it is no longer away.",
                 "botbak (#room | all) - sets bot as back<br />" +
                 "<b>Example:</b> !botback all"),
@@ -85,7 +85,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
             if (Common.IsToUser(username, message))
             {
-                string awayMessage = AwayMessage.Get(chatroom, username);
+                string awayMessage = AwayMessages.Get(chatroom, username);
                 if (!string.IsNullOrEmpty(awayMessage))
                 {
                     Say(chatroom, username + " is away: <b>" + awayMessage + "</b>");
@@ -94,7 +94,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             }
         }
 
-        private void BotAway(string ns, string from, string message)
+        private void BotIsAway(string ns, string from, string message)
         {
             string[] args = GetArgs(message);
             string room = ns;
@@ -148,7 +148,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             }
         }
 
-        private void BotBack(string ns, string from, string message)
+        private void BotIsBack(string ns, string from, string message)
         {
             string[] args = GetArgs(message);
             string room = ns;
