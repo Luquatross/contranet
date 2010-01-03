@@ -46,6 +46,30 @@ namespace DeviantArt.Chat.Oberon.Plugins
         }
         #endregion
 
+        #region Helper Methods
+        /// <summary>
+        /// Displays bot away status to user.
+        /// </summary>
+        /// <param name="ns">Chatroom to show status in.</param>
+        private void ShowStatus(string ns)
+        {
+            StringBuilder output = new StringBuilder();
+            output.Append("<b><u>Current Away status</u></b>:<ul>");
+
+            // get status for each chatroom we're signed into
+            Chat[] chatrooms = Bot.GetAllChatrooms();
+            foreach (Chat chat in chatrooms)
+            {
+                string respond = (string.IsNullOrEmpty(AwayMessages.Get(chat.Name)) ? "back" : "away");
+                output.Append("<li>" + chat.Name + ". Status: " + respond + "</li>");
+            }
+            output.Append("</ul>");
+
+            // send status
+            Say(ns, output.ToString());
+        }
+        #endregion
+
         #region Plugin Methods
         public override void Load()
         {
@@ -55,6 +79,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             // register commands
             RegisterCommand("botaway", new BotCommandEvent(BotIsAway), new CommandHelp(
                 "Allows the bot to be used for away messages.",
+                "botaway status - shows what rooms the bot is set to be away in<br />" + 
                 "botaway (#room | all) [away message] - bot will reply with away message when tabbed<br />" +                
                 "<b>Example:<b> !botaway #botdom Browing the interwebs. Be back soon!"), (int)PrivClassDefaults.Owner);
 
@@ -100,6 +125,13 @@ namespace DeviantArt.Chat.Oberon.Plugins
             string room = ns;
             bool isGlobal = false;
 
+            // show status 
+            if (args.Length >= 1 && args[0] == "status")
+            {
+                ShowStatus(ns);
+                return;
+            }
+
             // get the room to respond to
             if (args.Length >= 1 && args[0].StartsWith("#"))
             {
@@ -124,7 +156,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             if (isGlobal)
                 AwayMessages.Set(message);
             else
-                AwayMessages.Set(ns, message);
+                AwayMessages.Set(room, message);
 
             // let people know we are away
             if (isGlobal)
@@ -144,7 +176,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 Action(room, "is away: " + message);
 
                 // notify user in this room that command was successful
-                Say(ns, string.Format("** away message set to: <b>{0}</b> for #{1} *", message, room));
+                Say(ns, string.Format("** away message set to: <b>{0}</b> for {1} *", message, room));
             }
         }
 
@@ -158,27 +190,18 @@ namespace DeviantArt.Chat.Oberon.Plugins
             if (args.Length >= 1 && args[0].StartsWith("#"))
             {
                 room = args[0];
-                // remove the room name from the string and get new args
-                int index = message.IndexOf(room);
-                message = message.Substring(0, index) + message.Substring(index + room.Length + 1);
-                args = GetArgs(message);
             }
             // determine if applies to all rooms or not
             else if (args.Length >= 1 && args[0] == "all")
             {
                 isGlobal = true;
-
-                // remove the 'all' string from the string and get new args
-                int index = message.IndexOf("all");
-                message = message.Substring(0, index) + message.Substring(index + "all".Length + 1);
-                args = GetArgs(message);
             }
 
             // clear away message
             if (isGlobal)
                 AwayMessages.Clear();
             else
-                AwayMessages.Set(ns, null);
+                AwayMessages.Set(room, null);
 
             // let people know we are back
             if (isGlobal)
@@ -198,7 +221,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 Action(room, "is back.");
 
                 // notify user in this room that command was successful
-                Say(ns, string.Format("** bot set back for #{1} *", room));
+                Say(ns, string.Format("** bot set back for {0} *", room));
             }
         }
         #endregion
