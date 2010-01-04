@@ -1,0 +1,41 @@
+List of classes of which I KNOW they work:
+ActionRequest and deriving((Un)LoveTrack-,(Un)BanTrack-,addTrackToUserPlaylistRequest)
+AlbumMetaDataRequest
+ArtistTagsRequest
+ChangeStationRequest
+FriendRequest
+NeigboursRequest
+GetXspfPlaylistRequest
+Handshake
+OverallTopTagsRequest
+SimilarArtistsRequest
+TrackMetaDataRequest
+UserTagsRequest
+UserTopArtistsRequest
+XMLRPC
+
+RadioPlaylist
+XspfResolver
+
+Artist
+LastFmUser
+MetaData
+Station
+Stationurl
+Tag
+Track
+TrackInfo
+UnixTime
+WeightedArtist(now this one and the below one REALLY works^^)
+WeightedString
+
+LastFmClient
+
+Scrobbler classes(they should -.-)
+The modules^^
+==============================
+Classes which DO NOT work completely yet:
+WeightedStringList: qsort method
+WeightedArtistList: qsort method
+==============================
+The rest of the classes is untested!

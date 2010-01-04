@@ -1,0 +1,51 @@
+This file contains some HowTo's...
+
+Basic Howto
+===========
+Most things can be done through LastFmClient class(radio realted things, like handshake,
+change staion, request a playlist, artist/album/track info(meta data)...) 
+and TypeClasses.LastFmUser(user related things, like ban or love a track, add it
+to the personal playlist,...)
+
+Howto scrobble a track?
+=======================
+		'Create a scrobbler manager, it manages all scrobblers for the users
+		Dim m As New Scrobbler.ScrobblerManager()
+        Dim init As New Scrobbler.ScrobblerInit
+        init.User = m_user
+
+        'you may change this, of course^^
+        'For clients who have no official client Id this MUST be left as is!
+        'init.Version = My.Application.Info.Version.ToString(2)
+
+		'handshake the scrobbler
+        m.Handshake(init)
+
+		'Some sample track
+		Dim sampleTrack as TypeClasses.TrackInfo
+		'set the time stamp(sample)
+		sampleTrack.TimeStamp = 12345678
+		'you can also use timeStampMe method(sets it to current unix time)
+		sampleTrack.TimeStampMe()
+		'Make sure you set the username!
+		sampleTrack.Username = "SampleUser"
+		
+		'Now there are two ways to scrobble
+		'==================================
+		'1) Direct, catch the scrobble event of ScrobblerManager if you want...
+		m.scrobble(sampleTrack)
+		
+		'2) Indirect(recommended), cache the track and then scrobble the cache
+		'   (this is useful if scobbler is unreachable or there was an error;
+		'   recommended way by scrobbler spec page)
+		
+		'The "SampleUser" can be left out and set later, it's for saving, loading
+		'and identifying the cache
+		Dim cache as New ScrobbleCache("SampleUser")
+		'Append track to cache
+		cache.append(sampleTrack)
+		'set the savePath property and use True as param here to save to disk
+		write()
+		
+		'scrobble the cache
+		m.scrobble(cache)

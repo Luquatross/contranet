@@ -1,0 +1,282 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{1329B2E8-382C-4FDC-99CB-4F1E34BDE995}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>LastFmLib</RootNamespace>
+    <AssemblyName>LastFmLibNet</AssemblyName>
+    <MyType>Windows</MyType>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>2.0</OldToolsVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DocumentationFile>LastFmLibNet.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DocumentationFile>LastFmLibNet.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Data" />
+    <Import Include="System.Diagnostics" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="API 2.0\Album\AlbumGetInfo.vb" />
+    <Compile Include="API 2.0\Album\AlbumAddTags.vb" />
+    <Compile Include="API 2.0\Album\AlbumRemoveTag.vb" />
+    <Compile Include="API 2.0\Artist\ArtistGetEvents.vb" />
+    <Compile Include="API 2.0\Artist\ArtistGetInfo.vb" />
+    <Compile Include="API 2.0\Artist\ArtistGetSimilar.vb" />
+    <Compile Include="API 2.0\Artist\ArtistGetTopAlbums.vb" />
+    <Compile Include="API 2.0\Artist\ArtistGetTopFans.vb" />
+    <Compile Include="API 2.0\Artist\ArtistGetTopTags.vb" />
+    <Compile Include="API 2.0\Artist\ArtistGetTopTracks.vb" />
+    <Compile Include="API 2.0\Artist\ArtistSearch.vb" />
+    <Compile Include="API 2.0\Artist\ArtistShare.vb" />
+    <Compile Include="API 2.0\Auth\AuthGetSession.vb" />
+    <Compile Include="API 2.0\Auth\AuthGetToken.vb" />
+    <Compile Include="API 2.0\Base\BaseArtistRequest.vb" />
+    <Compile Include="API 2.0\Base\BaseGroupWeeklyChartList.vb" />
+    <Compile Include="API 2.0\Base\BaseShare.vb" />
+    <Compile Include="API 2.0\Base\BaseTagRequest.vb" />
+    <Compile Include="API 2.0\Base\BaseTrackRequest.vb" />
+    <Compile Include="API 2.0\Base\BaseUserGetTopX.vb" />
+    <Compile Include="API 2.0\Base\BaseUserRequest.vb" />
+    <Compile Include="API 2.0\Base\BaseUserWeeklyChart.vb" />
+    <Compile Include="API 2.0\Base\BaseWeeklyChartList.vb" />
+    <Compile Include="API 2.0\Artist\ArtistAddTags.vb" />
+    <Compile Include="API 2.0\Artist\ArtistRemoveTag.vb" />
+    <Compile Include="API 2.0\Event\EventAttend.vb" />
+    <Compile Include="API 2.0\Event\EventGetInfo.vb" />
+    <Compile Include="API 2.0\Geo\GetTopArtists.vb" />
+    <Compile Include="API 2.0\Geo\GetEvents.vb" />
+    <Compile Include="API 2.0\Geo\GetTopTracks.vb" />
+    <Compile Include="API 2.0\Group\GroupGetWeeklyAlbumChart.vb" />
+    <Compile Include="API 2.0\Group\GroupGetWeeklyArtistChart.vb" />
+    <Compile Include="API 2.0\Group\GroupGetWeeklyChartList.vb" />
+    <Compile Include="API 2.0\Group\GroupGetWeeklyTrackChart.vb" />
+    <Compile Include="API 2.0\modEnums.vb" />
+    <Compile Include="API 2.0\Base\RpcRequest.vb" />
+    <Compile Include="API 2.0\Playlist\PlaylistFetch.vb" />
+    <Compile Include="API 2.0\Tag\TagGetTopArtists.vb" />
+    <Compile Include="API 2.0\Tag\TagGetTopTags.vb" />
+    <Compile Include="API 2.0\Tag\TagGetTopTracks.vb" />
+    <Compile Include="API 2.0\Tag\TagSearch.vb" />
+    <Compile Include="API 2.0\Tag\TagGetSimilar.vb" />
+    <Compile Include="API 2.0\Tag\TagGetTopAlbums.vb" />
+    <Compile Include="API 2.0\TasteOMeter\TasteOMeterCompare.vb" />
+    <Compile Include="API 2.0\Track\TrackGetSimilar.vb" />
+    <Compile Include="API 2.0\Track\TrackGetTopFans.vb" />
+    <Compile Include="API 2.0\Track\TrackGetTopTags.vb" />
+    <Compile Include="API 2.0\Track\TrackRemoveTag.vb" />
+    <Compile Include="API 2.0\Track\TrackAddTags.vb" />
+    <Compile Include="API 2.0\Track\TrackBan.vb" />
+    <Compile Include="API 2.0\Track\TrackLove.vb" />
+    <Compile Include="API 2.0\Track\TrackSearch.vb" />
+    <Compile Include="API 2.0\Track\TrackShare.vb" />
+    <Compile Include="API 2.0\Types\AlbumInfo.vb" />
+    <Compile Include="API 2.0\Types\ArtistInfo.vb" />
+    <Compile Include="API 2.0\Types\ArtistSearchResult.vb" />
+    <Compile Include="API 2.0\Types\AuthData.vb" />
+    <Compile Include="API 2.0\Types\AuthToken.vb" />
+    <Compile Include="API 2.0\Base\BaseImageData.vb" />
+    <Compile Include="API 2.0\Types\FriendUser.vb" />
+    <Compile Include="API 2.0\Types\NeighbourUser.vb" />
+    <Compile Include="API 2.0\Types\PlaylistTrack.vb" />
+    <Compile Include="API 2.0\Types\TrackSearchResult.vb" />
+    <Compile Include="API 2.0\Types\UserInfo.vb" />
+    <Compile Include="API 2.0\Types\ChartInfo.vb" />
+    <Compile Include="API 2.0\Types\GroupWeeklyChartList.vb" />
+    <Compile Include="API 2.0\Types\Playlist.vb" />
+    <Compile Include="API 2.0\Types\RecentTrack.vb" />
+    <Compile Include="API 2.0\Types\TagSearchResult.vb" />
+    <Compile Include="API 2.0\Types\MusicEvent.vb" />
+    <Compile Include="API 2.0\Base\SearchResultBase.vb" />
+    <Compile Include="API 2.0\Types\Session.vb" />
+    <Compile Include="API 2.0\Types\TagInfo.vb" />
+    <Compile Include="API 2.0\Types\TopFan.vb" />
+    <Compile Include="API 2.0\Types\Track.vb" />
+    <Compile Include="API 2.0\Types\UserWeeklyChartList.vb" />
+    <Compile Include="API 2.0\Types\Venue.vb" />
+    <Compile Include="API 2.0\User\UserGetEvents.vb" />
+    <Compile Include="API 2.0\User\UserGetFriends.vb" />
+    <Compile Include="API 2.0\User\UserGetNeighbours.vb" />
+    <Compile Include="API 2.0\User\UserGetPlaylists.vb" />
+    <Compile Include="API 2.0\User\UserGetTopAlbums.vb" />
+    <Compile Include="API 2.0\User\UserGetTopArtists.vb" />
+    <Compile Include="API 2.0\User\UserGetTopTags.vb" />
+    <Compile Include="API 2.0\User\UserGetTopTracks.vb" />
+    <Compile Include="API 2.0\User\UserGetRecentTracks.vb" />
+    <Compile Include="API 2.0\User\UserGetWeeklyAlbumChart.vb" />
+    <Compile Include="API 2.0\User\UserGetWeeklyArtistChart.vb" />
+    <Compile Include="API 2.0\User\UserGetWeeklyTrackChart.vb" />
+    <Compile Include="API 2.0\User\UserGetWeeklyChartList.vb" />
+    <Compile Include="API 2.0\Util.vb" />
+    <Compile Include="Exceptions\clsExceptions.vb" />
+    <Compile Include="LastFmClient.vb" />
+    <Compile Include="Modules\modConstants.vb" />
+    <Compile Include="Modules\modGeneralFunctions.vb" />
+    <Compile Include="Modules\modMD5Hash.vb" />
+    <Compile Include="Modules\modUtils.vb" />
+    <Compile Include="RSS\Category.vb" />
+    <Compile Include="RSS\Enclosure.vb" />
+    <Compile Include="RSS\NamedUrl.vb" />
+    <Compile Include="RSS\RssCloud.vb" />
+    <Compile Include="RSS\RssDocument.vb" />
+    <Compile Include="RSS\ChannelHeader.vb" />
+    <Compile Include="RSS\RssImage.vb" />
+    <Compile Include="RSS\RssItem.vb" />
+    <Compile Include="RSS\RssParser.vb" />
+    <Compile Include="Radio\clsEnums.vb" />
+    <Compile Include="Radio\RadioPlaylist.vb" />
+    <Compile Include="Radio\XspfResolver.vb" />
+    <Compile Include="RSS\RssSource.vb" />
+    <Compile Include="RSS\RssWrongNameException.vb" />
+    <Compile Include="RSS\XCalEventData.vb" />
+    <Compile Include="Scrobbler\ScrobbleCache.vb" />
+    <Compile Include="Scrobbler\ScrobbleManager.vb" />
+    <Compile Include="Scrobbler\Scrobbler.vb" />
+    <Compile Include="Scrobbler\ScrobblerHandshakeRequest.vb" />
+    <Compile Include="Scrobbler\ScrobblerHttp.vb" />
+    <Compile Include="Scrobbler\ScrobblerNowPlayingRequest.vb" />
+    <Compile Include="Scrobbler\ScrobblerPostRequest.vb" />
+    <Compile Include="Scrobbler\structs.vb" />
+    <Compile Include="TypeClasses\Artist.vb" />
+    <Compile Include="TypeClasses\MD5Hash.vb" />
+    <Compile Include="TypeClasses\MetaData.vb" />
+    <Compile Include="TypeClasses\StationUrl.vb" />
+    <Compile Include="TypeClasses\Track.vb" />
+    <Compile Include="TypeClasses\TrackInfo.vb" />
+    <Compile Include="TypeClasses\LastFmUser.vb" />
+    <Compile Include="TypeClasses\UserMetaData.vb" />
+    <Compile Include="TypeClasses\MimeData.vb" />
+    <Compile Include="TypeClasses\QMimeData.vb" />
+    <Compile Include="TypeClasses\Station.vb" />
+    <Compile Include="TypeClasses\Tag.vb" />
+    <Compile Include="TypeClasses\UnixTime.vb" />
+    <Compile Include="TypeClasses\WeightedArtist.vb" />
+    <Compile Include="TypeClasses\WeightedArtistList.vb" />
+    <Compile Include="TypeClasses\WeightedString.vb" />
+    <Compile Include="TypeClasses\WeightedStringList.vb" />
+    <Compile Include="API 2.0\ClassDraft.vb" />
+    <Compile Include="API 2.0\modConstants.vb" />
+    <Compile Include="API 2.0\Base\BaseRequest.vb" />
+    <Compile Include="API 2.0\Settings.vb" />
+    <Compile Include="WebRequests\Base classes\UserFeedRequestBase.vb" />
+    <Compile Include="WebRequests\RequestCache.vb" />
+    <Compile Include="WebRequests\User\ActionRequest.vb" />
+    <Compile Include="WebRequests\Album\AlbumMetaDataRequest.vb" />
+    <Compile Include="WebRequests\Artist\ArtistMetadataRequest.vb" />
+    <Compile Include="WebRequests\Tags\ArtistTagsRequest.vb" />
+    <Compile Include="WebRequests\Radio\ChangeStationRequest.vb" />
+    <Compile Include="WebRequests\Base classes\FeedRequestBase.vb" />
+    <Compile Include="WebRequests\Base classes\RequestBase.vb" />
+    <Compile Include="WebRequests\User\DeleteFriendRequest.vb" />
+    <Compile Include="WebRequests\User\FriendsRequest.vb" />
+    <Compile Include="WebRequests\Radio\GetXspfPlaylistRequest.vb" />
+    <Compile Include="WebRequests\Radio\Handshake.vb" />
+    <Compile Include="Modules\modEnums.vb" />
+    <Compile Include="WebRequests\User\NeighboursRequest.vb" />
+    <Compile Include="WebRequests\Radio\RadioMetaDataRequest.vb" />
+    <Compile Include="WebRequests\User\RecentTracksRequest.vb" />
+    <Compile Include="WebRequests\Radio\RecommendRequest.vb" />
+    <Compile Include="WebRequests\Radio\ReportRebufferingRequest.vb" />
+    <Compile Include="WebRequests\Tags\SearchTagRequest.vb" />
+    <Compile Include="WebRequests\Tags\SetTagRequest.vb" />
+    <Compile Include="WebRequests\Artist\SimilarArtistsRequest.vb" />
+    <Compile Include="WebRequests\Tags\SimilarTagsRequest.vb" />
+    <Compile Include="WebRequests\Base classes\TagsRequestBase.vb" />
+    <Compile Include="WebRequests\User\UserFeedRequests.vb" />
+    <Compile Include="WebRequests\User\UserReplyTrackerFeedRequest.vb" />
+    <Compile Include="WebRequests\User\UserTopArtistsRequest.vb" />
+    <Compile Include="WebRequests\Tags\OverallTopTagsRequest.vb" />
+    <Compile Include="WebRequests\Track\TrackMetaDataRequest.vb" />
+    <Compile Include="WebRequests\Radio\TrackToIDRequest.vb" />
+    <Compile Include="WebRequests\User\UserAlbumTagsRequest.vb" />
+    <Compile Include="WebRequests\User\UserArtistTagsRequest.vb" />
+    <Compile Include="WebRequests\User\UserPicturesRequest.vb" />
+    <Compile Include="WebRequests\User\UserTagsRequest.vb" />
+    <Compile Include="WebRequests\User\UserTrackTagsRequest.vb" />
+    <Compile Include="WebRequests\User\VerifyUserRequest.vb" />
+    <Compile Include="WebRequests\XMLRpc.vb" />
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="My Project\Application.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Application.myapp</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="My Project\Resources.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="My Project\Application.myapp">
+      <Generator>MyApplicationCodeGenerator</Generator>
+      <LastGenOutput>Application.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="My Project\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <CustomToolNamespace>My</CustomToolNamespace>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ChangeLog And TODO.txt" />
+    <Content Include="HOWTO%27s.txt" />
+    <Content Include="lgpl-2.1.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Working classes.txt" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
