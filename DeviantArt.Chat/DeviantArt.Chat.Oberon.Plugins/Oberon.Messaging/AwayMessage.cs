@@ -71,7 +71,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 // see if message contains the username
                 if (Common.IsToUser(username, message))
                 {
-                    Say(chatroom, username + "I am currently away. Reason: " + away.Value);
+                    Say(chatroom, "I am currently away. Reason: " + away.Value);
                     return;
                 }
             }
@@ -99,8 +99,8 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
             if (AwayMessages.ContainsKey(awayKey))
             {
-                AwayMessages.Remove(awayKey);
-                Say(ns, from + " is back.");
+                AwayMessages.Remove(awayKey);                
+                Action(ns, from + " is back.");
             }
         }
         #endregion
