@@ -58,10 +58,6 @@ namespace DeviantArt.Chat.Oberon.Plugins
             string message = commandPacket.Message;
             string owner = Bot.Username;
 
-            // make sure it isn't the bot sign on - that is for botaway command
-            if (from == Bot.Username.ToLower())
-                return;
-
             // check to see if user is in our list
             foreach (KeyValuePair<string, string> away in AwayMessages)
             {
@@ -70,8 +66,8 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
                 // see if message contains the username
                 if (Common.IsToUser(username, message))
-                {
-                    Say(chatroom, "I am currently away. Reason: " + away.Value);
+                {                         
+                    Say(chatroom, username + " is currently away. Reason: <b><i>" + away.Value + "</i></b>");
                     return;
                 }
             }
@@ -79,6 +75,10 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
         private void SetAway(string ns, string from, string message)
         {
+            // make sure it isn't the bot sign on - that is for botaway command
+            if (from.ToLower() == Bot.Username.ToLower())
+                return;
+
             // make the key a combination of room and the user. this way, if the user
             // is set away in a different room, they'll get a different away message.
             string awayKey = ns + "_" + from;
@@ -90,7 +90,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 AwayMessages.Add(awayKey, message);
 
             // let user know it worked
-            Respond(ns, from, "away message set to: " + message);
+            Say(ns, from  + " away message set to: <b><i>" + message + "</i></b>");
         }
 
         private void SetBack(string ns, string from, string message)
@@ -99,8 +99,8 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
             if (AwayMessages.ContainsKey(awayKey))
             {
-                AwayMessages.Remove(awayKey);                
-                Action(ns, from + " is back.");
+                AwayMessages.Remove(awayKey);                                
+                Say(ns, "<b><i>" + from + " is back.</i></b>");
             }
         }
         #endregion
