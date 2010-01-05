@@ -118,8 +118,10 @@ namespace DeviantArt.Chat.Oberon.Plugins
                         throw new ArgumentNullException("Unable to find command.");
 
                     // trim the command off of the message. may have a trailing space
-                    message = message.Replace(command + " ", "");
-                    message = message.Replace(command, "");                    
+                    if (message.IndexOf(command + " ") == 0)
+                        message = message.Substring(message.IndexOf(command + " ") + command.Length + 1);
+                    else
+                        message = message.Substring(message.IndexOf(command) + command.Length);
                 }
                 catch
                 {
