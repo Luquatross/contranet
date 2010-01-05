@@ -8,6 +8,8 @@ using System.IO;
 using DeviantArt.Chat.Oberon.Plugins.ChartLyrics;
 using System.ServiceModel;
 using System.Xml.Serialization;
+using System.Xml.Linq;
+using System.Xml;
 
 namespace DeviantArt.Chat.Oberon.Plugins
 {
@@ -73,11 +75,19 @@ namespace DeviantArt.Chat.Oberon.Plugins
         private string GetLastFmXml(string url)
         {
             // create request and get response
-            WebRequest request = HttpWebRequest.Create(url);
-            WebResponse response = request.GetResponse();
+            try
+            {
+                WebRequest request = HttpWebRequest.Create(url);
+                WebResponse response = request.GetResponse();
 
-            // get string from response
-            return new StreamReader(response.GetResponseStream()).ReadToEnd();
+                // get string from response
+                return new StreamReader(response.GetResponseStream()).ReadToEnd();
+            }
+            catch (WebException ex)
+            {
+                // if it was a bad request, load the error xml
+                return new StreamReader(ex.Response.GetResponseStream()).ReadToEnd();
+            }
         }
 
         /// <summary>
@@ -94,12 +104,30 @@ namespace DeviantArt.Chat.Oberon.Plugins
         }
 
         /// <summary>
+        /// Returns artist metadata.
+        /// </summary>
+        /// <param name="artist">Artist to search for.</param>
+        /// <returns>Query results.</returns>
+        private XmlDocument GetArtistMetaData(string artist)
+        {
+            NameValueCollection arguments = new NameValueCollection
+            {
+                { "artist", artist }
+            };
+
+            string xml = GetLastFmXml(ConstructUrl("artist.getinfo", arguments));
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(xml);
+            return doc;
+        }
+
+        /// <summary>
         /// Returns album metadata.
         /// </summary>
         /// <param name="artist">Artist to search for. Optional.</param>
         /// <param name="album">Album to searh for.</param>
         /// <returns>Query Results</returns>
-        private lfm GetAlbumMetaData(string artist, string album)
+        private XmlDocument GetAlbumMetaData(string artist, string album)
         {
             NameValueCollection arguments = new NameValueCollection();
             if (!string.IsNullOrEmpty(artist))
@@ -108,10 +136,9 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 arguments.Add("album", album);
 
             string xml = GetLastFmXml(ConstructUrl("album.getinfo", arguments));
-            XmlSerializer serializer = new XmlSerializer(typeof(lfmAlbum));
-            lfm result = (lfm)serializer.Deserialize(new StringReader(xml));
-
-            return result;
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(xml);
+            return doc;
         }
         #endregion
 
@@ -132,47 +159,52 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 ShowHelp(ns, from, "artist");
                 return;
             }
-
             string artist = message;
 
             // make the request
-            lfm result = GetAlbumMetaData(artist, "");
-            if (result.status == "ok")
+            XmlDocument result = GetArtistMetaData(artist);
+            XmlNode root = result.DocumentElement;                        
+            if (result.DocumentElement.Attributes["status"].Value == "ok")
             {
-                //StringBuilder say = new StringBuilder();
+                StringBuilder say = new StringBuilder();
 
-                //// form artist data
-                //say.Append(string.Format(
-                //    "<b><a href=\"{0}\">{1}</a></b><br /><sub><b>Play count:</b> {2}<br /><b>Listeners:</b> {3}<br /><b>Average plays/listeners:</b> {4}",
-                //    request.Metadata.artistPageUrl,
-                //    request.Metadata.ArtistName,
-                //    request.Metadata.PlayCount,
-                //    request.Metadata.numListeners,
-                //    request.Metadata.numPlays));
+                // form artist data
+                say.Append(string.Format(
+                    "<b><a href=\"{0}\">{1}</a></b><br /><sub><b>Play count:</b> {2}<br /><b>Listeners:</b> {3}",
+                    root.SelectSingleNode("artist/url").InnerText,
+                    root.SelectSingleNode("artist/name").InnerText,
+                    root.SelectSingleNode("artist/stats/playcount").InnerText,
+                    root.SelectSingleNode("artist/stats/listeners").InnerText));
 
-                //// if there are similar artists, add them
-                //if (request.Metadata.similarArtists != null &&
-                //    request.Metadata.similarArtists.Count > 0)
-                //{
-                //    say.Append("<br /><b>Simiar artists:</b> ");
-                //    string similarString = "<a href=\"{0}\">{1}</a>";
-                //    List<string> similars = new List<string>();
-                //    foreach (string similar in request.Metadata.similarArtists)
-                //        similars.Add(similar);
-                //    say.Append(string.Join(",", similars.ToArray()));
-                //}
+                // if there are similar artists, add them
+                XmlNodeList similarArtists = root.SelectNodes("artist/similar/artist");
+                if (similarArtists.Count > 0)                    
+                {
+                    say.Append("<br /><b>Simiar artists:</b> ");
+                    string similarString = "<a href=\"{0}\">{1}</a>";
+                    List<string> similars = new List<string>();
+                    foreach (XmlNode similar in similarArtists)
+                    {
+                        string name = similar.SelectSingleNode("name").InnerText;
+                        string url = similar.SelectSingleNode("url").InnerText;
+                        similars.Add("<a href=\"" + url + "\">" + name + "</a>");
+                    }
+                    say.Append(string.Join(",", similars.ToArray()));
+                }
 
-                //// if there is a summar, add it
-                ////if (request.Metadata.
-                //say.Append("</sub>");
+                // if there is a summary, add it
+                XmlNode summary = root.SelectSingleNode("artist/bio/summary");
+                if (summary != null)
+                    say.Append("<br /><b>Info:</b> " + summary.InnerText);                
 
-                //// send it off!
-                //Say(ns, say.ToString());
+                // send it off!
+                say.Append("</sub>");
+                Say(ns, say.ToString());
             }
             else
             {
                 // show the user the error message
-                //Respond(ns, from, Service.LastError.Message);
+                Respond(ns, from, root.SelectSingleNode("error").InnerText);
             }
         }
         #endregion
