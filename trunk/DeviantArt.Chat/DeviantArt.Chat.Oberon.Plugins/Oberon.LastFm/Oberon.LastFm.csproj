@@ -8,7 +8,7 @@
     <ProjectGuid>{17D08EA7-AEF5-4083-BC41-7355F861D167}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Oberon.LastFm</RootNamespace>
+    <RootNamespace>DeviantArt.Chat.Oberon.Plugins</RootNamespace>
     <AssemblyName>Oberon.LastFm</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -35,6 +35,14 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="System.Runtime.Serialization">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.ServiceModel">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Web.Services" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -45,8 +53,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\Album.cs" />
     <Compile Include="LastFm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service References\ChartLyrics\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\DeviantArt.Chat.Library\DeviantArt.Chat.Library.csproj">
@@ -57,13 +71,37 @@
       <Project>{61781D7F-3E2F-4B3B-A5F0-7106F3921A3E}</Project>
       <Name>DeviantArt.Chat.Oberon</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\HelperProjects\LastFm\LastFmLib\LastFmLib.vbproj">
-      <Project>{1329B2E8-382C-4FDC-99CB-4F1E34BDE995}</Project>
-      <Name>LastFmLib</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="plugin.build" />
+    <None Include="Service References\ChartLyrics\apiv1.wsdl" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadataStorage Include="Service References\ChartLyrics\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\ChartLyrics\apiv1.disco" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\ChartLyrics\configuration91.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\ChartLyrics\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\ChartLyrics\DeviantArt.Chat.Oberon.Plugins.ChartLyrics.GetLyricResult.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ChartLyrics\DeviantArt.Chat.Oberon.Plugins.ChartLyrics.SearchLyricResult.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ChartLyrics\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
