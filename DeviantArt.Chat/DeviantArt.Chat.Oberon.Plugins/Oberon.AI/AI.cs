@@ -109,9 +109,9 @@ namespace DeviantArt.Chat.Oberon.Plugins
         /// <returns>Encoded message.</returns>
         private string EncodeMessage(string message)
         {
-            byte[] encbuff = System.Text.Encoding.UTF8.GetBytes("the string");
+            byte[] encbuff = System.Text.Encoding.UTF8.GetBytes(message);
             string enc = Convert.ToBase64String(encbuff);
-            return HttpUtility.UrlEncode(enc);
+            return enc; 
         }
         #endregion
 
