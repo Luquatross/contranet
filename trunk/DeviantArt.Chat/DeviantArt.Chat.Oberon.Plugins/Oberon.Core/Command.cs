@@ -417,7 +417,24 @@ namespace DeviantArt.Chat.Oberon.Plugins
         {
             string[] args = GetArgs(message);
             bool showUsage = false;
-            if (args.Length == 2)
+
+            if (args.Length == 1)
+            {
+                if (args[0] == "list")
+                {
+                    List<PrivClass> privClasses = Bot.Access.GetAllPrivClasses();
+                    StringBuilder output = new StringBuilder("<b><u>Priv Classes</u></b>:<sub><ul>");
+                    foreach (PrivClass privClass in privClasses)
+                    {
+                        output.AppendFormat("<li><b>{0}</b> - Level: {1}</li>", privClass.Name, privClass.AccessLevel);
+                    }
+                    output.Append("</ul></sub>");
+                    Say(ns, output.ToString());
+                }
+                else
+                    showUsage = true;
+            }
+            else if (args.Length == 2)
             {
                 string privClass = args[0];
                 int level;
