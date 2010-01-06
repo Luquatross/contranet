@@ -123,9 +123,29 @@ namespace DeviantArt.Chat.Oberon.Plugins
         }
 
         /// <summary>
+        /// Returns track metadata.
+        /// </summary>
+        /// <param name="artist">Artist to search for.</param>
+        /// <param name="track">Track to search for.</param>
+        /// <returns>Query results</returns>
+        private XmlDocument GetTrackMetaData(string artist, string track)
+        {
+            NameValueCollection arguments = new NameValueCollection();
+            if (!string.IsNullOrEmpty(artist))
+                arguments.Add("artist", artist);
+            if (!string.IsNullOrEmpty(track))
+                arguments.Add("track", track);
+
+            string xml = GetLastFmXml(ConstructUrl("track.getinfo", arguments));
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(xml);
+            return doc;
+        }
+
+        /// <summary>
         /// Returns album metadata.
         /// </summary>
-        /// <param name="artist">Artist to search for. Optional.</param>
+        /// <param name="artist">Artist to search for.</param>
         /// <param name="album">Album to searh for.</param>
         /// <returns>Query Results</returns>
         private XmlDocument GetAlbumMetaData(string artist, string album)
@@ -152,6 +172,9 @@ namespace DeviantArt.Chat.Oberon.Plugins
             RegisterCommand("album", new BotCommandEvent(Album), new CommandHelp(
                 "Gets info for a musical album",
                 "album [artist name] - [album name] - returns info on the album specified."), (int)PrivClassDefaults.Guests);
+            RegisterCommand("song", new BotCommandEvent(Song), new CommandHelp(
+                "Gets info for a song",
+                "song [artist] - [title]</b> - returns info on the track given."), (int)PrivClassDefaults.Guests);
             RegisterCommand("lyrics", new BotCommandEvent(Lyrics), new CommandHelp(
                 "Searches ChartLyrics for the lyrics given, and returns any results",
                 "lyrics [lyrics] - returns results if there are any"), (int)PrivClassDefaults.Guests);
@@ -278,6 +301,32 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 // send it off!
                 say.Append("</sub>");
                 Say(ns, say.ToString());
+            }
+            else
+            {
+                // show the user the error message
+                Respond(ns, from, root.SelectSingleNode("error").InnerText);
+            }
+        }
+
+        private void Song(string ns, string from, string message)
+        {
+            string[] args = message.Split('-');
+            if (args.Length != 2)
+            {
+                ShowHelp(ns, from, "song");
+                return;
+            }
+
+            string artist = args[0].Trim();
+            string song = args[1].Trim();
+
+            // make the request
+            XmlDocument result = GetAlbumMetaData(artist, song);
+            XmlNode root = result.DocumentElement;
+            if (result.DocumentElement.Attributes["status"].Value == "ok")
+            {
+
             }
             else
             {
