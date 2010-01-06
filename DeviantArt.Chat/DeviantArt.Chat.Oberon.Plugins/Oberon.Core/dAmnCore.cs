@@ -123,6 +123,11 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     else
                         message = message.Substring(message.IndexOf(command) + command.Length);
                 }
+                catch (ArgumentNullException ex)
+                {
+                    // there wasn't a command - user doesn't need to know, just continue
+                    return;
+                }
                 catch
                 {
                     Bot.Console.Warning("Invalid command. Command: " + message);
@@ -134,7 +139,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 bool isAuthorized = Bot.Access.UserHasAccess(from, command);
                 if (!isAuthorized)
                 {
-                    dAmn.Say(chatroom, string.Format("{0}: access to the command {1} is denied.", from, command));
+                    dAmn.Say(chatroom, string.Format("{0}: access to the command '{1}' is denied.", from, command));
                     return;
                 }
 
