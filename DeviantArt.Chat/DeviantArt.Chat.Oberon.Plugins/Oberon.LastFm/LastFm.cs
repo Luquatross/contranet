@@ -1,18 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Net;
 using System.IO;
-using DeviantArt.Chat.Oberon.Plugins.ChartLyrics;
+using System.Net;
 using System.ServiceModel;
-using System.Xml.Serialization;
-using System.Xml.Linq;
+using System.Text;
 using System.Xml;
+using DeviantArt.Chat.Library;
+using DeviantArt.Chat.Oberon.Plugins.ChartLyrics;
 
 namespace DeviantArt.Chat.Oberon.Plugins
 {
+    /// <summary>
+    /// Class that allows the user to have some Last.fm functionality in the chatroom.
+    /// Namely, looking up songs, albums, and lyrices.
+    /// </summary>
     public class LastFm : Plugin
     {
         #region Private Variables
@@ -146,20 +147,26 @@ namespace DeviantArt.Chat.Oberon.Plugins
         public override void Load()
         {
             RegisterCommand("artist", new BotCommandEvent(Artist), new CommandHelp(
-                "Gets info for an artist",
-                "artist [artist] - returns info on the artist given."), (int)PrivClassDefaults.Guests);
+                "Gets info for a musical artist",
+                "artist [artist name] - returns info on the artist specified."), (int)PrivClassDefaults.Guests);
+            RegisterCommand("album", new BotCommandEvent(Album), new CommandHelp(
+                "Gets info for a musical album",
+                "album [artist name] - [album name] - returns info on the album specified."), (int)PrivClassDefaults.Guests);
+            RegisterCommand("lyrics", new BotCommandEvent(Lyrics), new CommandHelp(
+                "Searches ChartLyrics for the lyrics given, and returns any results",
+                "lyrics [lyrics] - returns results if there are any"), (int)PrivClassDefaults.Guests);
         }
         #endregion
 
         #region Last.fm Methods
         private void Artist(string ns, string from, string message)
         {
-            if (string.IsNullOrEmpty(message))
+            string artist = message;
+            if (string.IsNullOrEmpty(artist))
             {
                 ShowHelp(ns, from, "artist");
                 return;
-            }
-            string artist = message;
+            }            
 
             // make the request
             XmlDocument result = GetArtistMetaData(artist);
@@ -180,8 +187,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 XmlNodeList similarArtists = root.SelectNodes("artist/similar/artist");
                 if (similarArtists.Count > 0)                    
                 {
-                    say.Append("<br /><b>Simiar artists:</b> ");
-                    string similarString = "<a href=\"{0}\">{1}</a>";
+                    say.Append("<br /><b>Simiar artists:</b> ");                    
                     List<string> similars = new List<string>();
                     foreach (XmlNode similar in similarArtists)
                     {
@@ -189,13 +195,13 @@ namespace DeviantArt.Chat.Oberon.Plugins
                         string url = similar.SelectSingleNode("url").InnerText;
                         similars.Add("<a href=\"" + url + "\">" + name + "</a>");
                     }
-                    say.Append(string.Join(",", similars.ToArray()));
+                    say.Append(string.Join(", ", similars.ToArray()));
                 }
 
                 // if there is a summary, add it
                 XmlNode summary = root.SelectSingleNode("artist/bio/summary");
                 if (summary != null)
-                    say.Append("<br /><b>Info:</b> " + summary.InnerText);                
+                    say.Append("<br /><b>Info:</b> " + StringHelper.StripTags(summary.InnerText));                
 
                 // send it off!
                 say.Append("</sub>");
@@ -206,6 +212,112 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 // show the user the error message
                 Respond(ns, from, root.SelectSingleNode("error").InnerText);
             }
+        }
+
+        private void Album(string ns, string from, string message)
+        {
+            string[] args = message.Split('-');
+            if (args.Length != 2)
+            {
+                ShowHelp(ns, from, "album");
+                return;
+            }
+
+            string artist = args[0].Trim();
+            string album = args[1].Trim();
+
+            // make the request
+            XmlDocument result = GetAlbumMetaData(artist, album);
+            XmlNode root = result.DocumentElement;
+            if (result.DocumentElement.Attributes["status"].Value == "ok")
+            {
+                StringBuilder say = new StringBuilder();
+
+                // form artist data
+                say.Append(string.Format(
+                    "<b><a href=\"{0}\">{1}</a></b> by <b><a href=\"http://www.last.fm/music/{2}\">{3}</a></b><br/><sub>",
+                    root.SelectSingleNode("album/url").InnerText,
+                    root.SelectSingleNode("album/name").InnerText,
+                    root.SelectSingleNode("album/artist").InnerText,
+                    root.SelectSingleNode("album/artist").InnerText));
+
+                // add release data
+                XmlNode releaseDate = root.SelectSingleNode("album/releasedate");
+                if (releaseDate != null)
+                    say.Append("<b>Released:</b> " + releaseDate.InnerText + "<br />");
+
+                // add play count
+                say.Append(string.Format("<b>Play count:</b> {0}<br /><b>Listeners:</b> {1}",
+                    root.SelectSingleNode("album/playcount").InnerText,
+                    root.SelectSingleNode("album/listeners").InnerText));
+                
+                // add tags
+                XmlNodeList topTags = root.SelectNodes("album/toptags/tag");
+                if (topTags.Count > 0)
+                {
+                    say.Append("<br /><b>Tags:</b> ");                    
+                    List<string> tags = new List<string>();
+                    foreach (XmlNode topTag in topTags)
+                    {
+                        string name = topTag.SelectSingleNode("name").InnerText;
+                        string url = topTag.SelectSingleNode("url").InnerText;
+                        tags.Add("<a href=\"" + url + "\">" + name + "</a>");
+                    }
+                    say.Append(string.Join(", ", tags.ToArray()));
+                }
+
+                // if there is a summary, add it
+                XmlNode summary = root.SelectSingleNode("album/wiki/summary");
+                if (summary != null)
+                {
+                    string summaryString = StringHelper.StripTags(summary.InnerText);
+                    summaryString = (summaryString.Length > 500) ? summaryString.Remove(500) + "..." : summaryString;
+                    say.Append("<br /><b>Info:</b> " + summaryString);
+                }
+
+                // send it off!
+                say.Append("</sub>");
+                Say(ns, say.ToString());
+            }
+            else
+            {
+                // show the user the error message
+                Respond(ns, from, root.SelectSingleNode("error").InnerText);
+            }
+        }
+
+        private void Lyrics(string ns, string from, string message)
+        {
+            string lyrics = message;
+            if (string.IsNullOrEmpty(lyrics))
+            {
+                ShowHelp(ns, from, "lyrics");
+                return;
+            }
+
+            SearchLyricResult[] results = this.GetSongsForLyrics(lyrics);
+            if (results == null || results.Length == 0)
+            {
+                Respond(ns, from, "No results found for <b>\"" + lyrics + "\"</b>");
+            }
+            else
+            {
+                StringBuilder say = new StringBuilder();
+                say.Append("<b>Song results for <u>" + lyrics + "</u>:</b><br /><sub><ol>");
+                foreach (SearchLyricResult result in results)
+                {
+                    say.AppendFormat("<li><b><a href=\"{0}\">{1}</a> - <a href=\"{2}\">{3}</a> - (<a href=\"{4}\">Lyrics</a> / <a href=\"http://www.youtube.com/results?search_query={5} {6}&search=Search\">Youtube</a>)</li>",
+                        result.ArtistUrl,
+                        result.Artist,
+                        result.SongUrl,
+                        result.Song,
+                        result.SongUrl,
+                        result.Artist,
+                        result.Song);
+                }
+                say.Append("</ol></sub>");
+                Say(ns, say.ToString());
+            }         
         }
         #endregion
     }
