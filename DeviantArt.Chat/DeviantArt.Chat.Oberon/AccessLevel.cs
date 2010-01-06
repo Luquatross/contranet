@@ -104,7 +104,7 @@ namespace DeviantArt.Chat.Oberon
 
             // set bot owner to have maximum privileges no matter what
             SetUserLevel(Bot.Owner, (int)PrivClassDefaults.Owner);
-        }
+        }        
 
         /// <summary>
         /// Gets the user access level.
@@ -177,6 +177,15 @@ namespace DeviantArt.Chat.Oberon
                 CommandAccessLevel[command] = value;
             else
                 CommandAccessLevel.Add(command, value);
+        }
+
+        /// <summary>
+        /// Gets a copy of all the priv classes in the system.
+        /// </summary>
+        /// <returns>Copy of all the priv classes in the system.</returns>
+        public List<PrivClass> GetAllPrivClasses()
+        {
+            return new List<PrivClass>(PrivClasses);
         }
 
         /// <summary>
