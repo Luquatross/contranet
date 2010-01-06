@@ -723,5 +723,22 @@ namespace DeviantArt.Chat.Library
                 return sb;
             }
         }
+
+        /// <summary>
+        /// Removes white spaces from each string in array and remove
+        /// any array elements that may be empty or composed of just whitespace.
+        /// </summary>
+        /// <param name="strings">String array to inspect.</param>
+        /// <returns>String array with all whitespaces removed and any elements that are composed of just whitespace.</returns>
+        public static string[] TrimStrings(string[] strings)
+        {
+            List<string> list = new List<string>(strings);
+            // trim all elements in list
+            list = list.Select(s => s.Trim()).ToList();
+            // remove all elements that are whitespace
+            list.RemoveAll(s => string.IsNullOrEmpty(s));
+
+            return list.ToArray();
+        }
     }
 }
