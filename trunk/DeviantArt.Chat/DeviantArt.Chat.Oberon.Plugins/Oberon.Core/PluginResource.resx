@@ -260,4 +260,10 @@ addprivclass [name] [level]
 delprivclass [name]
 &lt;b&gt;Example:&lt;/b&gt; !user add devartuser 50</value>
   </data>
+  <data name="TrigCheck.Summary" xml:space="preserve">
+    <value>Displays the trigger for the bot.</value>
+  </data>
+  <data name="TrigCheck.Usage" xml:space="preserve">
+    <value>trigcheck</value>
+  </data>
 </root>

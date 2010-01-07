@@ -48,6 +48,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             base.Load();
 
             // register comamnds
+            RegisterCommand("trigcheck", new BotCommandEvent(TrigCheck), GetCommandHelp("TrigCheck.Summary", "TrigCheck.Usage"), (int)PrivClassDefaults.Guests);
             RegisterCommand("help", new BotCommandEvent(Help), GetCommandHelp("Help.Summary", "Help.Usage"), (int)PrivClassDefaults.Guests);
             RegisterCommand("time", new BotCommandEvent(Time), GetCommandHelp("Time.Summary", "Time.Usage"), (int)PrivClassDefaults.Guests);
             RegisterCommand("about", new BotCommandEvent(About), GetCommandHelp("About.Summary", "About.Usage"), (int)PrivClassDefaults.Guests);
@@ -72,6 +73,11 @@ namespace DeviantArt.Chat.Oberon.Plugins
         #endregion
 
         #region Command Event Handlers
+        private void TrigCheck(string ns, string from, string message)
+        {
+            Respond(ns, from, Bot.Trigger);
+        }
+
         private void Help(string ns, string from, string message)
         {
             string[] args = GetArgs(message);
