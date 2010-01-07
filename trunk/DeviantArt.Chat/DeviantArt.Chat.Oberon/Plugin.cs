@@ -100,6 +100,10 @@ namespace DeviantArt.Chat.Oberon
         /// </summary>
         public Plugin()
         {
+            // set our status to off initially. will be turned on either my module
+            // itself during load or by bot settings.
+            Status = PluginStatus.Off;
+
             // load the resource manager
             ResourceManager = GetResourceManager();
         }

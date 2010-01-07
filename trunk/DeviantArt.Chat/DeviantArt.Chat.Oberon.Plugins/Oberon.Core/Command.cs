@@ -10,7 +10,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
     /// This class encapsulates all internal Oberon commands. Whereas the dAmnCore.cs class allows 
     /// basic functionality in the bot, this class enables non-built-in dAmn functionality.
     /// </summary>
-    public class Command : Plugin
+    public class Command : CorePluginBase
     {
         #region Private Variables
         private string _PluginName = "Oberon Commands Plugin";
@@ -45,6 +45,8 @@ namespace DeviantArt.Chat.Oberon.Plugins
         /// </summary>
         public override void Load()
         {
+            base.Load();
+
             // register comamnds
             RegisterCommand("help", new BotCommandEvent(Help), GetCommandHelp("Help.Summary", "Help.Usage"), (int)PrivClassDefaults.Guests);
             RegisterCommand("time", new BotCommandEvent(Time), GetCommandHelp("Time.Summary", "Time.Usage"), (int)PrivClassDefaults.Guests);
