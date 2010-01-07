@@ -71,6 +71,7 @@
     <EmbeddedResource Include="PluginResource.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>PluginResource.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
