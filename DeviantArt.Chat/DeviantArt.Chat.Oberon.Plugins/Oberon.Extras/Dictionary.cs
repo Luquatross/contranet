@@ -64,20 +64,29 @@ namespace DeviantArt.Chat.Oberon.Plugins
             
             // get each of the tokens
             List<string> tokens = new List<string>(definition.Split(
-                new string[] { "<li>" }, StringSplitOptions.RemoveEmptyEntries));
+                new string[] { "<li>" }, StringSplitOptions.RemoveEmptyEntries));            
             
             // start generating output
             StringBuilder output = new StringBuilder();            
             output.Append("<ol>");
 
-            // first token is the word plus noun or verb, etc. Remove it.
-            tokens.RemoveAt(0);
+            // if there is only one token, there is only one definition in the list
+            if (tokens.Count == 1)
+            {
+                definition = definition.Substring(definition.IndexOf(':') + 1).TrimStart(' ');
+                tokens = new List<string> { definition };
+            }
+            else
+            {
+                // first token is the word plus noun or verb, etc. Remove it.
+                tokens.RemoveAt(0);
+            }
 
             // rest is definitions
             foreach (string token in tokens)
                 output.AppendFormat("<li>{0}</li>", token);
             output.Append("</ol>");
-
+            
             return output.ToString();
         }
         #endregion
@@ -107,7 +116,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
             if (string.IsNullOrEmpty(definition))
             {
-                Say(ns, string.Format("<b>No definition was found for <u>{0}</u>.</b>", word));
+                Respond(ns, from, string.Format("<b>No definition was found for <u>{0}</u>.</b>", word));
             }
             else
             {
