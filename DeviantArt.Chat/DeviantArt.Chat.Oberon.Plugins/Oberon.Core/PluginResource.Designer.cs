@@ -420,6 +420,24 @@ namespace DeviantArt.Chat.Oberon.Plugins {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Displays the trigger for the bot..
+        /// </summary>
+        internal static string TrigCheck_Summary {
+            get {
+                return ResourceManager.GetString("TrigCheck.Summary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to trigcheck.
+        /// </summary>
+        internal static string TrigCheck_Usage {
+            get {
+                return ResourceManager.GetString("TrigCheck.Usage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Manage users registered to the bot..
         /// </summary>
         internal static string User_Summary {
