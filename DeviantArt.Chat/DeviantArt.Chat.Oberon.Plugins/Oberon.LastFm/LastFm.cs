@@ -349,11 +349,11 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     say.AppendFormat("<b>Track Number:</b> {0}<br />", album.Attributes["position"].Value);
 
                 // get track details
-                decimal min = System.Math.Floor(Convert.ToDecimal(root.SelectSingleNode("track/duration")) / 60000);
-                decimal sec = System.Math.Round((Convert.ToDecimal(root.SelectSingleNode("track/duration")) - min) * 60);
+                decimal min = System.Math.Floor(Convert.ToDecimal(root.SelectSingleNode("track/duration").InnerText) / 60000);
+                decimal sec = System.Math.Round((Convert.ToDecimal(root.SelectSingleNode("track/duration").InnerText) / 60000 - min) * 60);
                 say.AppendFormat("<b>Length</b> {0}:{1}<br />",
-                    min.ToString().PadRight(2, '0'),
-                    sec.ToString().PadRight(2, '0'));
+                    min.ToString().PadLeft(2, '0'),
+                    sec.ToString().PadLeft(2, '0'));
 
                 // add play count
                 say.AppendFormat("<b>Play count:</b> {0}<br /><b>Listeners:</b> {1}",
