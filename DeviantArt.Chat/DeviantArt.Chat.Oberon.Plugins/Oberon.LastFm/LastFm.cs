@@ -7,6 +7,7 @@ using System.Text;
 using System.Xml;
 using DeviantArt.Chat.Library;
 using DeviantArt.Chat.Oberon.Plugins.ChartLyrics;
+using System;
 
 namespace DeviantArt.Chat.Oberon.Plugins
 {
@@ -322,11 +323,70 @@ namespace DeviantArt.Chat.Oberon.Plugins
             string song = args[1].Trim();
 
             // make the request
-            XmlDocument result = GetAlbumMetaData(artist, song);
+            XmlDocument result = GetTrackMetaData(artist, song);
             XmlNode root = result.DocumentElement;
             if (result.DocumentElement.Attributes["status"].Value == "ok")
             {
+                StringBuilder say = new StringBuilder();
 
+                // add song info
+                say.AppendFormat("<b><a href=\"{0}\">{1}</a></b> by <b><a href=\"{2}\">{3}</a></b>:<br /><sub>",
+                    root.SelectSingleNode("track/url").InnerText,
+                    root.SelectSingleNode("track/name").InnerText,
+                    root.SelectSingleNode("track/artist/url").InnerText,
+                    root.SelectSingleNode("track/artist/name").InnerText);
+
+                // album title
+                XmlNode title = root.SelectSingleNode("track/album/title");
+                if (title != null)
+                    say.AppendFormat("<b>Album:</b> <a href=\"{0}\">{1}</a><br />",
+                        root.SelectSingleNode("track/album/url").InnerText,
+                        title.InnerText);
+
+                // track position
+                XmlNode album = root.SelectSingleNode("track/album");
+                if (album != null)
+                    say.AppendFormat("<b>Track Number:</b> {0}<br />", album.Attributes["position"].Value);
+
+                // get track details
+                decimal min = System.Math.Floor(Convert.ToDecimal(root.SelectSingleNode("track/duration")) / 60000);
+                decimal sec = System.Math.Round((Convert.ToDecimal(root.SelectSingleNode("track/duration")) - min) * 60);
+                say.AppendFormat("<b>Length</b> {0}:{1}<br />",
+                    min.ToString().PadRight(2, '0'),
+                    sec.ToString().PadRight(2, '0'));
+
+                // add play count
+                say.AppendFormat("<b>Play count:</b> {0}<br /><b>Listeners:</b> {1}",
+                    root.SelectSingleNode("track/playcount").InnerText,
+                    root.SelectSingleNode("track/listeners").InnerText);
+
+                // add tags
+                XmlNodeList topTags = root.SelectNodes("track/toptags/tag");
+                if (topTags.Count > 0)
+                {
+                    say.Append("<br /><b>Tags:</b> ");
+                    List<string> tags = new List<string>();
+                    foreach (XmlNode topTag in topTags)
+                    {
+                        string name = topTag.SelectSingleNode("name").InnerText;
+                        string url = topTag.SelectSingleNode("url").InnerText;
+                        tags.Add("<a href=\"" + url + "\">" + name + "</a>");
+                    }
+                    say.Append(string.Join(", ", tags.ToArray()));
+                }
+
+                // if there is a summary, add it
+                XmlNode summary = root.SelectSingleNode("track/wiki/summary");
+                if (summary != null)
+                {
+                    string summaryString = StringHelper.StripTags(summary.InnerText);
+                    summaryString = (summaryString.Length > 500) ? summaryString.Remove(500) + "..." : summaryString;
+                    say.Append("<br /><b>Info:</b> " + summaryString);
+                }
+
+                // send it off!
+                say.Append("</sub>");
+                Say(ns, say.ToString());
             }
             else
             {
