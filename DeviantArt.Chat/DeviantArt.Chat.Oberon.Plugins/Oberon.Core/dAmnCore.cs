@@ -11,7 +11,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
     /// Enables basic functionality for the Bot (chatroom handling, users joining / leaving,
     /// chatroom logging, etc).
     /// </summary>
-    public class dAmnCore : Plugin
+    public class dAmnCore : CorePluginBase
     {
         #region Private Variables
         private string _PluginName = "dAmn Core Plugin";
@@ -36,6 +36,8 @@ namespace DeviantArt.Chat.Oberon.Plugins
         /// </summary>
         public override void Load()
         {
+            base.Load();
+
             RegisterEvent(dAmnPacketType.Ping, new BotServerPacketEvent(Ping));
             RegisterEvent(dAmnPacketType.Disconnect, new BotServerPacketEvent(Disconnect));
             RegisterEvent(dAmnPacketType.Chat, new BotServerPacketEvent(CheckMessage));
