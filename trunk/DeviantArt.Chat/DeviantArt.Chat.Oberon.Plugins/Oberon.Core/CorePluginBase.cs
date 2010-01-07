@@ -10,6 +10,8 @@ namespace DeviantArt.Chat.Oberon.Plugins
     /// </summary>
     public abstract class CorePluginBase : Plugin
     {
+        public CorePluginBase() { }
+
         /// <summary>
         /// Load override - sets plugin status to On.
         /// </summary>
