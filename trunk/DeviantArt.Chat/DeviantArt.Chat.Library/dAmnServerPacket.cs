@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace DeviantArt.Chat.Library
 {
@@ -48,6 +49,59 @@ namespace DeviantArt.Chat.Library
     /// </summary>
     public class dAmnServerPacket : dAmnPacket
     {
+        #region TabLumps
+        /// <summary>
+        /// Tablumps are a strings that come as part of a chat message. They are encoded html and deviantart
+        /// specific html-ish entities that are separated and encoded with tabs. Strings from the HtmlMatch
+        /// list will be replaced with strings from HtmlReplace list. Likewise, strings from the DevMatch list
+        /// will be replaced with strings from the DevReplace list.
+        /// </summary>
+        private static Dictionary<string, string[]> TabLumps = new Dictionary<string, string[]>
+        {
+            // Regex expressiions to match html present in the tablimps
+            { "HtmlMatch", new string[] {
+                "&b\t",  "&/b\t",    "&i\t",    "&/i\t", "&u\t",   "&/u\t", "&s\t",   "&/s\t",    "&sup\t",    "&/sup\t", "&sub\t", "&/sub\t", "&code\t", "&/code\t",
+			    "&br\t", "&ul\t",    "&/ul\t",  "&ol\t", "&/ol\t", "&li\t", "&/li\t", "&bcode\t", "&/bcode\t",
+			    "&/a\t", "&/acro\t", "&/abbr\t", "&p\t", "&/p\t" }
+            },
+
+            // Html strings that will replace the correspnding regex matches
+            { "HtmlReplace", new string[] {
+                "<b>",  "</b>",       "<i>",     "</i>", "<u>",   "</u>", "<s>",   "</s>",    "<sup>",    "</sup>", "<sub>", "</sub>", "<code>", "</code>",
+			    "\n",   "<ul>",       "</ul>",   "<ol>", "</ol>", "<li>", "</li>", "<bcode>", "</bcode>",
+			    "</a>", "</acronym>", "</abbr>", "<p>",  "</p>\n" }
+            },
+
+            { "DevMatch", new string[] {
+                "&emote\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t",
+			    "&a\t([^\t]+)\t([^\t]*)\t",
+			    "&link\t([^\t]+)\t&\t",
+			    "&link\t([^\t]+)\t([^\t]+)\t&\t",
+			    "&dev\t[^\t]\t([^\t]+)\t",
+			    "&avatar\t([^\t]+)\t[0-9]\t",
+			    "&thumb\t([0-9]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t",
+			    "&img\t([^\t]+)\t([^\t]*)\t([^\t]*)\t",
+			    "&iframe\t([^\t]+)\t([0-9%]*)\t([0-9%]*)\t&\\/iframe\t",
+			    "&acro\t([^\t]+)\t",
+			    "&abbr\t([^\t]+)\t" }
+            },
+
+            { "DevReplace", new string[] {
+                "$1",
+			    "<a href=\"$1\" title=\"$2\">",
+			    "$1",
+			    "$1 ($2)",
+			    ":dev$1:",
+			    ":icon$1:",
+			    ":thumb$1:",
+			    "<img src=\"$1\" alt=\"$2\" title=\"\\3\" />",
+			    "<iframe src=\"$1\" width=\"$2\" height=\"\\3\" />",
+			    "<acronym title=\"$1\">",
+			    "<abbr title=\"$1\">" }
+            }
+        };
+        #endregion
+
         #region Public Properties
         /// <summary>
         /// Type of packet that this is.
@@ -364,6 +418,27 @@ namespace DeviantArt.Chat.Library
                     eventResponse = packet.args["e"];
                     break;
             }
+        }
+
+        /// <summary>
+        /// Removes/replaces tablumps in the dAmn packet.
+        /// </summary>
+        /// <param name="data">Data to process.</param>
+        /// <returns>String with all tablumps handled.</returns>
+        public static string ProcessTabLumps(string data)
+        {
+            // first do a simple string replacement
+            for (int i = 0; i < TabLumps["HtmlMatch"].Length; i++)
+                data = data.Replace(TabLumps["HtmlMatch"][i], TabLumps["HtmlReplace"][i]);
+
+            // do regex replacement
+            for (int i = 0; i < TabLumps["DevMatch"].Length; i++)
+                data = Regex.Replace(data, TabLumps["DevMatch"][i], TabLumps["DevReplace"][i]);
+
+            // now fix stray html tags
+            data = Regex.Replace(data, "/<([^>]+) (width|height|title|alt)=\"\"([^>]*?)>/", "<$1\\3>");
+
+            return data;
         }
         #endregion
     }
