@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 using System.Net;
@@ -7,7 +8,6 @@ using System.Text;
 using System.Xml;
 using DeviantArt.Chat.Library;
 using DeviantArt.Chat.Oberon.Plugins.ChartLyrics;
-using System;
 
 namespace DeviantArt.Chat.Oberon.Plugins
 {
