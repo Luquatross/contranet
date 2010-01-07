@@ -140,6 +140,7 @@ namespace DeviantArt.Chat.Library
             string orig_data = data;
             try
             {
+                data = dAmnServerPacket.ProcessTabLumps(data);
                 dAmnPacket p = new dAmnPacket();
                 int i = data.IndexOf('\n');
                 if (i < 0)
