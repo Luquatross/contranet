@@ -369,6 +369,11 @@ namespace DeviantArt.Chat.Oberon
             foreach (string autoJoinChannel in this.AutoJoin)
                 autoJoinsElements.Add(new XElement("add", new XAttribute("channel", autoJoinChannel)));
 
+            // get plugin settings
+            List<XElement> pluginElements = new List<XElement>();
+            foreach (Plugin plugin in botPlugins.Values)
+                pluginElements.Add(new XElement("add", new XAttribute("key", plugin.PluginName), new XAttribute("value", plugin.Status.ToString("G"))));
+
             // construct document in linq to xml
             XDocument botConfig = new XDocument(
                 new XDeclaration("1.0", "utf-8", ""),
@@ -388,7 +393,8 @@ namespace DeviantArt.Chat.Oberon
                             new XElement("add", new XAttribute("key", "visittime"), new XAttribute("value", AuthCookie.Values["visittime"])),
                             new XElement("add", new XAttribute("key", "username"), new XAttribute("value", AuthCookie.Values["username"])),
                             new XElement("add", new XAttribute("key", "authtoken"), new XAttribute("value", AuthCookie.Values["authtoken"]))
-                        )
+                        ),
+                        new XElement("plugins", pluginElements)
                     )
                 );
             botConfig.Save(ConfigPath);
@@ -595,7 +601,7 @@ namespace DeviantArt.Chat.Oberon
                 foreach (Type t in assemblyTypes)
                 {
                     // check to see if this type inherits from the plugin class
-                    if (typeof(Plugin).IsAssignableFrom(t))
+                    if (typeof(Plugin).IsAssignableFrom(t) && !t.IsAbstract)
                     {
                         try
                         {
@@ -663,12 +669,42 @@ namespace DeviantArt.Chat.Oberon
                     allPlugins.Length
                 ));
 
+            // Load plugin statuses
+            LoadPluginStatuses();
+
             // add file watcher for plugin directory
             FileSystemWatcher pluginWatcher = new FileSystemWatcher();
             pluginWatcher.Filter = "*.dll"; // only watch for assemblies
             pluginWatcher.Path = PluginPath;
             pluginWatcher.EnableRaisingEvents = true;
             pluginWatcher.Changed += new FileSystemEventHandler(PluginDirectoryChanged);
+        }
+
+        /// <summary>
+        /// Turns plugins on or off based on values from the bot config file.
+        /// </summary>
+        private void LoadPluginStatuses()
+        {
+            // if file doesn't exist
+            if (!System.IO.File.Exists(ConfigPath))
+                return;
+
+            // create xml document
+            XmlDocument configDoc = new XmlDocument();
+            configDoc.Load(ConfigPath);
+
+            // get root element
+            XmlNode root = configDoc.DocumentElement;
+
+            XmlNodeList statusSettings = root.SelectNodes("plugins/add");
+            foreach (XmlNode statusSetting in statusSettings)
+            {
+                // get status
+                string pluginName = statusSetting.Attributes["key"].Value;
+                PluginStatus pluginStatus = (statusSetting.Attributes["value"].Value == "On" ? PluginStatus.On : PluginStatus.Off);
+
+                SetPluginStatus(pluginName, pluginStatus);
+            }
         }
 
         /// <summary>
