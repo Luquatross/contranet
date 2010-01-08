@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using DeviantArt.Chat.Library;
+using System.Text.RegularExpressions;
 
 namespace DeviantArt.Chat.Oberon.Plugins
 {
@@ -102,39 +103,55 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
             // if we find the trigger we have detected a command
             string trigger = Bot.Trigger;
-            if (!string.IsNullOrEmpty(message) && message.StartsWith(trigger))
+
+            // check if this is a trig check or not
+            bool isTrigCheck = Regex.IsMatch(message.Trim(), Bot.Username + @":\s+trigcheck");
+
+            // process command
+            if ((!string.IsNullOrEmpty(message) && message.StartsWith(trigger)) || isTrigCheck)
             {
                 string command = "";
-                try
-                {
-                    // trim trigger and get command 
-                    message = message.Substring(trigger.Length);
-                    int firstSpace = message.IndexOf(' ');
-                    // there is no space
-                    if (firstSpace == -1)
-                        firstSpace = message.Length;
-                    command = message.Substring(0, firstSpace);
 
-                    // check that we have a command
-                    if (string.IsNullOrEmpty(command))
-                        throw new ArgumentNullException("Unable to find command.");
+                // since trig check is a special command (that is, it's not handled like other commands)
+                // we have to put a special check in for it.
+                if (isTrigCheck)
+                {
+                    command = "trigcheck";
+                    message = "";
+                }
+                else
+                {
+                    try
+                    {
+                        // trim trigger and get command 
+                        message = message.Substring(trigger.Length);
+                        int firstSpace = message.IndexOf(' ');
+                        // there is no space
+                        if (firstSpace == -1)
+                            firstSpace = message.Length;
+                        command = message.Substring(0, firstSpace);
 
-                    // trim the command off of the message. may have a trailing space
-                    if (message.IndexOf(command + " ") == 0)
-                        message = message.Substring(message.IndexOf(command + " ") + command.Length + 1);
-                    else
-                        message = message.Substring(message.IndexOf(command) + command.Length);
-                }
-                catch (ArgumentNullException ex)
-                {
-                    // there wasn't a command - user doesn't need to know, just continue
-                    return;
-                }
-                catch
-                {
-                    Bot.Console.Warning("Invalid command. Command: " + message);
-                    dAmn.Say(chatroom, string.Format("{0}: invalid command.", from));
-                    return;
+                        // check that we have a command
+                        if (string.IsNullOrEmpty(command))
+                            throw new ArgumentNullException("Unable to find command.");
+
+                        // trim the command off of the message. may have a trailing space
+                        if (message.IndexOf(command + " ") == 0)
+                            message = message.Substring(message.IndexOf(command + " ") + command.Length + 1);
+                        else
+                            message = message.Substring(message.IndexOf(command) + command.Length);
+                    }
+                    catch (ArgumentNullException ex)
+                    {
+                        // there wasn't a command - user doesn't need to know, just continue
+                        return;
+                    }
+                    catch
+                    {
+                        Bot.Console.Warning("Invalid command. Command: " + message);
+                        dAmn.Say(chatroom, string.Format("{0}: invalid command.", from));
+                        return;
+                    }
                 }
 
                 // check user authorization
