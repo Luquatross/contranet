@@ -667,19 +667,39 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     output.Append("</ul>");
                     break;
                 case "turn":
-                    plugin = (from p in Bot.GetPlugins()
-                              where p.GetPluginKey() == pluginKey
-                              select p).SingleOrDefault();
-                    if (plugin == null)
-                    {
-                        Respond(ns, from, "** the plugin with key " + pluginKey + " does not exist *");
-                        return;
-                    }
-
                     // set status
                     PluginStatus pluginStatus = (status == "on") ? PluginStatus.On : PluginStatus.Off;
-                    Bot.SetPluginStatus(plugin.PluginName, pluginStatus);
-                    output.Append(string.Format("** status for plugin '{0}' was set to {1} *", pluginKey, pluginStatus.ToString("G")));
+
+                    if (pluginKey == "all")
+                    {
+                        // get all plugins (besides core ones)
+                        List<Plugin> pluginList = Bot.GetPlugins();
+                        pluginList.RemoveAll(p => p is CorePluginBase);
+
+                        // set all of their statuses
+                        foreach (Plugin p in pluginList)
+                            Bot.SetPluginStatus(p.PluginName, pluginStatus);
+                        output.Append(string.Format("** status for all plugins was set to '{0}' *", pluginStatus.ToString("G")));
+                    }
+                    else
+                    {
+                        plugin = (from p in Bot.GetPlugins()
+                                  where p.GetPluginKey() == pluginKey
+                                  select p).SingleOrDefault();
+                        if (plugin == null)
+                        {
+                            Respond(ns, from, "** the plugin with key " + pluginKey + " does not exist *");
+                            return;
+                        }
+                        else if (plugin is CorePluginBase)
+                        {
+                            Respond(ns, from, "** core plugins cannot be turned off *");
+                            return;
+                        }
+
+                        Bot.SetPluginStatus(plugin.PluginName, pluginStatus);
+                        output.Append(string.Format("** status for plugin '{0}' was set to {1} *", pluginKey, pluginStatus.ToString("G")));
+                    }
                     break;
                 default:
                     ShowHelp(ns, from, "plugins");
