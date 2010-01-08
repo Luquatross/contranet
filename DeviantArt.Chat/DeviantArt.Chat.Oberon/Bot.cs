@@ -743,7 +743,10 @@ namespace DeviantArt.Chat.Oberon
         /// <param name="status">Plugin status.</param>
         public void SetPluginStatus(string pluginName, PluginStatus status)
         {
-            botPlugins[pluginName].Status = status;
+            if (botPlugins.ContainsKey(pluginName))
+            {                
+                botPlugins[pluginName].Status = status;
+            }
         }
 
         /// <summary>
