@@ -384,6 +384,24 @@ namespace DeviantArt.Chat.Oberon.Plugins {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Saves the bot config file to the file system..
+        /// </summary>
+        internal static string SaveConfig_Summary {
+            get {
+                return ResourceManager.GetString("SaveConfig.Summary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to saveconfig.
+        /// </summary>
+        internal static string SaveConfig_Usage {
+            get {
+                return ResourceManager.GetString("SaveConfig.Usage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Have the bot say stuff..
         /// </summary>
         internal static string Say_Summary {
