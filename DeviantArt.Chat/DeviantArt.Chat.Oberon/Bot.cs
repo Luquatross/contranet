@@ -574,7 +574,8 @@ namespace DeviantArt.Chat.Oberon
             Dictionary<string, string> commandDetails = new Dictionary<string, string>();
             foreach (string key in commandMap.Keys.ToArray())
             {
-                commandDetails.Add(key, commandMap[key].Key.PluginName);
+                if (commandMap[key].Key.Status == PluginStatus.On)
+                    commandDetails.Add(key, commandMap[key].Key.PluginName);
             }
             return commandDetails;
         }
