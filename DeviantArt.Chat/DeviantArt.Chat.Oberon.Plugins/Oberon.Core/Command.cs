@@ -69,6 +69,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             RegisterCommand("quit", new BotCommandEvent(Quit), GetCommandHelp("Quit.Summary", "Quit.Usage"), (int)PrivClassDefaults.Owner);
             RegisterCommand("restart", new BotCommandEvent(Restart), GetCommandHelp("Restart.Summary", "Restart.Usage"), (int)PrivClassDefaults.Owner);
             RegisterCommand("say", new BotCommandEvent(Say), GetCommandHelp("Say.Summary", "Say.Usage"), (int)PrivClassDefaults.Members);
+            RegisterCommand("saveconfig", new BotCommandEvent(SaveConfig), GetCommandHelp("SaveConfig.Summary", "SaveConfig.Usage"), (int)PrivClassDefaults.Operators);
         }
         #endregion
 
@@ -117,7 +118,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 case "uptime":
                     TimeSpan diff = DateTime.Now.Subtract(Bot.Start);
                     about = string.Format("<b><u>Bot Uptime</b><br />Bot running {0} days, {1} hours, {2} minutes, and {3} seconds.", diff.Days, diff.Hours, diff.Minutes, diff.Seconds);
-                    dAmn.Say(ns, about);
+                    Say(ns, about);
                     break;
                 case "":
                 default:
@@ -131,7 +132,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     about = about.Replace("%T%", Bot.Trigger);
                     about = about.Replace("%R%", Bot.Info["Release"]);
                     about = about.Replace("%D%", Bot.IsDebug ? "Running in debug mode." : "");
-                    dAmn.Say(ns, about);
+                    Say(ns, about);
                     break;
             }
         }
@@ -154,7 +155,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     {
                         chatroom = args[1];
                         Bot.AddAutoJoinChatroom(chatroom);
-                        dAmn.Say(ns, string.Format("** #{0} chatroom added to auto join list *", chatroom));
+                        Say(ns, string.Format("** #{0} chatroom added to auto join list *", chatroom));
                     }
                     else
                         showUsage = true;
@@ -164,7 +165,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     {
                         chatroom = args[1];
                         Bot.RemoveAutoJoinChatroom(chatroom);
-                        dAmn.Say(ns, string.Format("** #{0} chatroom removed from auto join list *", chatroom));
+                        Say(ns, string.Format("** #{0} chatroom removed from auto join list *", chatroom));
                     }
                     else
                         showUsage = true;
@@ -176,7 +177,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                         foreach (string room in Bot.AutoJoin)
                             list.Append("<li>#" + room + "</li>");
                         list.Append("</ul>");
-                        dAmn.Say(ns, list.ToString());
+                        Say(ns, list.ToString());
                     }
                     else
                         showUsage = true;
@@ -203,7 +204,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             }
 
             dAmn.Join(args[0]);
-            dAmn.Say(ns, string.Format("** joined the chatroom #{0} *", args[0]));
+            Say(ns, string.Format("** joined the chatroom #{0} *", args[0]));
         }
 
         private void Part(string ns, string from, string message)
@@ -218,13 +219,13 @@ namespace DeviantArt.Chat.Oberon.Plugins
             else if (args.Length == 1)
             {
                 dAmn.Part(args[0]);
-                dAmn.Say(ns, string.Format("** left the chatroom #{0} *", args[0]));
+                Say(ns, string.Format("** left the chatroom #{0} *", args[0]));
             }
             else if (args.Length > 1)
             {
                 foreach (string room in args)
                     dAmn.Part(room);
-                dAmn.Say(ns, string.Format("** left the chatrooms {0} *", message));
+                Say(ns, string.Format("** left the chatrooms {0} *", message));
             }            
         }
 
@@ -248,7 +249,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             Chat chat = Bot.GetChatroom(room);
             if (chat == null)
             {
-                dAmn.Say(ns, string.Format("The bot is not signed into the chatroom {0}", room));
+                Say(ns, string.Format("The bot is not signed into the chatroom {0}", room));
                 return;
             }
 
@@ -260,7 +261,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             }
 
             // send list to server
-            dAmn.Say(ns, list.ToString());
+            Say(ns, list.ToString());
         }
 
         private void Chats(string ns, string from, string message)
@@ -271,7 +272,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 list.Append(string.Format("<li>{0} <sub>({1} users)</sub></li>", c.Name, c.UserCount));
             }
             list.Append("</ul>");
-            dAmn.Say(ns, list.ToString());
+            Say(ns, list.ToString());
         }
 
         private void Access(string ns, string from, string message)
@@ -302,7 +303,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
             // set level
             Bot.Access.SetCommandLevel(command, accessLevel);
-            dAmn.Say(ns, string.Format(
+            Say(ns, string.Format(
                 "** Access level for command '{0}' was set to {1} *", command, accessLevel));
             Bot.Access.SaveAccessLevels();
         }
@@ -330,7 +331,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                         if (int.TryParse(args[2], out level))
                         {
                             Bot.Access.SetUserLevel(user, level);
-                            dAmn.Say(ns, string.Format(
+                            Say(ns, string.Format(
                                 "** :dev{0}: has been given access level privilege {1} by {2} *",
                                 user,
                                 level,
@@ -342,7 +343,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                             if (Bot.Access.HasUserLevel(privClass))
                             {
                                 Bot.Access.SetUserLevel(user, privClass);
-                                dAmn.Say(ns, string.Format(
+                                Say(ns, string.Format(
                                     "** :dev{0}: has been made a member of bot privclass {1} by {2} *",
                                     user,
                                     privClass,
@@ -350,7 +351,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                             }
                             else
                             {
-                                dAmn.Say(ns, string.Format("<b>Error:</b> bot privclass {0} does not exist.", privClass));
+                                Say(ns, string.Format("<b>Error:</b> bot privclass {0} does not exist.", privClass));
                             }
                         }
                     }
@@ -371,7 +372,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     {
                         output.Append(string.Format(":dev{0}: <sub>(Access level: {1})</sub><br />", u.Key, u.Value)); 
                     }                    
-                    dAmn.Say(ns, output.ToString());
+                    Say(ns, output.ToString());
                     break;
                 case "del":
                     if (args.Length == 2)
@@ -453,7 +454,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 else
                 {
                     Bot.Access.UpdatePrivClassAccessLevel(privClass, level);
-                    dAmn.Say(ns, string.Format(
+                    Say(ns, string.Format(
                         "** Priv class {0} was changed to access level {1} by {2} *",
                         privClass, 
                         level,
@@ -536,7 +537,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             }
             else
             {
-                dAmn.Say(ns, output.ToString());
+                Say(ns, output.ToString());
             }
         }
 
@@ -547,7 +548,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 + "&middot; Module system created from scratch. Uses dynamic assembly loading.<br />"
                 + "&middot; Configuration system uses standard .NET config files<br />" 
                 + "&middot; Ideas stolen from anywhere and everywhere.</sub>";
-            dAmn.Say(ns, "<b><u>:bow: Credits</u></b>:<br />" + credit);
+            Say(ns, "<b><u>:bow: Credits</u></b>:<br />" + credit);
         }
 
         private void CTrig(string ns, string from, string message)
@@ -562,12 +563,12 @@ namespace DeviantArt.Chat.Oberon.Plugins
             string trigger = args[0];
             if (trigger.Length > 1)
             {
-                dAmn.Say(ns, from + ": bot trigger can only be one character.");
+                Say(ns, from + ": bot trigger can only be one character.");
                 return;
             }
 
             Bot.ChangeTrigger(trigger);
-            dAmn.Say(ns, string.Format("** bot trigger changed to {0} by {1} *", trigger, from));
+            Say(ns, string.Format("** bot trigger changed to {0} by {1} *", trigger, from));
         }
 
         private void Kick(string ns, string from, string message)
@@ -594,7 +595,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
             dAmn.Kick(room, user);
             if (room != ns)
-                dAmn.Say(ns, string.Format("** :dev{0}: kicked from #{1} by {2} *", user, room, from));
+                Say(ns, string.Format("** :dev{0}: kicked from #{1} by {2} *", user, room, from));
         }
 
         private void Plugins(string ns, string from, string message)
@@ -706,7 +707,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     return;
             }
 
-            dAmn.Say(ns, output.ToString());
+            Say(ns, output.ToString());
         }
 
         private void Ping(string ns, string from, string message)
@@ -716,13 +717,13 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
         private void Quit(string ns, string from, string message)
         {
-            dAmn.Say(ns, "** shutting down the bot... *");
+            Say(ns, "** shutting down the bot... *");
             Bot.Shutdown();
         }
 
         private void Restart(string ns, string from, string message)
         {
-            dAmn.Say(ns, "** restarting the bot... *");
+            Say(ns, "** restarting the bot... *");
             Bot.Restart();
         }
 
@@ -737,7 +738,13 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 message = message.Substring(message.IndexOf(args[1]));
             }
 
-            dAmn.Say(room, message);
+            Say(room, message);
+        }
+
+        private void SaveConfig(string ns, string from, string message)
+        {
+            Bot.SaveConfig();
+            Say(ns, from, "** bot config file saved successfully *");
         }
         #endregion
     }

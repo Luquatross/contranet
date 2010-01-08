@@ -267,4 +267,10 @@ delprivclass [name]
   <data name="TrigCheck.Usage" xml:space="preserve">
     <value>trigcheck</value>
   </data>
+  <data name="SaveConfig.Summary" xml:space="preserve">
+    <value>Saves the bot config file to the file system.</value>
+  </data>
+  <data name="SaveConfig.Usage" xml:space="preserve">
+    <value>saveconfig</value>
+  </data>
 </root>
