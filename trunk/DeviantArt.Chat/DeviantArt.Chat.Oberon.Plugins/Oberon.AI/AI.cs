@@ -172,18 +172,29 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     return;
 
                 string input = GetInput(message);
+                
+                try
+                {
+                    // form request
+                    WebRequest request = HttpWebRequest.Create(BotWebService + from + "/" + EncodeMessage(input));
+                    request.Timeout = (int)TimeSpan.FromSeconds(30.0).TotalMilliseconds;
 
-                // form request
-                WebRequest request = HttpWebRequest.Create(BotWebService + from + "/" + EncodeMessage(input));
-                // get the response
-                WebResponse response = request.GetResponse();
-                StreamReader reader = new StreamReader(response.GetResponseStream());
+                    // get the response
+                    WebResponse response = request.GetResponse();
+                    StreamReader reader = new StreamReader(response.GetResponseStream());
 
-                // read response into string
-                string reply = reader.ReadToEnd();
+                    // read response into string
+                    string reply = reader.ReadToEnd();
 
-                // send it to the client!
-                base.Respond(chatroom, from, reply);
+                    // send it to the client!
+                    base.Respond(chatroom, from, reply);
+                }
+                catch (WebException ex)
+                {
+                    // log error and try to restart the conversation
+                    Bot.Console.Log("Error getting AI response. " + ex.ToString());
+                    base.Respond(chatroom, from, "Sorry, I missed that. Could you say that again?");
+                }
             }
         }
         #endregion
