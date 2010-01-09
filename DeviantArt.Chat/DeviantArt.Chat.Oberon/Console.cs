@@ -74,6 +74,11 @@ namespace DeviantArt.Chat.Oberon
             Logger.InfoFormat(message);
         }
 
+        public void Debug(string message)
+        {
+            Logger.DebugFormat(message);
+        }
+
         public string GetValueFromConsole(string message)
         {
             while (true)
