@@ -70,7 +70,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
         /// </summary>
         private void Connect()
         {
-            if (IsConfigured && Messenger.Connected)
+            if (IsConfigured && !Messenger.Connected)
                 Messenger.Connect();
         }
 
@@ -236,10 +236,6 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 ShowHelp(ns, from, "msnnotify");
             }
         }
-        #endregion 
-    
-        
-
-        
+        #endregion                    
     }
 }
