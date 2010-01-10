@@ -94,5 +94,88 @@ namespace DeviantArt.Chat.Oberon
             foreach (FileInfo fi in dirInfo.GetFiles(searchPattern))
                 yield return fi;
         }
+
+        /// <summary>
+        /// Strings that may follow or precede the username in a sentence
+        /// </summary>
+        private static string[] SentenceStrings = new string[] { 
+            ",", ".", "<b>", "</b>", "<i>", "</i>", ":", "!", "?", "\"", "'", "(", ")", "=", "-", "~", "`", "^", "$", "[", "]" 
+        };
+
+        /// <summary>
+        /// Returns true if the references the username in list.
+        /// </summary>
+        /// <param name="message">Message to check.</param>
+        /// <param name="usernames"></param>
+        /// <param name="parseType">Way to parse usernames.</param>
+        /// <param name="foundUsername">User that was found, if any.</param>
+        /// <returns>True if references user in list, otherwise false.</returns>
+        public static bool IsMessageToUserInList(string message, List<string> usernames, MsgUsernameParse parseType, out string foundUsername)
+        {
+            foundUsername = null;
+            foreach (string username in usernames)
+            {
+                if (IsMessageToUser(message, username, parseType))
+                {
+                    foundUsername = username;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Returns true if the references the username provided.
+        /// </summary>
+        /// <param name="message">Message to check.</param>
+        /// <param name="username">Username to use.</param>
+        /// <param name="parseType">Way to parse username.</param>
+        /// <returns>True if references user, otherwise false.</returns>
+        public static bool IsMessageToUser(string message, string username, MsgUsernameParse parseType)
+        {
+            bool result = false;
+            switch (parseType)
+            {
+                case MsgUsernameParse.Lazy:
+                    result = username.Contains(username);
+                    break;
+                case MsgUsernameParse.Smart:
+                    foreach (string str in SentenceStrings)
+                    {
+                        if (message.Contains(username + str) || message.Contains(str + username))
+                        {
+                            result = true;
+                            break;
+                        }
+                    }
+                    break;
+                case MsgUsernameParse.Strict:
+                    result = message.StartsWith(username + ":");
+                    break;
+            }
+
+            return result;
+        }
+    }
+
+    /// <summary>
+    /// Enum to determine how to parse the username in a message.
+    /// </summary>
+    public enum MsgUsernameParse
+    {
+        /// <summary>
+        /// Lazy, if the username appears anywhere in the string.
+        /// </summary>
+        Lazy,
+
+        /// <summary>
+        /// Checks for user name followed by punctuation.
+        /// </summary>
+        Smart,
+
+        /// <summary>
+        /// Checks for username followed by :
+        /// </summary>
+        Strict
     }
 }
