@@ -34,7 +34,7 @@ namespace DeviantArt.Chat.Oberon
         /// <summary>
         /// Reference to the Bot instance that is running
         /// </summary>
-        protected Bot Bot = Bot.Instance;        
+        protected Bot Bot = Bot.Instance;
 
         /// <summary>
         /// Settings for this plugin.
@@ -71,7 +71,11 @@ namespace DeviantArt.Chat.Oberon
         /// <summary>
         /// Status of the plugin. 
         /// </summary>
-        public PluginStatus Status = PluginStatus.Off;
+        public PluginStatus Status
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Retrieves the name for the plugin.
@@ -108,14 +112,16 @@ namespace DeviantArt.Chat.Oberon
         #region Public Methods
         /// <summary>
         /// Method that is called once the plugin is loaded. Most of the plugin's initialization
-        /// is handled here (for example, registering for events and commands).
+        /// is handled here (for example, registering for events and commands). This method
+        /// will be called whether the plugin is activated or not.
         /// </summary>
         public abstract void Load();
 
         /// <summary>
         /// This method is called when the bot is shutting down. Override this 
         /// method to perform logic when during shutdown (for example, saving
-        /// plugin settings to the filesystem).
+        /// plugin settings to the filesystem). This method will be called whether the plugin
+        /// is activated or not.
         /// </summary>
         public virtual void Close()
         {
@@ -124,7 +130,7 @@ namespace DeviantArt.Chat.Oberon
         /// <summary>
         /// This method is called when a plugin gets its status set to 'On'.
         /// This can happen during the bot startup phase, or when a bot operator
-        /// sets the plugin status on 'On' manually.
+        /// sets the plugin status on 'On' manually. Occurs after Load().
         /// </summary>
         public virtual void Activate()
         {
