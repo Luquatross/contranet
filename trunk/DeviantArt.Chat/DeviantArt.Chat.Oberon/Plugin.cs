@@ -71,11 +71,7 @@ namespace DeviantArt.Chat.Oberon
         /// <summary>
         /// Status of the plugin. 
         /// </summary>
-        public PluginStatus Status
-        {
-            get;
-            set;
-        }
+        public PluginStatus Status = PluginStatus.Off;
 
         /// <summary>
         /// Retrieves the name for the plugin.
@@ -123,7 +119,24 @@ namespace DeviantArt.Chat.Oberon
         /// </summary>
         public virtual void Close()
         {
-        }        
+        }
+
+        /// <summary>
+        /// This method is called when a plugin gets its status set to 'On'.
+        /// This can happen during the bot startup phase, or when a bot operator
+        /// sets the plugin status on 'On' manually.
+        /// </summary>
+        public virtual void Activate()
+        {
+        }
+
+        /// <summary>
+        /// This method is called when a plugin gets its status set to 'Off'. This
+        /// only occurs when a bot operator sets the plugin status to 'Off' manually.
+        /// </summary>
+        public virtual void DeActivate()
+        {
+        }
 
         /// <summary>
         /// Get a unique key for this plugin. Is the plugin name with all spaces and special 

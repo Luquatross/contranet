@@ -645,7 +645,10 @@ namespace DeviantArt.Chat.Oberon
                 Console.Notice("Starting plugin loading.");
 
             // find and instantiate all plugins
-            Plugin[] allPlugins = FindPlugins();            
+            Plugin[] allPlugins = FindPlugins();
+
+            // set plugin statuses
+            LoadPluginStatuses();
 
             // load all plugins
             int pluginsLoaded = 0;
@@ -668,10 +671,7 @@ namespace DeviantArt.Chat.Oberon
                     "Plugin loading completed. {0} of {1} plugins are running.",
                     pluginsLoaded,
                     allPlugins.Length
-                ));
-
-            // Load plugin statuses
-            LoadPluginStatuses();
+                ));            
 
             // add file watcher for plugin directory
             FileSystemWatcher pluginWatcher = new FileSystemWatcher();
@@ -745,8 +745,17 @@ namespace DeviantArt.Chat.Oberon
         public void SetPluginStatus(string pluginName, PluginStatus status)
         {
             if (botPlugins.ContainsKey(pluginName))
-            {                
+            {       
+                // if we're setting it to the same value, don't bother
+                if (botPlugins[pluginName].Status == status)
+                    return;
+
+                // set status 7 trigger appropriate plugin method
                 botPlugins[pluginName].Status = status;
+                if (status == PluginStatus.On)
+                    botPlugins[pluginName].Activate();
+                else
+                    botPlugins[pluginName].DeActivate();
             }
         }
 
