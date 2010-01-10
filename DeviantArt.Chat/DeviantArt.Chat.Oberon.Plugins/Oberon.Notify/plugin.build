@@ -1,0 +1,20 @@
+﻿<?xml version="1.0"?>
+<!-- targets to be executed, when omitted from command line default is run -->
+<project name="Oberon.Notify" default="CopyFiles" xmlns="http://nant.sf.net/release/0.86-beta1/nant.xsd">
+  <!-- Declare properties -->
+  <target name="init">
+    <property name="folder.name" value="Notify" />
+  </target>
+
+  <!-- Copy files from to executable dir -->
+  <target name="CopyFiles" depends="init">
+    <!-- Copy core assemblies -->
+    <copy todir="../../${out.dir}/Plugins/${folder.name}" flatten="true" overwrite="true">
+      <fileset>
+        <include name="**/${project::get-name()}.dll" />
+        <include name="**/${project::get-name()}.pdb" if="${debug}" />
+        <include name="**/MSNPSharp.dll" />
+      </fileset>
+    </copy>
+  </target>
+</project>
