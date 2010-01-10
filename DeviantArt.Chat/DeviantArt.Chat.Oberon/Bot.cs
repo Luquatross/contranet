@@ -755,7 +755,7 @@ namespace DeviantArt.Chat.Oberon
                 if (status == PluginStatus.On)
                     botPlugins[pluginName].Activate();
                 else
-                    botPlugins[pluginName].DeActivate();
+                    botPlugins[pluginName].Deactivate();
             }
         }
 

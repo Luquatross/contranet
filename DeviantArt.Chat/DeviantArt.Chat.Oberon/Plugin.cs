@@ -134,7 +134,7 @@ namespace DeviantArt.Chat.Oberon
         /// This method is called when a plugin gets its status set to 'Off'. This
         /// only occurs when a bot operator sets the plugin status to 'Off' manually.
         /// </summary>
-        public virtual void DeActivate()
+        public virtual void Deactivate()
         {
         }
 
