@@ -290,6 +290,7 @@ namespace DeviantArt.Chat.Oberon
 
             // create access level object
             Access = new AccessLevel(this);
+            Access.DefaultUserAccessLevel = (int)PrivClassDefaults.Guests;
 
             // Now we're ready to get some work done!
             Console.Notice("Ready!");
