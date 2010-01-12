@@ -178,6 +178,36 @@ namespace DeviantArt.Chat.Oberon
         }
 
         /// <summary>
+        /// Gets a particular argument from an array of arguments. If the value is not
+        /// there null is returned.
+        /// </summary>
+        /// <param name="args">Args to look in.</param>
+        /// <param name="index">Index argument should appear at.</param>
+        /// <returns>Argument if found, otherwise null.</returns>
+        protected string GetArg(string[] args, int index)
+        {
+            return GetArg(args, index, null);
+        }
+
+        /// <summary>
+        /// Gets a particular argument from an array of arguments. If the value is not
+        /// there default value is returned.
+        /// </summary>
+        /// <param name="args">Args to look in.</param>
+        /// <param name="index">Index argument should appear at.</param>
+        /// <param name="defaultValue">Default value to return if arg is not present.</param>
+        /// <returns>Argument if found, otherwise default value.</returns>
+        protected string GetArg(string[] args, int index, string defaultValue)
+        {
+            if (args.Length < index)
+                return defaultValue;
+            else if (string.IsNullOrEmpty(args[index]))
+                return defaultValue;
+            else
+                return args[index];
+        }
+
+        /// <summary>
         /// Show help message to the user for a particular command.
         /// </summary>
         /// <param name="ns">Chatroom.</param>
