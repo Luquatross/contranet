@@ -208,6 +208,28 @@ namespace DeviantArt.Chat.Oberon
         }
 
         /// <summary>
+        /// Gets a particular argument from the provided string. The index
+        /// is the index of the arg in the string (using spaces as delimiters). Will
+        /// return from that index through the end of the string.
+        /// </summary>
+        /// <param name="data">Data to parse.</param>
+        /// <param name="index">Index to get.</param>
+        /// <returns>Arg parsed from string.</returns>
+        protected string ParseArg(string data, int index)
+        {
+            string[] args = GetArgs(data);
+            if (args.Length < index)
+                return null;            
+            int foundIndex = 0;
+            for (int i = 0; i < index; i++)
+            {
+                foundIndex = data.IndexOf(' ');
+                data = data.Substring(foundIndex);
+            }
+            return data.Trim();
+        }
+
+        /// <summary>
         /// Show help message to the user for a particular command.
         /// </summary>
         /// <param name="ns">Chatroom.</param>
