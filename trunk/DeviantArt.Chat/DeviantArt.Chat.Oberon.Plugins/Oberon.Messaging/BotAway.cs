@@ -108,7 +108,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             string message = commandPacket.Message;
             string username = Bot.Username;
 
-            if (Common.IsToUser(username, message))
+            if (Utility.IsMessageToUser(message, username, MsgUsernameParse.Lazy))
             {
                 string awayMessage = AwayMessages.Get(chatroom, username);
                 if (!string.IsNullOrEmpty(awayMessage))

@@ -29,6 +29,16 @@ namespace DeviantArt.Chat.Oberon.Collections
         /// Default setting for the collection. Typically a non-value, such as null or -1.
         /// </summary>
         private T DefaultSetting;
+
+        /// <summary>
+        /// Allow accessing of individual settings.
+        /// </summary>
+        public Dictionary<string, bool> AllowIndividualSetting = new Dictionary<string, bool>();
+
+        /// <summary>
+        /// Allow accessing of priv class settings.
+        /// </summary>
+        public Dictionary<string, bool> AllowPrivClassSettings = new Dictionary<string, bool>();
         #endregion
 
         #region Constructor
@@ -75,9 +85,9 @@ namespace DeviantArt.Chat.Oberon.Collections
             // get room string
             string room = "room_" + chatroom + "_";
 
-            if (Settings.ContainsKey(room + "user_" + username))
+            if (Settings.ContainsKey(room + "user_" + username) && DoesAllowIndividualSettings(chatroom))
                 return Settings[room + "user_" + username];
-            if (Settings.ContainsKey(room + "priv_" + user.PrivClass))
+            if (Settings.ContainsKey(room + "priv_" + user.PrivClass) && DoesAllowPrivClassSettings(chatroom))
                 return Settings[room + "priv_" + user.PrivClass];
             else 
                 return Get(chatroom);
@@ -148,6 +158,69 @@ namespace DeviantArt.Chat.Oberon.Collections
         public void Clear()
         {
             Settings.Clear();
+        }
+
+        /// <summary>
+        /// Clears out all settings for just a chatroom.
+        /// </summary>
+        /// <param name="chatroom"></param>
+        public void ClearChatroom(string chatroom)
+        {
+            List<string> keys = Settings.Keys.Where(k => k.Contains("room_" + chatroom)).ToList();
+            foreach (string key in keys)
+                Settings.Remove(key);
+        }
+
+        /// <summary>
+        /// True if chatroom allows individual settings.
+        /// </summary>
+        /// <param name="chatroom">Chatroom to check.</param>
+        /// <returns>True if chatroom allows individual settings.</returns>
+        public bool DoesAllowIndividualSettings(string chatroom)
+        {
+            if (AllowIndividualSetting.ContainsKey(chatroom))
+                return AllowIndividualSetting[chatroom];
+            else
+                return true;
+        }
+
+        /// <summary>
+        /// True if chatroom allows priv class settings.
+        /// </summary>
+        /// <param name="chatroom">Chatroom to check.</param>
+        /// <returns>True if chatroom allows privclass settings.</returns>
+        public bool DoesAllowPrivClassSettings(string chatroom)
+        {
+            if (AllowPrivClassSettings.ContainsKey(chatroom))
+                return AllowPrivClassSettings[chatroom];
+            else
+                return true;
+        }
+
+        /// <summary>
+        /// Set the allow individual setting property.
+        /// </summary>
+        /// <param name="chatroom">Chatroom to set property for.</param>
+        /// <param name="value">Value.</param>
+        public void SetAllowIndividualSettings(string chatroom, bool value)
+        {
+            if (AllowIndividualSetting.ContainsKey(chatroom))
+                AllowIndividualSetting[chatroom] = value;
+            else
+                AllowIndividualSetting.Add(chatroom, value);
+        }
+
+        /// <summary>
+        /// Set the allow privclass property.
+        /// </summary>
+        /// <param name="chatroom">Chatroom to set property for.</param>
+        /// <param name="value">Value.</param>
+        public void SetAllowPrivClassSettings(string chatroom, bool value)
+        {
+            if (AllowPrivClassSettings.ContainsKey(chatroom))
+                AllowPrivClassSettings[chatroom] = value;
+            else
+                AllowPrivClassSettings.Add(chatroom, value);
         }
         #endregion
     }
