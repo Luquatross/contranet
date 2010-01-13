@@ -94,6 +94,62 @@ namespace DeviantArt.Chat.Oberon.Collections
         }
 
         /// <summary>
+        /// Gets global setting. Doesn't use heirarchy, returns DefaultSetting if not set.
+        /// </summary>
+        /// <param name="chatroom">Chatroom.</param>
+        /// <param name="username">Username.</param>
+        /// <returns>Setting.</returns>
+        public T GetIndividualSetting(string chatroom, string username)
+        {
+            string key = "room_" + chatroom + "_" + "user_" + username;
+            if (Settings.ContainsKey(key))
+                return Settings[key];
+            else
+                return DefaultSetting;
+        }
+
+        /// <summary>
+        /// Gets global setting. Doesn't use heirarchy, returns DefaultSetting if not set.
+        /// </summary>
+        /// <param name="chatroom">Chatroom.</param>
+        /// <param name="privClass">PrivClass.</param>
+        /// <returns>Setting.</returns>
+        public T GetPrivClassSetting(string chatroom, string privClass)
+        {
+            string key = "room_" + chatroom + "_" + "priv_" + privClass;
+            if (Settings.ContainsKey(key))
+                return Settings[key];
+            else
+                return DefaultSetting;
+        }
+
+        /// <summary>
+        /// Gets chatroom setting. Doesn't use heirarchy, returns DefaultSetting if not set.
+        /// </summary>
+        /// <param name="chatroom">Chatroom.</param>
+        /// <returns>Setting.</returns>
+        public T GetChatroomSetting(string chatroom)
+        {
+            string key = "room_" + chatroom;
+            if (Settings.ContainsKey(key))
+                return Settings[key];
+            else
+                return DefaultSetting;
+        }
+
+        /// <summary>
+        /// Gets global setting. Doesn't use heirarchy, returns DefaultSetting if not set.
+        /// </summary>
+        /// <returns>Setting.</returns>
+        public T GetGlobalSetting()
+        {
+            if (Settings.ContainsKey("all"))
+                return Settings["all"];
+            else
+                return DefaultSetting;
+        }
+
+        /// <summary>
         /// Sets a global setting.
         /// </summary>
         /// <param name="setting">Setting.</param>
