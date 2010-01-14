@@ -518,6 +518,10 @@ namespace DeviantArt.Chat.Oberon
                         dAmn.Say(ns, string.Format("{0}: error occured executing the command '{1}'. Notify the bot admin.", from, commandName));
                     }
                 }
+                else
+                {
+                    dAmn.Say(ns, string.Format("{0}: the plugin for this command is deactivated.", from));
+                }
             }
             else
             {

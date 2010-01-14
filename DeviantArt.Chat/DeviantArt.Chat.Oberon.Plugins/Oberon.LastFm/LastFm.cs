@@ -80,6 +80,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             try
             {
                 WebRequest request = HttpWebRequest.Create(url);
+                request.Timeout = 30000; // 30 seconds
                 WebResponse response = request.GetResponse();
 
                 // get string from response
@@ -87,6 +88,10 @@ namespace DeviantArt.Chat.Oberon.Plugins
             }
             catch (WebException ex)
             {
+                // if it was a time out, rethrow it, as we have no xml
+                if (ex.Status == WebExceptionStatus.Timeout)
+                    throw new TimeoutException("Last.fm is being slow right now. Try again in a second.", ex);
+
                 // if it was a bad request, load the error xml
                 return new StreamReader(ex.Response.GetResponseStream()).ReadToEnd();
             }
@@ -193,48 +198,56 @@ namespace DeviantArt.Chat.Oberon.Plugins
             }            
 
             // make the request
-            XmlDocument result = GetArtistMetaData(artist);
-            XmlNode root = result.DocumentElement;                        
-            if (result.DocumentElement.Attributes["status"].Value == "ok")
+            try
             {
-                StringBuilder say = new StringBuilder();
-
-                // form artist data
-                say.Append(string.Format(
-                    "<b><a href=\"{0}\">{1}</a></b><br /><sub><b>Play count:</b> {2}<br /><b>Listeners:</b> {3}",
-                    root.SelectSingleNode("artist/url").InnerText,
-                    root.SelectSingleNode("artist/name").InnerText,
-                    root.SelectSingleNode("artist/stats/playcount").InnerText,
-                    root.SelectSingleNode("artist/stats/listeners").InnerText));
-
-                // if there are similar artists, add them
-                XmlNodeList similarArtists = root.SelectNodes("artist/similar/artist");
-                if (similarArtists.Count > 0)                    
+                XmlDocument result = GetArtistMetaData(artist);
+                XmlNode root = result.DocumentElement;
+                if (result.DocumentElement.Attributes["status"].Value == "ok")
                 {
-                    say.Append("<br /><b>Simiar artists:</b> ");                    
-                    List<string> similars = new List<string>();
-                    foreach (XmlNode similar in similarArtists)
+                    StringBuilder say = new StringBuilder();
+
+                    // form artist data
+                    say.Append(string.Format(
+                        "<b><a href=\"{0}\">{1}</a></b><br /><sub><b>Play count:</b> {2}<br /><b>Listeners:</b> {3}",
+                        root.SelectSingleNode("artist/url").InnerText,
+                        root.SelectSingleNode("artist/name").InnerText,
+                        root.SelectSingleNode("artist/stats/playcount").InnerText,
+                        root.SelectSingleNode("artist/stats/listeners").InnerText));
+
+                    // if there are similar artists, add them
+                    XmlNodeList similarArtists = root.SelectNodes("artist/similar/artist");
+                    if (similarArtists.Count > 0)
                     {
-                        string name = similar.SelectSingleNode("name").InnerText;
-                        string url = similar.SelectSingleNode("url").InnerText;
-                        similars.Add("<a href=\"" + url + "\">" + name + "</a>");
+                        say.Append("<br /><b>Simiar artists:</b> ");
+                        List<string> similars = new List<string>();
+                        foreach (XmlNode similar in similarArtists)
+                        {
+                            string name = similar.SelectSingleNode("name").InnerText;
+                            string url = similar.SelectSingleNode("url").InnerText;
+                            similars.Add("<a href=\"" + url + "\">" + name + "</a>");
+                        }
+                        say.Append(string.Join(", ", similars.ToArray()));
                     }
-                    say.Append(string.Join(", ", similars.ToArray()));
+
+                    // if there is a summary, add it
+                    XmlNode summary = root.SelectSingleNode("artist/bio/summary");
+                    if (summary != null)
+                        say.Append("<br /><b>Info:</b> " + StringHelper.StripTags(summary.InnerText));
+
+                    // send it off!
+                    say.Append("</sub>");
+                    Say(ns, say.ToString());
                 }
-
-                // if there is a summary, add it
-                XmlNode summary = root.SelectSingleNode("artist/bio/summary");
-                if (summary != null)
-                    say.Append("<br /><b>Info:</b> " + StringHelper.StripTags(summary.InnerText));                
-
-                // send it off!
-                say.Append("</sub>");
-                Say(ns, say.ToString());
+                else
+                {
+                    // show the user the error message
+                    Respond(ns, from, root.SelectSingleNode("error").InnerText);
+                }
             }
-            else
+            catch (TimeoutException ex)
             {
-                // show the user the error message
-                Respond(ns, from, root.SelectSingleNode("error").InnerText);
+                // last.fm is taking too long - let user know
+                Respond(ns, from, ex.Message);
             }
         }
 
