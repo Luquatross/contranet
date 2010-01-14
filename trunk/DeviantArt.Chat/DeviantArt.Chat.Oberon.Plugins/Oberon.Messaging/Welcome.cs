@@ -223,7 +223,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             string subCommand = GetArg(args, 0);
             string var1 = GetArg(args, 1);
             string var2 = GetArg(args, 2);
-            string var3 = GetArg(args, 3);
+            string var3 = GetArg(args, 3);            
 
             // create output variables
             StringBuilder say = new StringBuilder();
@@ -231,7 +231,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             switch (subCommand.ToLower())
             {
                 case "all":
-                    string message = ParseArg(message, 1);
+                    message = ParseArg(message, 1);
                     if (string.IsNullOrEmpty(message))
                     {
                         say.Append("You need to give a welcome message to set.");
@@ -250,7 +250,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     else
                     {
                         string pc = var1;
-                        string message = ParseArg(message, 2);
+                        message = ParseArg(message, 2);
                         // make sure priv class exists if we're signed into the room
                         Chat chat = Bot.GetChatroom(room);
                         if (chat != null)
@@ -302,7 +302,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 case "clear":
                     if (string.IsNullOrEmpty(var1))
                     {
-                        say.Append("This will delete all welcome data! Type <code>{0}wt {1} yes</code> to clear all welcome data.", Bot.Trigger, subCommand);
+                        say.AppendFormat("This will delete all welcome data! Type <code>{0}wt {1} yes</code> to clear all welcome data.", Bot.Trigger, subCommand);
                     }
                     else
                     {
@@ -312,8 +312,17 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     break;
                 case "settings":
                     say.AppendFormat("<b><u>Welcome settings for {0}</u></b>:<br /><sub>");
-                    say.AppendFormat("Welcome messages are turned {0}<br />", IsWelcomesEnabled(room) == true ? "on" : "off");
-                    say.AppendFormat("Welcome messages for individuals are turned {0}<br />", IsIndvWelcomeAllowed(room) == true ? "on" : "off");
+                    say.AppendFormat("Welcome messages are turned <b>{0}</b><br />", IsWelcomesEnabled(room) == true ? "on" : "off");
+                    say.AppendFormat("Welcome messages for individuals are turned <b>{0}</b><br />", IsIndvWelcomeAllowed(room) == true ? "on" : "off");
+                    Chat foundChat = Bot.GetChatroom(room);
+                    if (room != null)
+                    {
+                        foreach (string privClass in foundChat.PrivClasses.Keys)
+                        {
+                            string privStatus = string.IsNullOrEmpty(WelcomeMessages.GetPrivClassSetting(room, privClass)) ? "off" : "on";
+                            say.AppendFormat("Welcome messages for {0} members are turned <b>{0}</b><br />", privClass, privStatus);
+                        }
+                    }
                     say.Append("</sub>");
                     break;
                 default:

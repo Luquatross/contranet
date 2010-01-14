@@ -685,7 +685,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     else
                     {
                         plugin = (from p in Bot.GetPlugins()
-                                  where p.GetPluginKey() == pluginKey
+                                  where p.GetPluginKey().ToLower() == pluginKey.ToLower()
                                   select p).SingleOrDefault();
                         if (plugin == null)
                         {

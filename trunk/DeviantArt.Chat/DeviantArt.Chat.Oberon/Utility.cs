@@ -137,7 +137,7 @@ namespace DeviantArt.Chat.Oberon
             switch (parseType)
             {
                 case MsgUsernameParse.Lazy:
-                    result = username.Contains(username);
+                    result = message.Contains(username);
                     break;
                 case MsgUsernameParse.Smart:
                     foreach (string str in SentenceStrings)

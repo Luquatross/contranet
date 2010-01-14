@@ -108,6 +108,11 @@ namespace DeviantArt.Chat.Oberon.Plugins
             string message = commandPacket.Message;
             string username = Bot.Username;
 
+            // make sure we didn't send a message! otherwise we would be replying to ourselves
+            if (from.ToLower() == username.ToLower())
+                return;
+
+            // see if message is to us or not
             if (Utility.IsMessageToUser(message, username, MsgUsernameParse.Lazy))
             {
                 string awayMessage = AwayMessages.Get(chatroom, username);
