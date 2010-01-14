@@ -199,7 +199,7 @@ namespace DeviantArt.Chat.Oberon
         /// <returns>Argument if found, otherwise default value.</returns>
         protected string GetArg(string[] args, int index, string defaultValue)
         {
-            if (args.Length < index)
+            if (args.Length <= index)
                 return defaultValue;
             else if (string.IsNullOrEmpty(args[index]))
                 return defaultValue;
