@@ -29,6 +29,15 @@ namespace DeviantArt.Chat.Oberon
     /// <param name="from">User who issued the command.</param>
     /// <param name="message">Contents of the command.</param>    
     public delegate void BotCommandEvent(string ns, string from, string message);
+
+    /// <summary>
+    /// Method which will sort event listeners in order of priority.
+    /// </summary>
+    /// <param name="x">Event to compate.</param>
+    /// <param name="y">Event to compate.</param>
+    public delegate int BotEventSorter(
+        KeyValuePair<Plugin, BotServerPacketEvent> x,
+        KeyValuePair<Plugin, BotServerPacketEvent> y);
     #endregion
 
     #region Bot Helper Classes
@@ -153,6 +162,11 @@ namespace DeviantArt.Chat.Oberon
         {
             get { return System.IO.Path.Combine(CurrentDirectory, "Plugins"); }
         }
+
+        /// <summary>
+        /// Sorter for event listeners so that events are relayed in the correct order.
+        /// </summary>
+        public BotEventSorter EventListenerSorter { get; set; }
         #endregion
 
         #region Private Variables
@@ -817,7 +831,7 @@ namespace DeviantArt.Chat.Oberon
             
             ListeningStoppedEvent.Set();
             Console.Notice("Bot has stopped listening.");
-        }
+        }        
 
         /// <summary>
         /// Processes a packet received from the server and delegates it out the associated listeners.
@@ -827,15 +841,20 @@ namespace DeviantArt.Chat.Oberon
         {
             // find the right listeners for this event
             BotEventList listeners = eventMap[packet.PacketType];
+            
             if (listeners != null && listeners.Count > 0)
             {
+                // sort event list in terms of priority
+                if (EventListenerSorter != null)
+                    listeners.Sort(new Comparison<KeyValuePair<Plugin,BotServerPacketEvent>>(EventListenerSorter));
+
                 // trigger the event for each listener
                 foreach (KeyValuePair<Plugin, BotServerPacketEvent> listener in listeners)
                 {
                     Plugin plugin = listener.Key;
                     BotServerPacketEvent method = listener.Value;
 
-                    // only trigger event if plug is activated
+                    // only trigger event if plugin is activated
                     if (plugin.Status == PluginStatus.On)
                     {
                         string ns = null;

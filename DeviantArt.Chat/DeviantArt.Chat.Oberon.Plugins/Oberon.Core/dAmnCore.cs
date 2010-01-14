@@ -59,6 +59,8 @@ namespace DeviantArt.Chat.Oberon.Plugins
             RegisterEvent(dAmnPacketType.AdminMove, new BotServerPacketEvent(AdminMove));
             RegisterEvent(dAmnPacketType.AdminRemove, new BotServerPacketEvent(AdminRemove));            
             RegisterEvent(dAmnPacketType.AdminError, new BotServerPacketEvent(AdminError));
+
+            Bot.EventListenerSorter = EventListenerSorter;
         }
         #endregion
 
@@ -575,6 +577,47 @@ namespace DeviantArt.Chat.Oberon.Plugins
             string command = subPacket.body;
             string error = subPacket.args["e"];
             chat.Log(string.Format("Admin error. The command '{0}' returned: {1}", command, error));
+        }
+        #endregion
+      
+        #region Event Listener Sorter
+        /// <summary>
+        /// Sorts event listeners so that dAmnCore plugins come first, then general CorePluginBase, then
+        /// everything else.
+        /// </summary>
+        /// <param name="x">Object to compare.</param>
+        /// <param name="y">Object to compare.</param>
+        /// <returns>Comparison value.</returns>
+        public int EventListenerSorter(KeyValuePair<Plugin, BotServerPacketEvent> x, KeyValuePair<Plugin, BotServerPacketEvent> y)
+        {
+            if (x.Key is dAmnCore)
+            {
+                if (y.Key is dAmnCore)
+                    return 0; // both are dAmnCore plugins...should be impossible, but hey
+                else
+                    return 1; // dAmnCore takes priority
+            }
+            else 
+            {
+                if (y.Key is dAmnCore)
+                    return -1; // dAmnCore takes priority
+
+                if (x.Key is CorePluginBase)
+                {
+                    if (y.Key is CorePluginBase)
+                        return 0; // both are CorePluginBase, are the same
+                    else
+                        return 1; // CorePluginBase takes priority
+                }
+                else
+                {
+                    if (y.Key is CorePluginBase)
+                        return -1; // CorePluginBase takes priority
+                    else
+                        // when we reach here, x and y are neither dAmnCore, nor CorePluginBase, so we don't care
+                        return 0;
+                }
+            }
         }
         #endregion
     }
