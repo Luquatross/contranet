@@ -366,8 +366,19 @@ namespace DeviantArt.Chat.Library
                 case dAmnPacketType.MemberList:
                     eventResponse = packet.args["p"];
                     from = packet.args["by"];
-                    break;
+                    break;                               
                 case dAmnPacketType.Chat:
+                case dAmnPacketType.MemberJoin:
+                case dAmnPacketType.MemberPart:
+                case dAmnPacketType.MemberKick:
+                case dAmnPacketType.PrivChange:
+                case dAmnPacketType.AdminCreate:
+                case dAmnPacketType.AdminError:
+                case dAmnPacketType.AdminMove:
+                case dAmnPacketType.AdminRemove:
+                case dAmnPacketType.AdminRename:
+                case dAmnPacketType.AdminShow:
+                case dAmnPacketType.AdminUpdate:
                     // get sub packet
                     dAmnPacket subPacket = dAmnPacket.Parse(packet.body);
                     switch (subPacket.cmd)
