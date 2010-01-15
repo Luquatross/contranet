@@ -595,24 +595,24 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 if (y.Key is dAmnCore)
                     return 0; // both are dAmnCore plugins...should be impossible, but hey
                 else
-                    return 1; // dAmnCore takes priority
+                    return -1; // dAmnCore takes priority
             }
             else 
             {
                 if (y.Key is dAmnCore)
-                    return -1; // dAmnCore takes priority
+                    return 1; // dAmnCore takes priority
 
                 if (x.Key is CorePluginBase)
                 {
                     if (y.Key is CorePluginBase)
                         return 0; // both are CorePluginBase, are the same
                     else
-                        return 1; // CorePluginBase takes priority
+                        return -1; // CorePluginBase takes priority
                 }
                 else
                 {
                     if (y.Key is CorePluginBase)
-                        return -1; // CorePluginBase takes priority
+                        return 1; // CorePluginBase takes priority
                     else
                         // when we reach here, x and y are neither dAmnCore, nor CorePluginBase, so we don't care
                         return 0;
