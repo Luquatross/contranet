@@ -11,7 +11,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
     /// Base class for notify classes. Takes care of detecting if a message was sent 
     /// to a user and loading and saving settings.
     /// </summary>
-    public abstract class NotifyBase : Plugin
+    public abstract class ImNotifyBase : Plugin
     {
         #region Protected Variables
         protected const string _FolderName = "Messaging";

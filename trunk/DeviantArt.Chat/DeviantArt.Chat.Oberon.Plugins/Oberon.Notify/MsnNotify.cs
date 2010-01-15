@@ -6,7 +6,7 @@ using MSNPSharp;
 
 namespace DeviantArt.Chat.Oberon.Plugins
 {
-    public class MsnNotify : NotifyBase
+    public class MsnNotify : ImNotifyBase
     {
         #region Private Variables
         private string _PluginName = "MSN Notify";
