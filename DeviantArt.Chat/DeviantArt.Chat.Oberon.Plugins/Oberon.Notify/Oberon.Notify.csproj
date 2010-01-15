@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FlashNotify.cs" />
     <Compile Include="MsnNotify.cs" />
     <Compile Include="ImNotifyBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
