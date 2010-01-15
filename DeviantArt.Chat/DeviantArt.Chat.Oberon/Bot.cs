@@ -10,6 +10,7 @@ using System.Xml;
 using System.Xml.Linq;
 using DeviantArt.Chat.Library;
 using System.Text;
+using System.Diagnostics;
 
 namespace DeviantArt.Chat.Oberon
 {
@@ -120,7 +121,8 @@ namespace DeviantArt.Chat.Oberon
         public Console Console { get; private set; }
         public string SystemString { get; private set; }
         public string Session { get; private set; }
-        public bool IsDebug { get; private set; }        
+        public bool IsDebug { get; private set; }
+        public IntPtr ConsoleWindow { get; private set; }
 
         /// <summary>
         /// Strings to display when shutting down.
@@ -249,6 +251,9 @@ namespace DeviantArt.Chat.Oberon
 
             // Get a new console interface
             this.Console = new Console();
+
+            // set the reference to the console window itself
+            this.ConsoleWindow = Process.GetCurrentProcess().MainWindowHandle;
 
             // Some introduction messages! We've already done quite a bit but only introduce things here...
             this.Console.Notice("Hey thar!");
