@@ -68,7 +68,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
         }
         #endregion
 
-        #region Handlers
+        #region Event & Command Handlers
         private void ChatReceived(string chatroom, dAmnServerPacket packet)
         {
             // if flash isn't on, don't bother processing
@@ -81,7 +81,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             string message = commandPacket.Message;
             string username = Bot.Username;
 
-            // make sure we didn't send a message! otherwise we would be replying to ourselves
+            // make sure we didn't send a message!
             if (from.ToLower() == username.ToLower())
                 return;
 
