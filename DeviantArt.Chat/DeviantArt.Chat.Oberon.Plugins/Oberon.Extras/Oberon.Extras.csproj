@@ -55,6 +55,7 @@
   <ItemGroup>
     <Compile Include="Dictionary.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Regexes.cs" />
     <Compile Include="Web References\DictService\Reference.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
