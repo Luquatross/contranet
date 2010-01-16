@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 namespace DeviantArt.Chat.Oberon.Plugins
 {
     /// <summary>
-    /// PLugin that lets a user test a regex pattern.
+    /// Plugin that lets a user test a regex pattern.
     /// </summary>
     public class Regexes : Plugin
     {
@@ -28,6 +28,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
         }
         #endregion
 
+        #region Plugin Methods
         public override void Load()
         {
             // register our comment with bot
@@ -36,7 +37,9 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 "regex [pattern] [source]<br />" +
                 "<b>Example:</b> !regex /^def/ abcdef"), (int)PrivClassDefaults.Guests);
         }
+        #endregion
 
+        #region Command Handlers
         private void Regex(string ns, string from, string message)
         {
             string[] args = GetArgs(message);
@@ -65,5 +68,6 @@ namespace DeviantArt.Chat.Oberon.Plugins
             say.Append("</ul></sub>");
             Say(ns, say.ToString());
         }
+        #endregion
     }
 }
