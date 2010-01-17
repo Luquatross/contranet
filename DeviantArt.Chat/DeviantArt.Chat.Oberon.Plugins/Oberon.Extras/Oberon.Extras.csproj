@@ -57,6 +57,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BannedWords.cs" />
     <Compile Include="Calc.cs" />
     <Compile Include="Dictionary.cs" />
     <Compile Include="Games.cs" />
