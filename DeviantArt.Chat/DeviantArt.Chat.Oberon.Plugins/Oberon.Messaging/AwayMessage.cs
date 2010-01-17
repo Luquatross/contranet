@@ -39,7 +39,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             // register commands
             RegisterCommand("setaway", new BotCommandEvent(SetAway), new CommandHelp(
                 "Allows users to set themselves away.",
-                "setaway [away message<br />" +
+                "setaway [away message]<br />" +
                 "<b>Example:</b> !setaway Gone for a bit"), (int)PrivClassDefaults.Guests);
 
             RegisterCommand("setback", new BotCommandEvent(SetBack), new CommandHelp(
