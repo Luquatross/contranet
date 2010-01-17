@@ -35,7 +35,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             RegisterCommand("regex", new BotCommandEvent(Regex), new CommandHelp(
                 "Tests regular expressions.",
                 "regex [pattern] [source]<br />" +
-                "<b>Example:</b> !regex /^def/ abcdef"), (int)PrivClassDefaults.Guests);
+                "<b>Example:</b> !regex ^abc abcdef"), (int)PrivClassDefaults.Guests);
         }
         #endregion
 

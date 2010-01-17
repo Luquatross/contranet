@@ -104,7 +104,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
         private void Define(string ns, string from, string message)
         {
             string[] args = GetArgs(message);
-            if (args.Length != 1)
+            if (args.Length == 0)
             {
                 ShowHelp(ns, from, "define");
                 return;

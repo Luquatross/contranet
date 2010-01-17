@@ -16,6 +16,9 @@
         
         <!-- Add supporting assemblies -->
         <include name="**/info.lundin.Math.dll" />
+        
+        <!-- Get any supporting configs -->
+        <include name="**/*.config" />
       </fileset>
     </copy>
   </target>
