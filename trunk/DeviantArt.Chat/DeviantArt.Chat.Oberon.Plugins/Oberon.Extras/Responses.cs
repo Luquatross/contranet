@@ -165,7 +165,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
             string subCommand = GetArg(args, 0);
             string var1 = GetArg(args, 1);
-            string response = ParseArg(message, 2);
+            string var2 = GetArg(args, 2);            
             List<string> disabledRooms;
 
             switch (subCommand)
@@ -176,6 +176,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                         Respond(ns, from, var1 + " is already stored as an auto-response.");
                         return;
                     }
+                    string response = ParseArg(message, 2);
                     if (string.IsNullOrEmpty(response))
                     {
                         Respond(ns, from, "You need to give a response to be used!");
@@ -245,7 +246,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                                 Respond(ns, from, "Responses are not disabled in any rooms.");
                                 return;
                             }
-                            if (string.IsNullOrEmpty(response) || response != "yes")
+                            if (string.IsNullOrEmpty(var2) || var2 != "yes")
                             {
                                 Respond(ns, from, "This will re-enable responses in all rooms. Type \"<code>response clear rooms yes</code>\" to confirm.");
                                 return;
@@ -259,18 +260,22 @@ namespace DeviantArt.Chat.Oberon.Plugins
                                 Respond(ns, from, "There are no responses stored.");
                                 return;
                             }
-                            if (string.IsNullOrEmpty(response) || response != "yes")
+                            if (string.IsNullOrEmpty(var2) || var2 != "yes")
                             {
                                 Respond(ns, from, "This will delete all stored responses. Type \"<code>response clear responses yes</code>\" to confirm.");
                                 return;
                             }
                             StoredResponses.Clear();
+                            Respond(ns, from, "Responses have been deleted.");
                             return;
                         default:
                             ShowHelp(ns, from, "response");
                             return;
                     }
                     break;
+                default:
+                    ShowHelp(ns, from, "response");
+                    return;
             }
         }
         #endregion

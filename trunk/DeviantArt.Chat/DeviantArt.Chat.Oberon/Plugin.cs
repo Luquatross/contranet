@@ -223,7 +223,7 @@ namespace DeviantArt.Chat.Oberon
             int foundIndex = 0;
             for (int i = 0; i < index; i++)
             {
-                foundIndex = data.IndexOf(' ');
+                foundIndex = data.IndexOf(' ') + 1;
                 data = data.Substring(foundIndex);
             }
             return data.Trim();

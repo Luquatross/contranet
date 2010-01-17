@@ -161,6 +161,9 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 return;
             }
 
+            // strip question mark if it's there
+            question = question.TrimEnd('?');
+
             // pick random response and send it 
             int randomIndex = Randomizer.Next(EightBallResponses.Count);
             Respond(ns, from, string.Format(

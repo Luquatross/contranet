@@ -56,11 +56,11 @@ namespace DeviantArt.Chat.Oberon.Plugins
             try
             {
                 double result = Parser.Parse(message, new System.Collections.Hashtable());
-                Say(ns, "<b>Calculation Result:</b> " + result.ToString());
+                Respond(ns, from, "<b>Calculation Result:</b><code> " + result.ToString() + "</code>");
             }
             catch (Exception ex)
             {
-                Say(ns, "<b>Calc Error:</b> " + ex.Message);
+                Respond(ns, from, "<b>Calc Error:</b> " + ex.Message);
             }
         }
         #endregion
