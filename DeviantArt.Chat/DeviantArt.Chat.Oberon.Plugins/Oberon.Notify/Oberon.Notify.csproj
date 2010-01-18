@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{49146D14-8794-4348-B6F4-0479A37D82A1}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -31,10 +31,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MSNPSharp, Version=3.0.0.1417, Culture=neutral, PublicKeyToken=adaaf016a67b1373, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\MSNPSharp.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -62,6 +58,10 @@
     <ProjectReference Include="..\..\DeviantArt.Chat.Oberon\DeviantArt.Chat.Oberon.csproj">
       <Project>{61781D7F-3E2F-4B3B-A5F0-7106F3921A3E}</Project>
       <Name>DeviantArt.Chat.Oberon</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\HelperProjects\MsnpSharp\MSNPSharp\MSNPSharp.csproj">
+      <Project>{97CB2DC7-2FE8-4AF5-84D0-6B9872A5E960}</Project>
+      <Name>MSNPSharp</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

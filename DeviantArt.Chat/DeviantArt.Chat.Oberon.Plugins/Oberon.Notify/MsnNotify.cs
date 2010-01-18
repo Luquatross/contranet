@@ -40,7 +40,6 @@ namespace DeviantArt.Chat.Oberon.Plugins
             Messenger = new Messenger();
             Messenger.Nameserver.BotMode = true;
             Messenger.Nameserver.AutoSynchronize = false;
-            Messenger.Owner.CID = (long)1;
             Messenger.Nameserver.SignedIn += new EventHandler<EventArgs>(SignedIn);
 
             // set the credentials
