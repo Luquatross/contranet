@@ -32,6 +32,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Oberon.Notify", "DeviantArt
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Oberon.Search", "DeviantArt.Chat.Oberon.Plugins\Oberon.Search\Oberon.Search.csproj", "{1227AB30-7CD9-424E-A409-12F8B2E553C4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSNPSharp", "HelperProjects\MsnpSharp\MSNPSharp\MSNPSharp.csproj", "{97CB2DC7-2FE8-4AF5-84D0-6B9872A5E960}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -86,6 +88,10 @@ Global
 		{1227AB30-7CD9-424E-A409-12F8B2E553C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1227AB30-7CD9-424E-A409-12F8B2E553C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1227AB30-7CD9-424E-A409-12F8B2E553C4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97CB2DC7-2FE8-4AF5-84D0-6B9872A5E960}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97CB2DC7-2FE8-4AF5-84D0-6B9872A5E960}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97CB2DC7-2FE8-4AF5-84D0-6B9872A5E960}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97CB2DC7-2FE8-4AF5-84D0-6B9872A5E960}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -100,6 +106,7 @@ Global
 		{1227AB30-7CD9-424E-A409-12F8B2E553C4} = {4678E941-DDB9-46E4-89A4-D527CDCF79C0}
 		{9C87D82C-0E27-4995-A2CB-72BCB84EF2E2} = {9D9AEE3A-27E0-464B-8FDF-C9D193AD3114}
 		{1329B2E8-382C-4FDC-99CB-4F1E34BDE995} = {9D9AEE3A-27E0-464B-8FDF-C9D193AD3114}
+		{97CB2DC7-2FE8-4AF5-84D0-6B9872A5E960} = {9D9AEE3A-27E0-464B-8FDF-C9D193AD3114}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		VisualSVNWorkingCopyRoot = 
