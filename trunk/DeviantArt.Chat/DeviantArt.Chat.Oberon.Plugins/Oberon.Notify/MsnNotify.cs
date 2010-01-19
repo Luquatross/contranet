@@ -17,7 +17,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
         private Messenger Messenger;
 
         /// <summary>
-        /// Local cache of conversations, we don't have to create one each time. Key is dA username, 
+        /// Local cache of conversations, so we don't have to create one each time. Key is dA username, 
         /// value is Conversation.
         /// </summary>
         private Dictionary<string, Conversation> Conversations = new Dictionary<string, Conversation>();
@@ -41,9 +41,6 @@ namespace DeviantArt.Chat.Oberon.Plugins
             Messenger.Nameserver.BotMode = true;
             Messenger.Nameserver.AutoSynchronize = false;
             Messenger.Nameserver.SignedIn += new EventHandler<EventArgs>(SignedIn);
-
-            // set the credentials
-            SetCredentials();
         }
         #endregion
 
@@ -51,7 +48,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
         /// <summary>
         /// Sets the credentials for the Messenger object.
         /// </summary>
-        private void SetCredentials()
+        private void SetMsnCredentials()
         {
             if (!IsConfigured)
                 return;
@@ -70,7 +67,10 @@ namespace DeviantArt.Chat.Oberon.Plugins
         private void Connect()
         {
             if (IsConfigured && !Messenger.Connected)
+            {
+                SetMsnCredentials();
                 Messenger.Connect();
+            }
         }
 
         /// <summary>
@@ -163,6 +163,28 @@ namespace DeviantArt.Chat.Oberon.Plugins
         #endregion
 
         #region Plugin Methods
+        public override void Load()
+        {
+            // call base load method
+            base.Load();            
+            
+            // register commands
+            RegisterCommand("msnnotify", new BotCommandEvent(MessengerNotify), new CommandHelp(
+                "Allows a user to be notified via MSN when they are tabbed in a chatroom.",
+                "msnnotify add [msn username] - sets that username to be notified when you are tabbed<br />" +
+                "msnnotify off - turn off notifications for yourself<br />" +
+                "msnnotify mystatus - shows whether your notifications are on or off"), 
+                (int)PrivClassDefaults.Members);
+            
+            RegisterCommand("msnadmin", new BotCommandEvent(MessengerAdmin), new CommandHelp(
+                "Manage msnnotify configuration.",
+                "msnadmin set [username] [password] - configures username and password bot will use to sign in<br />" +
+                "msnadmin connect - connect to msn network<br />" +
+                "msnadmin disconnect - disconnects from msn network<br />" +
+                "msnadmin status - show connection status for plugin"),
+                (int)PrivClassDefaults.Operators);
+        }
+
         public override void Activate()
         {
             Connect();
@@ -172,24 +194,10 @@ namespace DeviantArt.Chat.Oberon.Plugins
         {
             Disconnect();
         }
-
-        public override void Load()
-        {
-            // call base load method
-            base.Load();            
-            
-            // register commands
-            RegisterCommand("msnnotify", new BotCommandEvent(Notify), new CommandHelp(
-                "Allows a user to be notified via MSN when they are tabbed in a chatroom.",
-                "msnnotify add [msn username] - sets that username to be notified when you are tabbed<br />" +
-                "msnnotify off - turn off notifications for yourself<br />" +
-                "msnnotify mystatus - shows whether your notifications are on or off<br />" +
-                "msnnotify status - show connection status for plugin"), (int)PrivClassDefaults.Members);            
-        }
         #endregion
 
         #region Command Handlers
-        private void Notify(string ns, string from, string message)
+        private void MessengerNotify(string ns, string from, string message)
         {
             string[] args = GetArgs(message);
 
@@ -219,20 +227,64 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 else
                     Respond(ns, from, "your msn notifcations are turned off.");
             }
-            else if (args.Length == 1 && args[0] == "status")
-            {
-                if (!IsConfigured)
-                    Say(ns, "** msnnotify has not yet been configured *");
-                else if (Messenger.Nameserver.IsSignedIn)
-                    Say(ns, "** msnnotify is signed in and connected *");
-                else if (Messenger.Connected)
-                    Say(ns, "** msnnotify is not signed in, but is connected *");
-                else
-                    Say(ns, "** msnnotify is not signed in or connected. *");
-            }
             else
             {
                 ShowHelp(ns, from, "msnnotify");
+            }
+        }
+
+        private void MessengerAdmin(string ns, string from, string message)
+        {
+            string[] args = GetArgs(message);
+            string subCommand = GetArg(args, 0);
+
+            switch (subCommand)
+            {
+                case "set":
+                    string username = GetArg(args, 1);
+                    string password = GetArg(args, 2);
+
+                    if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+                    {
+                        Respond(ns, from, "You must provide a username and password.");
+                        return;
+                    }
+
+                    Username = username;
+                    Password = password;
+                    Respond(ns, from, "MSN Notify has been configured successfully.");
+                    break;
+                case "connect":
+                    if (Messenger.Connected)
+                    {
+                        Respond(ns, from, "MSN Notify is already connected.");
+                        return;
+                    }
+                    Connect();
+                    Respond(ns, from, "Connection has started. Check the status in a second to see if it was successful.");
+                    break;
+                case "disconnect":
+                    if (!Messenger.Connected)
+                    {
+                        Respond(ns, from, "MSN Notify is already disconnected.");
+                        return;
+                    }
+                    Disconnect();
+                    Respond(ns, from, "MSN Notify has disconnected.");
+                    break;
+                case "status":
+                    if (!IsConfigured)
+                        Say(ns, "** msnnotify has not yet been configured *");
+                    else if (Messenger.Nameserver.IsSignedIn)
+                        Say(ns, "** msnnotify is signed in and connected *");
+                    else if (Messenger.Connected)
+                        Say(ns, "** msnnotify is not signed in, but is connected *");
+                    else
+                        Say(ns, "** msnnotify is not signed in or connected. *");
+                    break;
+                default:
+                    ShowHelp(ns, from, "msnadmin");
+                    break;
             }
         }
         #endregion                    
