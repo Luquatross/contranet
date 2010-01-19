@@ -15,8 +15,6 @@ namespace DeviantArt.Chat.Oberon.Plugins
     {
         #region Protected Variables
         protected const string _FolderName = "Messaging";
-        protected const string _Username = "deviant@thehomeofjon.net";
-        protected const string _Password = "batman";
         #endregion
 
         #region Protected Properties
@@ -25,13 +23,8 @@ namespace DeviantArt.Chat.Oberon.Plugins
         /// </summary>
         protected string Username
         {
-            get
-            {
-                if (!Settings.ContainsKey("Username"))
-                    return _Username;
-                else
-                    return (string)Settings["Username"];
-            }
+            get { return (string)Settings["Username"]; }
+            set { Settings["Username"] = value; }
         }
 
         /// <summary>
@@ -39,13 +32,8 @@ namespace DeviantArt.Chat.Oberon.Plugins
         /// </summary>
         protected string Password
         {
-            get
-            {
-                if (!Settings.ContainsKey("Password"))
-                    return _Password;
-                else
-                    return (string)Settings["Password"];
-            }
+            get{ return (string)Settings["Password"]; }
+            set { Settings["Password"] = value; }
         }
 
         /// <summary>
@@ -62,7 +50,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
         /// <summary>
         /// List of people who want to be notified of messages.
-        /// The keuyis their dA username and the value is their
+        /// The keyis their dA username and the value is their
         /// IM username.
         /// </summary>
         protected Dictionary<string, string> NotifyList
@@ -108,7 +96,8 @@ namespace DeviantArt.Chat.Oberon.Plugins
         /// <param name="imUsername">IM Network username.</param>
         protected void AddNotification(string username, string imUsername)
         {
-            NotifyList.Add(username, imUsername);
+            if (!NotifyList.ContainsKey(username))
+                NotifyList.Add(username, imUsername);
         }
 
         /// <summary>
@@ -117,7 +106,8 @@ namespace DeviantArt.Chat.Oberon.Plugins
         /// <param name="username">DeviantArt username to remove.</param>
         protected void RemoveNotification(string username)
         {
-            NotifyList.Remove(username);
+            if (NotifyList.ContainsKey(username))
+                NotifyList.Remove(username);
         }
 
         /// <summary>
