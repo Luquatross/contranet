@@ -39,6 +39,23 @@ namespace DeviantArt.Chat.Oberon.Plugins
         }
 
         /// <summary>
+        /// Chuck Norris responses.
+        /// </summary>
+        private List<string> ChuckNorrisResponses
+        {
+            get
+            {
+                if (!Settings.ContainsKey("ChuckNorrisResponses"))
+                    Settings["ChuckNorrisResponses"] = GetChuckNorrisDefaults();
+                return (List<string>)Settings["ChuckNorrisResponses"];
+            }
+            set
+            {
+                Settings["ChuckNorrisResponses"] = value;
+            }
+        }
+
+        /// <summary>
         /// Fortune cookie responses.
         /// </summary>
         private List<string> FortuneCookieResponses
@@ -87,6 +104,15 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
         #region Helper Methods
         /// <summary>
+        /// Get the default strings for chuck norris responses.
+        /// </summary>
+        /// <returns></returns>
+        private List<string> GetChuckNorrisDefaults()
+        {
+            return ReadList("ChuckNorrisResponses");
+        }
+
+        /// <summary>
         /// Get default strings for 8-ball responses.
         /// </summary>        
         private List<string> GetEightBallDefaults()
@@ -127,8 +153,11 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 "Ask the 8ball a question",
                 "8ball [my question]"), (int)PrivClassDefaults.Guests);
             RegisterCommand("fortune", new BotCommandEvent(FortuneCookie), new CommandHelp(
-                "Get a fortune cookie!",
+                "Get a fortune cookie!",                
                 "fortune"), (int)PrivClassDefaults.Guests);
+            RegisterCommand("chucknorris", new BotCommandEvent(ChuckNorris), new CommandHelp(
+                "Gets a chuck norris fact.",
+                "chucknorris"), (int)PrivClassDefaults.Guests);
             RegisterCommand("rr", new BotCommandEvent(RussianRoulette), new CommandHelp(
                 "Play Russian Roulette, if you dare!",
                 "rr"), (int)PrivClassDefaults.Guests);
@@ -178,6 +207,13 @@ namespace DeviantArt.Chat.Oberon.Plugins
             int randomIndex = Randomizer.Next(FortuneCookieResponses.Count);
             Respond(ns, from, string.Format("Confucious say: <b>{0}</b>",
                 FortuneCookieResponses[randomIndex]));
+        }
+
+        private void ChuckNorris(string ns, string from, string message)
+        {
+            // pick random and sent it
+            int randomIndex = Randomizer.Next(ChuckNorrisResponses.Count);
+            Say(ns, "<b>" + ChuckNorrisResponses[randomIndex] + "</b>");
         }
 
         private void RussianRoulette(string ns, string from, string message)
