@@ -139,18 +139,19 @@ namespace DeviantArt.Chat.Oberon
         /// <param name="message">Message to log.</param>
         public void Log(string message)
         {
-            Notice("[" + DateTime.Now.ToString("T") + "] " + message);
+            Notice("[" + DateTime.Now.ToString("T") + "] " + FormatLogMessage(message));
         }
 
         /// <summary>
-        /// Logs a notice to the chatroom log file. No timestamp is included.
+        /// Logs a notice to the chatroom log file. No timestamp is included and 
+        /// mesages is not formatted to remove tags.
         /// </summary>
         /// <param name="message">Message to log to chatroom log file.</param>
         public void Notice(string message)
         {
             if (LogFile != null && LogFile.BaseStream.CanWrite)
             {
-                LogFile.WriteLine(FormatLogMessage(message));
+                LogFile.WriteLine(message);
                 LogFile.Flush();
             }
         }
