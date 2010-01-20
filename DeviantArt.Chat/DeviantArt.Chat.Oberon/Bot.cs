@@ -740,22 +740,25 @@ namespace DeviantArt.Chat.Oberon
 
             int runningPlugins = 0;
             XmlNodeList statusSettings = root.SelectNodes("plugins/add");
-            foreach (XmlNode statusSetting in statusSettings)
+            if (statusSettings.Count > 0)
             {
-                // get status
-                string pluginName = statusSetting.Attributes["key"].Value;
-                PluginStatus pluginStatus = (statusSetting.Attributes["value"].Value == "On" ? PluginStatus.On : PluginStatus.Off);
+                foreach (XmlNode statusSetting in statusSettings)
+                {
+                    // get status
+                    string pluginName = statusSetting.Attributes["key"].Value;
+                    PluginStatus pluginStatus = (statusSetting.Attributes["value"].Value == "On" ? PluginStatus.On : PluginStatus.Off);
 
-                // set status
-                SetPluginStatus(pluginName, pluginStatus);
+                    // set status
+                    SetPluginStatus(pluginName, pluginStatus);
 
-                // record if it's on
-                if (pluginStatus == PluginStatus.On)
-                    runningPlugins++;
+                    // record if it's on
+                    if (pluginStatus == PluginStatus.On)
+                        runningPlugins++;
+                }
+
+                // display how many plugins are activated
+                Console.Notice(string.Format("Plugin statuses loaded. {0} plugins are activated.", runningPlugins));
             }
-
-            // display how many plugins are activated
-            Console.Notice(string.Format("Plugin statuses loaded. {0} plugins are activated.", runningPlugins));
         }
 
         /// <summary>
