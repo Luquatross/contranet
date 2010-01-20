@@ -502,6 +502,9 @@ namespace DeviantArt.Chat.Oberon
             // add access level
             Access.SetCommandLevel(commandName, accessLevel);
 
+            // output debug data
+            Console.Debug(string.Format("Added command listener. Command = '{0}', Plugin = '{1}', AccessLevel = '{2}'", commandName, plugin.ToString(), accessLevel));
+
             // register plugin so we have a reference to it
             RegisterPlugin(plugin);
         }
@@ -515,8 +518,11 @@ namespace DeviantArt.Chat.Oberon
         /// <param name="message">Contents of the command.</param>        
         public void TriggerCommand(string commandName, string ns, string from, string message)
         {
+            Console.Debug(string.Format("command '{0}' is requesting to be triggered.", commandName));
             if (commandMap.ContainsKey(commandName))
             {
+                Console.Debug(string.Format("command '{0}' was found in command map.", commandName));
+
                 // get plugin info for the command
                 Plugin plugin = commandMap[commandName].Key;
                 BotCommandEvent method = commandMap[commandName].Value;
@@ -524,6 +530,9 @@ namespace DeviantArt.Chat.Oberon
                 // only trigger command if plugin is activated
                 if (plugin.Status == PluginStatus.On)
                 {
+                    // output debug info
+                    Console.Debug("executing command handler: " + method.ToString());
+
                     // anything could happen when calling a plugin method. if it blows up, 
                     // handle it gracefully and let the bot continue to run.
                     try
@@ -540,11 +549,13 @@ namespace DeviantArt.Chat.Oberon
                 else
                 {
                     dAmn.Say(ns, string.Format("{0}: the plugin for this command is deactivated.", from));
+                    Console.Debug(string.Format("The plugin for this command {0} is deactivated.", commandName));
                 }
             }
             else
             {
                 dAmn.Say(ns, string.Format("{0}: '{1}' is not a recognized command.", from, commandName));
+                Console.Debug(string.Format("'{0}' was not found in command map.", commandName));
             }
         }
 
@@ -695,7 +706,7 @@ namespace DeviantArt.Chat.Oberon
             }
             if (IsDebug)
                 Console.Notice(string.Format(
-                    "Plugin loading completed. {0} of {1} plugins are running.",
+                    "Plugin loading completed. {0} of {1} plugins were loaded.",
                     pluginsLoaded,
                     allPlugins.Length
                 ));
@@ -727,6 +738,7 @@ namespace DeviantArt.Chat.Oberon
             // get root element
             XmlNode root = configDoc.DocumentElement;
 
+            int runningPlugins = 0;
             XmlNodeList statusSettings = root.SelectNodes("plugins/add");
             foreach (XmlNode statusSetting in statusSettings)
             {
@@ -734,8 +746,16 @@ namespace DeviantArt.Chat.Oberon
                 string pluginName = statusSetting.Attributes["key"].Value;
                 PluginStatus pluginStatus = (statusSetting.Attributes["value"].Value == "On" ? PluginStatus.On : PluginStatus.Off);
 
+                // set status
                 SetPluginStatus(pluginName, pluginStatus);
+
+                // record if it's on
+                if (pluginStatus == PluginStatus.On)
+                    runningPlugins++;
             }
+
+            // display how many plugins are activated
+            Console.Notice(string.Format("Plugin statuses loaded. {0} plugins are activated.", runningPlugins));
         }
 
         /// <summary>
@@ -779,6 +799,9 @@ namespace DeviantArt.Chat.Oberon
                 // if we're setting it to the same value, don't bother
                 if (botPlugins[pluginName].Status == status)
                     return;
+
+                // output debug info
+                Console.Debug(string.Format("Plugin status for '{0}' changed to {1}", pluginName, status.ToString("G")));
 
                 // set status and trigger appropriate plugin method
                 botPlugins[pluginName].Status = status;
@@ -827,6 +850,7 @@ namespace DeviantArt.Chat.Oberon
                 // process packet if it exists
                 if (packet != null)
                 {
+                    Console.Debug("packet recevied: " + packet.ToString());
                     ProcessPacket(packet);
                 }
 
@@ -865,6 +889,9 @@ namespace DeviantArt.Chat.Oberon
                         string ns = null;
                         if (!string.IsNullOrEmpty(packet.param))
                             ns = dAmn.DeformatChat(packet.param);
+
+                        // output debug message
+                        Console.Debug("executing event handler: " + method.ToString());
 
                         // anything could happen when calling the plugin method. if it blows
                         // up handle it gracefully and let the bot continue to run.
@@ -918,6 +945,9 @@ namespace DeviantArt.Chat.Oberon
                     // servers to register that we've left.
                     dAmn.Disconnect();
                     Thread.Sleep(300);
+
+                    // output debug message
+                    Console.Debug("IsRestarting set to true. Restarting bot.");
                 }
 
                 // start up the bot
