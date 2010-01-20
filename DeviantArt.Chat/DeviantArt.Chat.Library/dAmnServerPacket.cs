@@ -62,14 +62,14 @@ namespace DeviantArt.Chat.Library
             { "HtmlMatch", new string[] {
                 "&b\t",  "&/b\t",    "&i\t",    "&/i\t", "&u\t",   "&/u\t", "&s\t",   "&/s\t",    "&sup\t",    "&/sup\t", "&sub\t", "&/sub\t", "&code\t", "&/code\t",
 			    "&br\t", "&ul\t",    "&/ul\t",  "&ol\t", "&/ol\t", "&li\t", "&/li\t", "&bcode\t", "&/bcode\t",
-			    "&/a\t", "&/acro\t", "&/abbr\t", "&p\t", "&/p\t" }
+			    "&/a\t", "&/acro\t", "&/abbr\t", "&p\t", "&/p\t", "&lt;", "&gt;" }
             },
 
             // Html strings that will replace the correspnding regex matches
             { "HtmlReplace", new string[] {
                 "<b>",  "</b>",       "<i>",     "</i>", "<u>",   "</u>", "<s>",   "</s>",    "<sup>",    "</sup>", "<sub>", "</sub>", "<code>", "</code>",
 			    "\n",   "<ul>",       "</ul>",   "<ol>", "</ol>", "<li>", "</li>", "<bcode>", "</bcode>",
-			    "</a>", "</acronym>", "</abbr>", "<p>",  "</p>\n" }
+			    "</a>", "</acronym>", "</abbr>", "<p>",  "</p>\n", "<", ">" }
             },
 
             { "DevMatch", new string[] {

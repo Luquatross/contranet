@@ -128,6 +128,9 @@ namespace DeviantArt.Chat.Oberon
             // format links
             message = Regex.Replace(message, "<a href=\"(.*?)\">(.*?)</a>", "[$2]");
 
+            // get rid of bold
+            message = message.Replace("<b>", "").Replace("</b>", "");
+
             return message;
         }
         #endregion
