@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace DeviantArt.Chat.Oberon
 {
@@ -95,8 +96,13 @@ namespace DeviantArt.Chat.Oberon
         {
             try
             {
-                string logFile = string.Format("{0}_{1}.log", Name.TrimStart('#'), DateTime.Now.ToString("yyyy-MM-dd"));
+                string logFile = string.Format("{0}\\{0}_{1}.log", Name.TrimStart('#'), DateTime.Now.ToString("yyyy-MM-dd"));
                 string logFilePath = Path.Combine(Bot.Instance.CurrentDirectory, "Logs\\Chats\\" + logFile);
+
+                // make sure directory exists
+                if (!Directory.Exists(Path.GetDirectoryName(logFilePath)))
+                    Directory.CreateDirectory(Path.GetDirectoryName(logFilePath));
+
                 return File.AppendText(logFilePath);
             }
             catch (IOException ex)
@@ -107,6 +113,22 @@ namespace DeviantArt.Chat.Oberon
                 Bot.Instance.Console.Log("Error writing to chat room log file. " + ex.ToString());
                 return null;
             }
+        }
+
+        /// <summary>
+        /// Formats log message so it's suitable for reading in the log file.
+        /// </summary>
+        /// <param name="message">Message to format.</param>
+        /// <returns>Chat log suitable string.</returns>
+        private string FormatLogMessage(string message)
+        {
+            // get rid of abbr
+            message = Regex.Replace(message, "<abbr title=\"(.*?)\"></abbr>", "");
+
+            // format links
+            message = Regex.Replace(message, "<a href=\"(.*?)\">(.*?)</a>", "[$2]");
+
+            return message;
         }
         #endregion
 
@@ -128,7 +150,7 @@ namespace DeviantArt.Chat.Oberon
         {
             if (LogFile != null && LogFile.BaseStream.CanWrite)
             {
-                LogFile.WriteLine(message);
+                LogFile.WriteLine(FormatLogMessage(message));
                 LogFile.Flush();
             }
         }
