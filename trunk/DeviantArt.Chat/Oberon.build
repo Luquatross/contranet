@@ -20,7 +20,7 @@
     <property name="console.dir" value="${project::get-name()}.${bot.name}" />
     <property name="plugin.dir" value="${project::get-name()}.${bot.name}.Plugins" />
     <property name="build.dir" value="bin\${config}" />
-    <property name="out.dir" value="Executables" />
+    <property name="out.dir" value="Executables\${config}" />
     
     <!-- Assembly names -->
     <property name="library.dll" value="${library.dir}\${build.dir}\${project::get-name()}.Library.dll" />
