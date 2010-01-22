@@ -576,7 +576,14 @@ namespace DeviantArt.Chat.Oberon.Plugins
             string[] args = GetArgs(message);
             string room;
             string user;
+            string reason;
 
+            if (args.Length > 2)
+            {
+                room = args[0];
+                user = args[1];
+                reason = ParseArg(message, 2);
+            }
             if (args.Length == 2)
             {
                 room = args[0];
@@ -593,7 +600,12 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 return;
             }
 
-            dAmn.Kick(room, user);
+            // kick user
+            if (string.IsNullOrEmpty(reason))
+                dAmn.Kick(room, user);
+            else
+                dAmn.Kick(room, user, reason);
+
             if (room != ns)
                 Say(ns, string.Format("** :dev{0}: kicked from #{1} by {2} *", user, room, from));
         }
