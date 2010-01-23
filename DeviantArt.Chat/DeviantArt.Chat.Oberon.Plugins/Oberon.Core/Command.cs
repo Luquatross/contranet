@@ -576,7 +576,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             string[] args = GetArgs(message);
             string room;
             string user;
-            string reason;
+            string reason = null;
 
             if (args.Length > 2)
             {

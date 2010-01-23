@@ -107,7 +107,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             string trigger = Bot.Trigger;
 
             // check if this is a trig check or not
-            bool isTrigCheck = Regex.IsMatch(message.Trim(), Bot.Username + @":\s+trigcheck");
+            bool isTrigCheck = Regex.IsMatch(message.Trim(), Bot.Username + @":\s+trigcheck", RegexOptions.IgnoreCase);
 
             // process command
             if ((!string.IsNullOrEmpty(message) && message.StartsWith(trigger)) || isTrigCheck)
