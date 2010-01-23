@@ -572,29 +572,28 @@ namespace DeviantArt.Chat.Oberon.Plugins
         }
 
         private void Kick(string ns, string from, string message)
-        {
+        {            
             string[] args = GetArgs(message);
-            string room;
+            string room = ns;
             string user;
             string reason = null;
 
-            if (args.Length > 2)
+            // get the room to respond to
+            if (args.Length >= 1 && args[0].StartsWith("#"))
             {
                 room = args[0];
-                user = args[1];
-                reason = ParseArg(message, 2);
+                // remove the room name from the string and get new args
+                int index = message.IndexOf(room);
+                message = message.Substring(0, index) + message.Substring(index + room.Length + 1);
+                args = GetArgs(message);
             }
-            if (args.Length == 2)
-            {
-                room = args[0];
-                user = args[1];
-            }
-            else if (args.Length == 1)
-            {
-                room = ns;
-                user = args[0];
-            }
-            else
+
+            // get arguments
+            user = GetArg(args, 0);
+            reason = ParseArg(message, 1);
+
+            // show help if needed
+            if (string.IsNullOrEmpty(user))
             {
                 ShowHelp(ns, from, "kick");
                 return;
