@@ -594,11 +594,19 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
             // log kick
             string reason = string.IsNullOrEmpty(packet.body) ? string.Empty : " Reason: " + packet.body;
-            chat.Log(string.Format("Bot was kicked from {0}.{1}", chatroom, reason));
+            string message = string.Format("Bot was kicked from {0}.{1}", chatroom, reason);
+            chat.Log(message);
+            Bot.Console.Notice(message);
 
-            // if it's an autojoin channel, sign back in
+            // remove chatroom
+            Bot.UnregisterChatroom(chatroom);
+
+            // if it's an autojoin channel, try to sign back in
             if (Bot.AutoJoin.Contains(chatroom.Trim('#')))
+            {
                 dAmn.Join(chatroom);
+                Bot.Console.Notice("Bot joined " + chatroom);
+            }
         }
         #endregion
       
