@@ -46,6 +46,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             RegisterEvent(dAmnPacketType.Action, new BotServerPacketEvent(LogAction));
             RegisterEvent(dAmnPacketType.Join, new BotServerPacketEvent(Join));
             RegisterEvent(dAmnPacketType.Part, new BotServerPacketEvent(Part));
+            RegisterEvent(dAmnPacketType.Kicked, new BotServerPacketEvent(Kicked));
             RegisterEvent(dAmnPacketType.MemberJoin, new BotServerPacketEvent(ChatroomJoin));
             RegisterEvent(dAmnPacketType.MemberPart, new BotServerPacketEvent(ChatroomPart));
             RegisterEvent(dAmnPacketType.Title, new BotServerPacketEvent(ChatroomTitle));
@@ -58,7 +59,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             RegisterEvent(dAmnPacketType.AdminRename, new BotServerPacketEvent(AdminRename));
             RegisterEvent(dAmnPacketType.AdminMove, new BotServerPacketEvent(AdminMove));
             RegisterEvent(dAmnPacketType.AdminRemove, new BotServerPacketEvent(AdminRemove));            
-            RegisterEvent(dAmnPacketType.AdminError, new BotServerPacketEvent(AdminError));
+            RegisterEvent(dAmnPacketType.AdminError, new BotServerPacketEvent(AdminError));            
 
             Bot.EventListenerSorter = EventListenerSorter;
         }
@@ -577,6 +578,27 @@ namespace DeviantArt.Chat.Oberon.Plugins
             string command = subPacket.body;
             string error = subPacket.args["e"];
             chat.Log(string.Format("Admin error. The command '{0}' returned: {1}", command, error));
+        }
+
+        /// <summary>
+        /// Occurs when we are kicked from a chatroom.
+        /// </summary>
+        private void Kicked(string chatroom, dAmnServerPacket packet)
+        {
+            Chat chat = Bot.GetChatroom(chatroom);
+            if (chat == null)
+            {
+                Bot.Console.Log("Error: kick event for a chatroom which doesn't exist.");
+                return;
+            }
+
+            // log kick
+            string reason = string.IsNullOrEmpty(packet.body) ? string.Empty : " Reason: " + packet.body;
+            chat.Log(string.Format("Bot was kicked from {0}.{1}", chatroom, reason));
+
+            // if it's an autojoin channel, sign back in
+            if (Bot.AutoJoin.Contains(chatroom.Trim('#')))
+                dAmn.Join(chatroom);
         }
         #endregion
       
