@@ -213,7 +213,21 @@ namespace DeviantArt.Chat.Oberon.Plugins
         private void Join(string chatroom, dAmnServerPacket packet)
         {
             if (packet.args["e"] != "ok")
-                return;
+            {
+                Bot.UnregisterChatroom(chatroom);
+                Bot.Console.Notice(string.Format("Unable to join chatroom {0}. Reason: {1}", chatroom, packet.args["e"]));
+
+                if (Bot.ChatroomsOpen() == 0)
+                {
+                    Bot.Console.Warning("No longer joined to any rooms! Exiting...");
+                    Bot.Shutdown();
+                    return;
+                }
+                else
+                {
+                    return;
+                }
+            }
             Bot.Console.Notice(string.Format("*** Bot has joined {0} *", chatroom));
             if (Bot.GetChatroom(chatroom) == null)
                 Bot.RegisterChatroom(chatroom, new Chat(chatroom));                
