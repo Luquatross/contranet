@@ -185,7 +185,7 @@ commands details - list all commands and show modules</value>
     <value>Kicks a user from a chatroom.</value>
   </data>
   <data name="Kick.Usage" xml:space="preserve">
-    <value>kick (room) [user]
+    <value>kick (#room) [user] (reason)
 &lt;b&gt;Example:&lt;/b&gt; !kick botdom devartuser</value>
   </data>
   <data name="List.Summary" xml:space="preserve">

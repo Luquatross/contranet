@@ -242,7 +242,7 @@ namespace DeviantArt.Chat.Oberon.Plugins {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to kick (room) [user]
+        ///   Looks up a localized string similar to kick (#room) [user] (reason)
         ///&lt;b&gt;Example:&lt;/b&gt; !kick botdom devartuser.
         /// </summary>
         internal static string Kick_Usage {
