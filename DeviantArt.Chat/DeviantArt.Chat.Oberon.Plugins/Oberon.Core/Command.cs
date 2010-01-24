@@ -70,6 +70,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             RegisterCommand("restart", new BotCommandEvent(Restart), GetCommandHelp("Restart.Summary", "Restart.Usage"), (int)PrivClassDefaults.Owner);
             RegisterCommand("say", new BotCommandEvent(Say), GetCommandHelp("Say.Summary", "Say.Usage"), (int)PrivClassDefaults.Members);
             RegisterCommand("saveconfig", new BotCommandEvent(SaveConfig), GetCommandHelp("SaveConfig.Summary", "SaveConfig.Usage"), (int)PrivClassDefaults.Operators);
+            RegisterCommand("sudo", new BotCommandEvent(Sudo), GetCommandHelp("Sudo.Summary", "Sudo.Usage"), (int)PrivClassDefaults.Owner);
         }
         #endregion
 
@@ -561,12 +562,6 @@ namespace DeviantArt.Chat.Oberon.Plugins
             }
 
             string trigger = args[0];
-            if (trigger.Length > 1)
-            {
-                Say(ns, from + ": bot trigger can only be one character.");
-                return;
-            }
-
             Bot.ChangeTrigger(trigger);
             Say(ns, string.Format("** bot trigger changed to {0} by {1} *", trigger, from));
         }
@@ -756,6 +751,30 @@ namespace DeviantArt.Chat.Oberon.Plugins
         {
             Bot.SaveConfig();
             Say(ns, from, "** bot config file saved successfully *");
+        }
+
+        private void Sudo(string ns, string from, string message)
+        {
+            string[] args = GetArgs(message);
+            string targetUser = GetArg(args, 0);
+            string commandName = GetArg(args, 1);
+            string newMessage = ParseArg(message, 2); 
+
+
+            // make sure we have all our arguments
+            if (string.IsNullOrEmpty(targetUser))
+            {
+                Respond(ns, from, "You must provide a user to impersonate.");
+                return;
+            }
+            else if (string.IsNullOrEmpty(commandName))
+            {
+                Respond(ns, from, "You must provide a command to execute.");
+                return;
+            }
+
+            // send it to the bot
+            Bot.TriggerCommand(commandName, ns, targetUser, newMessage);
         }
         #endregion
     }

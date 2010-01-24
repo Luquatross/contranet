@@ -77,13 +77,7 @@ namespace DeviantArt.Chat.Oberon
         /// <returns><see cref="User"/></returns>
         public User this[string userName]
         {
-            get
-            {
-                if (Members.ContainsKey(userName))
-                    return Members[userName];
-                else
-                    return null;
-            }
+            get { return GetUser(userName); }
         }
         #endregion
 
@@ -136,6 +130,19 @@ namespace DeviantArt.Chat.Oberon
         #endregion
 
         #region Public Methods
+        /// <summary>
+        /// Gets a user from the user list.
+        /// </summary>
+        /// <param name="userName">Username to get.</param>
+        /// <returns><see cref="User"/></returns>
+        public User GetUser(string userName)
+        {
+            if (Members.ContainsKey(userName))
+                return Members[userName];
+            else
+                return null;
+        }
+
         /// <summary>
         /// Logs a message to the chatroom log file.
         /// </summary>

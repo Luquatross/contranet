@@ -421,6 +421,25 @@ namespace DeviantArt.Chat.Oberon.Plugins {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Allows a command to be executed as if it was sent from another user. &lt;b&gt;Use very carefully&lt;/b&gt;. This command could allow users access to commands they don&apos;t usually have access to..
+        /// </summary>
+        internal static string Sudo_Summary {
+            get {
+                return ResourceManager.GetString("Sudo.Summary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to sudo [user] [command]  - Execute [command] as if it was from [user].&lt;br /&gt;
+        ///&lt;b&gt;Example:&lt;/b&gt; sudo devartuser ping.
+        /// </summary>
+        internal static string Sudo_Usage {
+            get {
+                return ResourceManager.GetString("Sudo.Usage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Displays the current bot time..
         /// </summary>
         internal static string Time_Summary {

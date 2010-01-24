@@ -273,4 +273,11 @@ delprivclass [name]
   <data name="SaveConfig.Usage" xml:space="preserve">
     <value>saveconfig</value>
   </data>
+  <data name="Sudo.Summary" xml:space="preserve">
+    <value>Allows a command to be executed as if it was sent from another user. &lt;b&gt;Use very carefully&lt;/b&gt;. This command could allow users access to commands they don't usually have access to.</value>
+  </data>
+  <data name="Sudo.Usage" xml:space="preserve">
+    <value>sudo [user] [command]  - Execute [command] as if it was from [user].&lt;br /&gt;
+&lt;b&gt;Example:&lt;/b&gt; sudo devartuser ping</value>
+  </data>
 </root>
