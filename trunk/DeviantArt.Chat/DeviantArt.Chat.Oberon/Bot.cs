@@ -863,7 +863,7 @@ namespace DeviantArt.Chat.Oberon
             
             ListeningStoppedEvent.Set();
             Console.Notice("Bot has stopped listening.");
-        }        
+        }
 
         /// <summary>
         /// Processes a packet received from the server and delegates it out the associated listeners.
@@ -894,7 +894,7 @@ namespace DeviantArt.Chat.Oberon
                             ns = dAmn.DeformatChat(packet.param);
 
                         // output debug message
-                        Console.Debug("executing event handler: " + method.ToString());
+                        Console.Debug("executing event handler: " + method.Method.ToString());
 
                         // anything could happen when calling the plugin method. if it blows
                         // up handle it gracefully and let the bot continue to run.
