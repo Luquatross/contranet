@@ -165,8 +165,7 @@ namespace DeviantArt.Chat.Library
             
             // get each line
             string[] lines = header.Split('\n');
-            string pktId = lines[0];
-            System.Diagnostics.Debug.Print("Header has " + lines.Length + " line(s).");
+            string pktId = lines[0];            
             string[] tmp = pktId.Split(new char[]{ ':' }, 2);
             if (tmp[0].ToLower() == "recv chat")
             {
