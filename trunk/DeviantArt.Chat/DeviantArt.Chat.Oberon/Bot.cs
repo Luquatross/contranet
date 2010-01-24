@@ -1110,6 +1110,7 @@ namespace DeviantArt.Chat.Oberon
             if (Chats.ContainsKey(chatroomName))
             {
                 Chats[chatroomName].Notice(string.Format("** Bot has left the {0} *", chatroomName));
+                Chats[chatroomName].CloseLog();
                 Chats.Remove(chatroomName);
             }
         }
