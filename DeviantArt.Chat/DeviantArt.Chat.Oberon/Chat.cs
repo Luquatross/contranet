@@ -44,6 +44,11 @@ namespace DeviantArt.Chat.Oberon
         /// Log file writer.
         /// </summary>
         private StreamWriter LogFile;
+
+        /// <summary>
+        /// Date the current log file was initialized.
+        /// </summary>
+        private DateTime LogInitDate;
         #endregion
 
         #region Public Properties
@@ -65,7 +70,8 @@ namespace DeviantArt.Chat.Oberon
         {
             // init variables
             Name = chatroomName;
-            LogFile = GetLogFileWriter();
+            LogInitDate = DateTime.Now;
+            LogFile = GetLogFileWriter();            
         }
         #endregion
 
@@ -90,7 +96,7 @@ namespace DeviantArt.Chat.Oberon
         {
             try
             {
-                string logFile = string.Format("{0}\\{0}_{1}.log", Name.TrimStart('#'), DateTime.Now.ToString("yyyy-MM-dd"));
+                string logFile = string.Format("{0}\\{0}_{1}.log", Name.TrimStart('#'), LogInitDate.ToString("yyyy-MM-dd"));
                 string logFilePath = Path.Combine(Bot.Instance.CurrentDirectory, "Logs\\Chats\\" + logFile);
 
                 // make sure directory exists
@@ -127,6 +133,23 @@ namespace DeviantArt.Chat.Oberon
 
             return message;
         }
+
+        /// <summary>
+        /// Checks to make sure current log file is today's date. If it isn't,
+        /// creates a new log file to use.
+        /// </summary>
+        private void CheckLogFileDate()
+        {
+            // check time difference is less than a day
+            if ((DateTime.Now - LogInitDate).Days != 0)
+            {
+                LogInitDate = DateTime.Now;
+                // close the current log
+                CloseLog();
+                // open a new one
+                OpenLog();
+            }
+        }
         #endregion
 
         #region Public Methods
@@ -159,6 +182,8 @@ namespace DeviantArt.Chat.Oberon
         /// <param name="message">Message to log to chatroom log file.</param>
         public void Notice(string message)
         {
+            CheckLogFileDate();
+
             if (LogFile != null && LogFile.BaseStream.CanWrite)
             {
                 LogFile.WriteLine(message);
