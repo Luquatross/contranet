@@ -141,7 +141,7 @@ namespace DeviantArt.Chat.Oberon
         private void CheckLogFileDate()
         {
             // check time difference is less than a day
-            if ((DateTime.Now - LogInitDate).Days != 0)
+            if ((DateTime.Now.Date - LogInitDate.Date).Days != 0)
             {
                 LogInitDate = DateTime.Now;
                 // close the current log
