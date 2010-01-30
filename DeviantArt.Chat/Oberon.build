@@ -1,6 +1,14 @@
 <?xml version="1.0"?>
 <!-- targets to be executed, when omitted from command line default is run -->
 <project name="DeviantArt.Chat" default="BuildAll" xmlns="http://nant.sf.net/release/0.86-beta1/nant.xsd">
+  
+  <!-- Documentation build file -->
+  <nant>
+    <buildfiles>
+      <include name="Documentation\Documentation.build" />
+    </buildfiles>
+  </nant>
+  
   <!-- Initialize the build process -->
   <target name="init">
     <property name="nant.settings.currentframework" value="net-3.5" />
@@ -21,10 +29,11 @@
     <property name="plugin.dir" value="${project::get-name()}.${bot.name}.Plugins" />
     <property name="build.dir" value="bin\${config}" />
     <property name="out.dir" value="Executables\${config}" />
+    <property name="doc.dir" value="Documentation" />
     
     <!-- Assembly names -->
     <property name="library.dll" value="${library.dir}\${build.dir}\${project::get-name()}.Library.dll" />
-    <property name="console.exe" value="${console.dir}\${build.dir}\${bot.name}.exe" />
+    <property name="console.exe" value="${console.dir}\${build.dir}\${bot.name}.exe" />    
 
     <sysinfo />
 
@@ -103,11 +112,29 @@
       </buildfiles>
     </nant>
   </target>
+  
+  <!-- Create documentation files 
+  <target name="CreateDocs">
+    <foreach item="file" property="doc.file">
+      <in>
+        <items>
+          <include name="**/*.xml" />
+        </items>
+      </in>
+      <do>
+        <exec program="${sys.env.programfiles}\NDoc3\bin\NDoc3Console.exe" failonerror="true"  verbose="${verbose}">
+          <arg value=""
+        </exec>
+      </do>
+    </foreach>
+  </target>
+  -->
 
   <!--
       Below are the main targets to use when building this solution.
                 
-      BuildAll : builds both. And puts the resulting zip files in the output directory.
+      BuildAll : builds both. And puts the resulting zip files in the output directory. Also builds 
+      documentation files.
   -->
-  <target name="BuildAll" depends="Compile CreatePackage" description="This target compiles the application" />
+  <target name="BuildAll" depends="Compile CreatePackage Sandcastle.Doc" description="This target compiles the application" />
 </project>
