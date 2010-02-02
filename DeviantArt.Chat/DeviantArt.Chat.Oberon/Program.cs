@@ -62,6 +62,8 @@ namespace DeviantArt.Chat.Oberon
                 case CtrlTypes.CTRL_CLOSE_EVENT:
                 case CtrlTypes.CTRL_LOGOFF_EVENT:
                 case CtrlTypes.CTRL_SHUTDOWN_EVENT:
+                    bot.Console.Notice("Initiating shutdown.");
+
                     // send the shutdown command
                     bot.Shutdown();
 
