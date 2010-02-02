@@ -232,6 +232,11 @@ namespace DeviantArt.Chat.Oberon
         /// Threads created by plugins.
         /// </summary>
         private List<Thread> pluginThreads = new List<Thread>();
+
+        /// <summary>
+        /// The amount of time to wait for a plugin thread to terminate.
+        /// </summary>
+        private TimeSpan pluginThreadWaitTime = TimeSpan.FromMinutes(1.00);
         #endregion
 
         #region Constructor and Singleton Methods
@@ -607,7 +612,7 @@ namespace DeviantArt.Chat.Oberon
         public Dictionary<string, string> GetCommandsDetails()
         {
             Dictionary<string, string> commandDetails = new Dictionary<string, string>();
-            foreach (string key in commandMap.Keys.ToArray())
+            foreach (string key in commandMap.Keys.ToArray().OrderBy(k => k))
             {
                 if (commandMap[key].Key.Status == PluginStatus.On)
                     commandDetails.Add(key, commandMap[key].Key.PluginName);
@@ -1053,7 +1058,7 @@ namespace DeviantArt.Chat.Oberon
             Access.SaveAccessLevels();
 
             // call the close method on each of our plugins
-            Console.Notice("Shutting down plugins. May take up to a few minutes.");
+            Console.Notice("Shutting down plugins. Please wait...");
             foreach (Plugin plugin in botPlugins.Values.ToArray())
             {
                 try
@@ -1068,15 +1073,27 @@ namespace DeviantArt.Chat.Oberon
                         ex.ToString()));
                 }
             }
+            Console.Notice("All plugins have been shutdown.");
 
             // wait for any plugin threads to complete
             if (IsDebug)
-                Console.Notice("Shutting down plugin threads...");
+                Console.Notice("Stopping plugin threads...");
             foreach (Thread t in pluginThreads)
             {
                 if (t.IsAlive)
-                    t.Join();
+                {
+                    if (!t.Join(pluginThreadWaitTime))
+                    {
+                        Console.Log(string.Format("Plugin Thread '{0}' has not shut down within 1 min. Aborting execution.",
+                            t.Name));
+                        // abort thread and wait for it to terminate
+                        t.Abort();
+                        t.Join();
+                    }
+                }
             }
+            if (IsDebug && pluginThreads.Count > 0)
+                Console.Notice("All plugin threads have terminated.");
 
             // display parting message
             foreach (string str in ShutDownString)
