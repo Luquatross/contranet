@@ -11,6 +11,7 @@ namespace DeviantArt.Chat.Oberon
     /// </summary>
     public static class Utility
     {
+        #region Helper Methods
         /// <summary>
         /// SHA Encrypts a string.
         /// </summary>
@@ -156,6 +157,41 @@ namespace DeviantArt.Chat.Oberon
 
             return result;
         }
+        #endregion
+
+        #region Extension Methods
+        /// <summary>
+        /// Finds the value associated with key. If it doesn't exist returns the default value for the type.
+        /// </summary>
+        /// <typeparam name="K">Key type for the dictionary.</typeparam>
+        /// <typeparam name="V">Value type for the the dictionary.</typeparam>
+        /// <param name="dic">Dictionary object.</param>
+        /// <param name="key">Key to look for.</param>
+        /// <returns>Value if found, otherwise default value for the type.</returns>
+        public static V GetValueOrDefault<K, V>(this Dictionary<K, V> dic, K key)
+        {
+            return dic.GetValueOrDefault(key, default(V));
+        }
+
+        /// <summary>
+        /// Finds the value associated with key. If it doesn't exist returns the default value.
+        /// </summary>
+        /// <typeparam name="K">Key type for the dictionary.</typeparam>
+        /// <typeparam name="V">Value type for the the dictionary.</typeparam>
+        /// <param name="dic">Dictionary object.</param>
+        /// <param name="key">Key to look for.</param>
+        /// <param name="defaultVal">Default value to return if key is not found.</param>
+        /// <returns>Value if found, otherwise default value.</returns>
+        public static V GetValueOrDefault<K, V>(this Dictionary<K, V> dic, K key, V defaultVal)
+        {
+            V ret;
+            bool found = dic.TryGetValue(key, out ret);
+            if (found)
+                return ret;
+            else
+                return defaultVal;
+        }
+        #endregion
     }
 
     /// <summary>
