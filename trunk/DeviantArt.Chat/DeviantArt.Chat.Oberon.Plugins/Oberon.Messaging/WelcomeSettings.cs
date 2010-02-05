@@ -58,7 +58,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
         /// Gets Chat object from the running bot.
         /// </summary>
         /// <returns>Chat.</returns>
-        private Chat GetChat()
+        public Chat GetChat()
         {
             return Bot.Instance.GetChatroom(ChatroomName);
         }
@@ -96,7 +96,16 @@ namespace DeviantArt.Chat.Oberon.Plugins
         /// <param name="index">Index of message to remove.</param>
         public void RemoveAllMessage(int index)
         {
-            AllMessages.RemoveAt(index);
+            if (AllMessages.Count >= index)
+                AllMessages.RemoveAt(index);
+        }
+
+        /// <summary>
+        /// Removes all messages that apply to all users.
+        /// </summary>
+        public void ClearAllMessage()
+        {
+            AllMessages.Clear();
         }
 
         /// <summary>
@@ -177,6 +186,16 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 message = GetAllMessage();
 
             return message;
+        }
+
+        /// <summary>
+        /// Deletes all welcome message data.
+        /// </summary>
+        public void Clear()
+        {
+            AllMessages.Clear();
+            PrivClassMessages.Clear();
+            IndividualMessages.Clear();
         }
     }
 

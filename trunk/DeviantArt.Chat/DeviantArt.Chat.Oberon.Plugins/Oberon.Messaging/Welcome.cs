@@ -91,15 +91,25 @@ namespace DeviantArt.Chat.Oberon.Plugins
         #region Event & Command Handlers
         private void UserJoined(string chatroom, dAmnServerPacket packet)
         {
+            // get data from packet
             dAmnCommandPacket command = new dAmnCommandPacket(packet);
-            if (IsWelcomesEnabled(chatroom))
+
+            // retrieve welcome settings for room
+            WelcomeSettings welcomeSettings = WelcomeMessages.Get(chatroom);
+
+            if (welcomeSettings.Enabled)
             {
-                string welcomeMsg = WelcomeMessages.Get(chatroom, command.From);
+                // get our variables
+                string from = command.From;
+                string privClass = welcomeSettings.GetChat().GetUser(from).PrivClass;
+                string welcomeMsg = welcomeSettings.GetMessage(from, privClass);
+
+                // send welcome message if we have one
                 if (!string.IsNullOrEmpty(welcomeMsg))
                 {
                     welcomeMsg = welcomeMsg.Replace("{channel}", chatroom);
                     welcomeMsg = welcomeMsg.Replace("{ns}", chatroom);
-                    welcomeMsg = welcomeMsg.Replace("{from}", command.From);
+                    welcomeMsg = welcomeMsg.Replace("{from}", from);
                     Say(chatroom, welcomeMsg);
                 }
             }
@@ -107,12 +117,15 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
         private void IndvWelcomeMessage(string ns, string from, string message)
         {
-            if (!IsWelcomesEnabled(ns))
+            // retrieve welcome settings
+            WelcomeSettings welcomeSettings = WelcomeMessages.Get(ns);
+
+            if (!welcomeSettings.Enabled)
             {
                 Respond(ns, from, "Welcomes are not being used in " + ns + ".");
                 return;
             }
-            else if (!IsIndvWelcomeAllowed(ns))
+            else if (!welcomeSettings.AllowIndividualSettings)
             {
                 Respond(ns, from, "You don't have the ability to set a welcome message in " + ns + ".");
             }
@@ -121,14 +134,14 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
             if (args.Length == 1 && args[0] == "off")
             {
-                string awayMessage = WelcomeMessages.Get(ns, from);
+                string awayMessage = welcomeSettings.GetIndividualMessage(from);
                 if (string.IsNullOrEmpty(awayMessage))
                 {
                     say = "You didn't have a welcome message stored anyway.";
                 }
                 else
-                {
-                    WelcomeMessages.SetIndividual(ns, from, null);
+                {                    
+                    welcomeSettings.SetIndividualMessage(from, null);
                     say = "Welcome message deleted!";
                 }
             }
@@ -139,8 +152,8 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     say = "You need to give a welcome message to be set.";
                 }
                 else
-                {
-                    WelcomeMessages.SetIndividual(ns, from, message);
+                {                    
+                    welcomeSettings.SetIndividualMessage(from, message);
                     say = "Welcome sest! Your welcome message is as follows:<br />" + message;
                 }
             }
@@ -187,6 +200,26 @@ namespace DeviantArt.Chat.Oberon.Plugins
                         say.AppendFormat("Welcome message for {0} set to \"{1}\".", room, message);
                     }
                     break;
+                case "list":
+                    List<string> allUserList = welcomeSettings.GetAllMessageList();
+                    say.Append("<b><u>Welcomes for all users:</u></b>:<sub><br />");
+                    foreach (string welcomeMsg in allUserList)
+                        say.AppendFormat("{0}<br />", welcomeMsg);
+                    say.Append("</sub>");
+                    break;
+                case "remove":
+                    int index;
+                    if (int.TryParse(var1, out index))
+                    {
+                        welcomeSettings.RemoveAllMessage(index);
+                        say.AppendFormat("Welcome message at {0} removed successfully.", index);
+                    }
+                    else
+                    {
+                        welcomeSettings.ClearAllMessage();
+                        say.Append("All global welcome messages have been removed.");
+                    }
+                    break;
                 case "pc":
                     if (string.IsNullOrEmpty(var1))
                     {
@@ -208,13 +241,13 @@ namespace DeviantArt.Chat.Oberon.Plugins
                         }
                         // delete if need be
                         if (message.ToLower() == "off")
-                        {
-                            WelcomeMessages.Set(room, pc, null);
+                        {                            
+                            welcomeSettings.SetPrivClassMessage(pc, null);
                             say.AppendFormat("Welcome for {0} members has been deleted.", pc);
                         }
                         else
                         {
-                            WelcomeMessages.Set(room, pc, message);
+                            welcomeSettings.SetPrivClassMessage(pc, message);
                             say.AppendFormat("Welcome message set.");
                         }
                     }
@@ -227,21 +260,14 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     else
                     {
                         bool indvStatus = var1.ToLower() == "on" ? true : false;
-                        if (IndvWelcomeEnabled.ContainsKey(room))
-                            IndvWelcomeEnabled[room] = indvStatus;
-                        else
-                            IndvWelcomeEnabled.Add(room, indvStatus);
-                        WelcomeMessages.SetAllowIndividualSettings(room, indvStatus);
-                        say.AppendFormat("Welcomes set to '{0}' for individual.", var1);
+                        welcomeSettings.AllowIndividualSettings = indvStatus;                        
+                        say.AppendFormat("Welcomes set to '{0}' for individuals.", var1);
                     }
                     break;
                 case "on":
                 case "off":
-                    bool welcStatus = subCommand.ToLower() == "on" ? true : false;
-                    if (WelcomeEnabled.ContainsKey(room))
-                        WelcomeEnabled[room] = welcStatus;
-                    else
-                        WelcomeEnabled.Add(room, welcStatus);
+                    bool welcStatus = subCommand.ToLower() == "on" ? true : false;                    
+                    welcomeSettings.Enabled = welcStatus;
                     say.AppendFormat("Welcomes in {0} have been set to '{1}'.", room, welcStatus);
                     break;
                 case "clear":
@@ -251,20 +277,20 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     }
                     else
                     {
-                        WelcomeMessages.ClearChatroom(room);
+                        welcomeSettings.Clear();
                         say.AppendFormat("Welcome data for {0} has been deleted.", room);
                     }
                     break;
                 case "settings":
                     say.AppendFormat("<b><u>Welcome settings for {0}</u></b>:<br /><sub>");
-                    say.AppendFormat("Welcome messages are turned <b>{0}</b><br />", IsWelcomesEnabled(room) == true ? "on" : "off");
-                    say.AppendFormat("Welcome messages for individuals are turned <b>{0}</b><br />", IsIndvWelcomeAllowed(room) == true ? "on" : "off");
+                    say.AppendFormat("Welcome messages are turned <b>{0}</b><br />", welcomeSettings.Enabled == true ? "on" : "off");
+                    say.AppendFormat("Welcome messages for individuals are turned <b>{0}</b><br />", welcomeSettings.AllowIndividualSettings == true ? "on" : "off");
                     Chat foundChat = Bot.GetChatroom(room);
                     if (room != null)
                     {
                         foreach (string privClass in foundChat.PrivClasses.Keys)
                         {
-                            string privStatus = string.IsNullOrEmpty(WelcomeMessages.GetPrivClassSetting(room, privClass)) ? "off" : "on";
+                            string privStatus = string.IsNullOrEmpty(welcomeSettings.GetPrivClassMessage(privClass)) ? "off" : "on";
                             say.AppendFormat("Welcome messages for {0} members are turned <b>{0}</b><br />", privClass, privStatus);
                         }
                     }
