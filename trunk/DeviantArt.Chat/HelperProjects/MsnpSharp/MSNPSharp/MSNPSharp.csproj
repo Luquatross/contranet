@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{97CB2DC7-2FE8-4AF5-84D0-6B9872A5E960}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -212,10 +212,12 @@
       <DependentUpon>Reference.map</DependentUpon>
     </None>
     <None Include="Web References\MSNWS.MSNABSharingService\msnab_datatypes.xsd">
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
     </None>
     <None Include="Web References\MSNWS.MSNABSharingService\msnab_servicetypes.xsd">
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
     </None>
     <None Include="Web References\MSNWS.MSNABSharingService\msnab_sharingservice.wsdl" />
     <None Include="Web References\MSNWS.MSNABSharingService\Reference.map">
@@ -223,7 +225,8 @@
       <LastGenOutput>Reference.cs</LastGenOutput>
     </None>
     <None Include="Web References\MSNWS.MSNOIMStoreService\oim_servicetypes.xsd">
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
     </None>
     <None Include="Web References\MSNWS.MSNOIMStoreService\oim_ws.wsdl" />
     <None Include="Web References\MSNWS.MSNOIMStoreService\Reference.map">
@@ -234,10 +237,12 @@
       <DependentUpon>Reference.map</DependentUpon>
     </None>
     <None Include="Web References\MSNWS.MSNOIMStoreService\utility.xsd">
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
     </None>
     <None Include="Web References\MSNWS.MSNOIMStoreService\wsrm.xsd">
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
     </None>
     <None Include="Web References\MSNWS.MSNRSIService\DeleteMessagesResponseType.datasource">
       <DependentUpon>Reference.map</DependentUpon>
@@ -250,24 +255,30 @@
       <LastGenOutput>Reference.cs</LastGenOutput>
     </None>
     <None Include="Web References\MSNWS.MSNRSIService\rsi_datatypes.xsd">
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
     </None>
     <None Include="Web References\MSNWS.MSNRSIService\rsi_faulttypes.xsd">
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
     </None>
     <None Include="Web References\MSNWS.MSNRSIService\rsi_servicetypes.xsd">
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
     </None>
     <None Include="Web References\MSNWS.MSNRSIService\rsi_ws.wsdl" />
     <None Include="Web References\MSNWS.MSNSecurityTokenService\addressing.xsd">
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
     </None>
     <None Include="Web References\MSNWS.MSNSecurityTokenService\ps-fault.xsd">
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
     </None>
     <None Include="Web References\MSNWS.MSNSecurityTokenService\ps.wsdl" />
     <None Include="Web References\MSNWS.MSNSecurityTokenService\ps.xsd">
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
     </None>
     <None Include="Web References\MSNWS.MSNSecurityTokenService\Reference.map">
       <Generator>MSDiscoCodeGenerator</Generator>
@@ -277,19 +288,24 @@
       <DependentUpon>Reference.map</DependentUpon>
     </None>
     <None Include="Web References\MSNWS.MSNSecurityTokenService\ws-policy.xsd">
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
     </None>
     <None Include="Web References\MSNWS.MSNSecurityTokenService\ws-secext.xsd">
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
     </None>
     <None Include="Web References\MSNWS.MSNSecurityTokenService\ws-trust.xsd">
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
     </None>
     <None Include="Web References\MSNWS.MSNSecurityTokenService\wss-utility.xsd">
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
     </None>
     <None Include="Web References\MSNWS.MSNSecurityTokenService\xmldsig-core-schema.xsd">
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
     </None>
     <None Include="Web References\MSNWS.MSNStorageService\FindDocumentsResultType.datasource">
       <DependentUpon>Reference.map</DependentUpon>
@@ -298,10 +314,12 @@
       <DependentUpon>Reference.map</DependentUpon>
     </None>
     <None Include="Web References\MSNWS.MSNStorageService\msnstorage_datatypes.xsd">
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
     </None>
     <None Include="Web References\MSNWS.MSNStorageService\msnstorage_servicetypes.xsd">
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
     </None>
     <None Include="Web References\MSNWS.MSNStorageService\msnstorage_ws.wsdl" />
     <None Include="Web References\MSNWS.MSNStorageService\Reference.map">
@@ -404,7 +422,8 @@
       <DependentUpon>Reference.map</DependentUpon>
     </None>
     <None Include="Web References\MSNWS.MSNSecurityTokenService\soap-env.xsd">
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
     </None>
     <None Include="Web References\MSNWS.MSNStorageService\CreateDocumentResponseType.datasource">
       <DependentUpon>Reference.map</DependentUpon>

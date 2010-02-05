@@ -19,7 +19,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
         /// <summary>
         /// Welcome messages we will be storing.
         /// </summary>
-        private RoomSettingCollection<string> WelcomeMessages
+        private WelcomeSettingsCollection WelcomeMessages
         {
             get
             {
@@ -27,45 +27,9 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 // the bot shuts down. if they haven't been created already, add them.
                 if (!Settings.ContainsKey("WelcomeMessages"))
                 {
-                    Settings["WelcomeMessages"] = new RoomSettingCollection<string>(null);
+                    Settings["WelcomeMessages"] = new WelcomeSettingsCollection();
                 }
-                return (RoomSettingCollection<string>)Settings["WelcomeMessages"];
-            }
-        }
-
-        /// <summary>
-        /// Determines if a chatroom has welcomes enabled or not. The key is the chatroom
-        /// and the value is whether or not it is enabled.
-        /// </summary>
-        private Dictionary<string, bool> WelcomeEnabled
-        {
-            get
-            {
-                // retrieve welcome enabled from settings so that they are stored 
-                // when the bot shuts down.
-                if (!Settings.ContainsKey("WelcomeEnabled"))
-                {
-                    Settings["WelcomeEnabled"] = new Dictionary<string, bool>();
-                }
-                return (Dictionary<string, bool>)Settings["WelcomeEnabled"];
-            }
-        }
-
-        /// <summary>
-        /// Determines if a chatroom allows individual welcome messages. The key is the 
-        /// chatroom and the value is whether or not it is enabled.
-        /// </summary>
-        private Dictionary<string, bool> IndvWelcomeEnabled
-        {
-            get
-            {
-                // retrieve welcome enabled from settings so that they are stored 
-                // when the bot shuts down.
-                if (!Settings.ContainsKey("IndvWelcomeEnabled"))
-                {
-                    Settings["IndvWelcomeEnabled"] = new Dictionary<string, bool>();
-                }
-                return (Dictionary<string, bool>)Settings["IndvWelcomeEnabled"];
+                return (WelcomeSettingsCollection)Settings["WelcomeMessages"];
             }
         }
         #endregion
@@ -83,31 +47,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
         #endregion
 
         #region Helper Methods
-        /// <summary>
-        /// Determines if individual welcome messages are enabled for the chatroom.
-        /// </summary>
-        /// <param name="chatroom">Chatroom to get setting for.</param>
-        /// <returns>True if individual welcome messages allowed, otherwise false.</returns>
-        private bool IsIndvWelcomeAllowed(string chatroom)
-        {
-            if (!IndvWelcomeEnabled.ContainsKey(chatroom))
-                return false;
-            else
-                return IndvWelcomeEnabled[chatroom];
-        }
 
-        /// <summary>
-        /// Determines if welcome messages are enabled for the chatroom.
-        /// </summary>
-        /// <param name="chatroom">Chatroom to get setting for.</param>
-        /// <returns>True if welcome messages enabled, otherwise false.</returns>
-        private bool IsWelcomesEnabled(string chatroom)
-        {
-            if (!WelcomeEnabled.ContainsKey(chatroom))
-                return false;
-            else
-                return WelcomeEnabled[chatroom];
-        }
         #endregion
 
         #region Plugin Methods
@@ -119,7 +59,9 @@ namespace DeviantArt.Chat.Oberon.Plugins
             // register commands
             RegisterCommand("wt", new BotCommandEvent(WelcomeManage), new CommandHelp(
                 "Manage chat room welcome message settings.",
-                "wt (#room) all [message] - Sets the welcome message used to greet all users.<br />" +
+                "wt (#room) all [message] - Adds a welcome message used to greet all users.<br />" +
+                "wt (#room) list - lists welcome messages used to greet all users.<br />" +
+                "wt (#room) remove [index] - index of the message to remove for all user greattings.<br />" +
                 "wt (#room) pc [privclass] [message] - Set the welcome message used to greet users in the privclasss<br />" +                                
                 "wt (#room) indv [on / off] - Allow users to set their own welcome messages.<br />" +
                 "wt (#room) [on / off] - Turn welcome messages on or off.<br />" +
@@ -225,6 +167,9 @@ namespace DeviantArt.Chat.Oberon.Plugins
             string var2 = GetArg(args, 2);
             string var3 = GetArg(args, 3);            
 
+            // get welcome settings
+            WelcomeSettings welcomeSettings = WelcomeMessages.Get(room);
+
             // create output variables
             StringBuilder say = new StringBuilder();
 
@@ -238,7 +183,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     }
                     else
                     {
-                        WelcomeMessages.Set(room, message);
+                        welcomeSettings.AddAllMessage(message);
                         say.AppendFormat("Welcome message for {0} set to \"{1}\".", room, message);
                     }
                     break;
