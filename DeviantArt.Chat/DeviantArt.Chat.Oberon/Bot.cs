@@ -11,6 +11,7 @@ using System.Xml.Linq;
 using DeviantArt.Chat.Library;
 using System.Text;
 using System.Diagnostics;
+using System.CodeDom.Compiler;
 
 namespace DeviantArt.Chat.Oberon
 {
@@ -623,10 +624,104 @@ namespace DeviantArt.Chat.Oberon
 
         #region Plugin Methods
         /// <summary>
+        /// Creates plugins from provided assembly and adds them to the provided list.
+        /// </summary>
+        /// <param name="a">Assembly to create plugins from.</param>
+        /// <param name="plugins">List to add created plugins to.</param>
+        private void CreatePluginsFromAssembly(Assembly a, List<Plugin> plugins)
+        {
+            Type[] assemblyTypes = a.GetTypes();
+            foreach (Type t in assemblyTypes)
+            {
+                // check to see if this type inherits from the plugin class
+                if (typeof(Plugin).IsAssignableFrom(t) && !t.IsAbstract)
+                {
+                    try
+                    {
+                        // create plugin
+                        Plugin p = (Plugin)Activator.CreateInstance(t);
+                        p.dAmn = dAmn;
+                        plugins.Add(p);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Notice(string.Format(
+                            "Error creating plugin '{0}'. See bot log for details.",
+                            t.ToString()));
+                        Console.Log("Error creating plugin.\n" + ex.ToString());
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Compiles the source files from into assemblies.
+        /// </summary>
+        /// <param name="sourceFiles">Source files to compile.</param>
+        /// <returns>Compiled assemblies.</returns>
+        private List<Assembly> CompileSourceFilePlugins(List<FileInfo> sourceFiles)
+        {
+            string[] referencedAssemblies = { "System.dll", "Oberon.exe", "DeviantArt.Chat.Library.dll" };
+            List<Assembly> compiledAssemblies = new List<Assembly>();
+
+            // get compiler parameters
+            CompilerParameters cp = new CompilerParameters();
+            cp.GenerateExecutable = false;
+            cp.GenerateInMemory = true;
+            cp.TreatWarningsAsErrors = false;
+
+            // referenced assemblies
+            cp.ReferencedAssemblies.AddRange(referencedAssemblies);
+            
+            // setup compiler variables
+            CodeDomProvider provider = null;
+            ICodeCompiler compiler = null;
+            CompilerResults results = null;
+
+            // find and compile all source files
+            foreach (FileInfo sourceFile in sourceFiles)
+            {
+                // get the provider
+                if (sourceFile.Extension.ToLower() == ".cs")
+                    provider = CodeDomProvider.CreateProvider("CSharp");
+                else if (sourceFile.Extension.ToLower() == ".vb")
+                    provider = CodeDomProvider.CreateProvider("VisualBasic");
+                else
+                    continue;
+
+                // compile!
+                compiler = provider.CreateCompiler();
+                results = compiler.CompileAssemblyFromFile(cp, sourceFile.FullName);
+
+                // use compile assembly
+                if (results.Errors.Count == 0)
+                {
+                    compiledAssemblies.Add(results.CompiledAssembly);
+                }
+                else
+                {
+                    // log error to console and log file, and skip
+                    Console.Notice(string.Format(
+                            "Error creating plugin from file '{0}'. See bot log for details.",
+                            sourceFile.Name));
+                    foreach (CompilerError error in results.Errors)
+                        Console.Log(string.Format("Line {0}, Col {1}: Error {2} - {3}",
+                            error.Line, 
+                            error.Column,
+                            error.ErrorNumber,
+                            error.ErrorText));
+                    continue;
+                }
+            }
+
+            return compiledAssemblies;
+        }
+
+        /// <summary>
         /// Finds all plugin in the plugin directory and sub-directories.
         /// </summary>
         /// <returns>List of found plugins</returns>
-        private Plugin[] FindPlugins()
+        private Plugin[] FindAndCreatePlugins()
         {
             List<Plugin> plugins = new List<Plugin>();
 
@@ -637,30 +732,22 @@ namespace DeviantArt.Chat.Oberon
             // find all assemblies that are plugins
             foreach (string assembly in assemblies)
             {    
-                // get all types in the assembly
+                // create plugin from assembly
                 Assembly a = Assembly.LoadFrom(assembly);
-                Type[] assemblyTypes = a.GetTypes();
-                foreach (Type t in assemblyTypes)
-                {
-                    // check to see if this type inherits from the plugin class
-                    if (typeof(Plugin).IsAssignableFrom(t) && !t.IsAbstract)
-                    {
-                        try
-                        {
-                            // create plugin
-                            Plugin p = (Plugin)Activator.CreateInstance(t);
-                            p.dAmn = dAmn;
-                            plugins.Add(p);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.Notice(string.Format(
-                                "Error creating plugin '{0}'. See bot log for details.",
-                                t.ToString()));
-                            Console.Log("Error creating plugin.\n" + ex.ToString());
-                        }
-                    }                    
-                }
+                CreatePluginsFromAssembly(a, plugins);
+            }
+
+            // find all csharp and vb source files
+            List<FileInfo> sourceFiles = new List<FileInfo>();
+            sourceFiles.AddRange(Utility.GetFilesRecursive(new DirectoryInfo(PluginPath), "*.cs"));
+            sourceFiles.AddRange(Utility.GetFilesRecursive(new DirectoryInfo(PluginPath), "*.vb"));
+
+            // compile source files and add plugins
+            if (sourceFiles.Count > 0)
+            {
+                List<Assembly> sourceAssemblies = CompileSourceFilePlugins(sourceFiles);
+                foreach (Assembly a in sourceAssemblies)
+                    CreatePluginsFromAssembly(a, plugins);
             }
 
             // remove any duplicates
@@ -692,7 +779,7 @@ namespace DeviantArt.Chat.Oberon
                 Console.Notice("Starting plugin loading.");
 
             // find and instantiate all plugins
-            Plugin[] allPlugins = FindPlugins();            
+            Plugin[] allPlugins = FindAndCreatePlugins();            
 
             // load all plugins
             int pluginsLoaded = 0;
