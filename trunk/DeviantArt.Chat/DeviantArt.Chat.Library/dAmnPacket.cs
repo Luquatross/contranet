@@ -24,7 +24,7 @@ namespace DeviantArt.Chat.Library
     public class dAmnPacket
     {
         #region Args and Body parts of packet
-        private class dAmnArgs
+        public class dAmnArgs
         {
             private string _body = "";
             private Dictionary<string, string> _args = new Dictionary<string, string>();

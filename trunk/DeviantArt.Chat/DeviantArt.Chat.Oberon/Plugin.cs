@@ -7,6 +7,7 @@ using DeviantArt.Chat.Library;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Resources;
+using System.Runtime.Serialization;
 
 namespace DeviantArt.Chat.Oberon
 {
@@ -319,6 +320,20 @@ namespace DeviantArt.Chat.Oberon
             {
                 BinaryFormatter bf = new BinaryFormatter();
                 Settings = (Hashtable)bf.Deserialize(fs);
+            }
+            catch (SerializationException ex)
+            {
+                // log error loading settings
+                Bot.Console.Warning(string.Format("Error loading plugin settings for plugin '{0}'. See bot log for details.", PluginName));
+                Bot.Console.Log("Error loading plugin settings. " + ex.ToString() + " Settings file will be backed up.");
+                fs.Close();
+
+                // if old backup exists, delete it
+                if (File.Exists(SettingsFile + ".bak"))
+                    File.Delete(SettingsFile + ".bak");
+
+                // rename file
+                File.Move(SettingsFile, SettingsFile + ".bak");                
             }
             finally
             {

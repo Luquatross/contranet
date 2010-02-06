@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace DeviantArt.Chat.Oberon.Plugins
 {
     /// <summary>
     /// Class that holds welcome message settings for a particular room.
     /// </summary>
+    [Serializable()]
     internal class WelcomeSettings
     {
         /// <summary>
@@ -52,6 +54,17 @@ namespace DeviantArt.Chat.Oberon.Plugins
         public WelcomeSettings(string chatroomName)
         {
             ChatroomName = chatroomName;
+        }
+
+        /// <summary>
+        /// Helper method to remove null values from a dictionary.
+        /// </summary>
+        /// <param name="dict">Dictionary to modify.</param>
+        private void RemoveNullValues(Dictionary<string, string> dict)
+        {
+            var nullKeys = from i in dict where i.Value == null select i.Key;
+            foreach (string key in nullKeys)
+                dict.Remove(key);
         }
 
         /// <summary>
@@ -124,7 +137,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
         /// <returns>Message for a priv class. if none, returns null.</returns>
         public string GetPrivClassMessage(string privClass)
         {
-            return PrivClassMessages.GetValueOrDefault(privClass);
+            return PrivClassMessages.GetValueOrDefault(privClass.ToLower());
         }
 
         /// <summary>
@@ -134,7 +147,8 @@ namespace DeviantArt.Chat.Oberon.Plugins
         /// <param name="message">Message to set.</param>
         public void SetPrivClassMessage(string privClass, string message)
         {
-            PrivClassMessages[privClass] = message;
+            PrivClassMessages[privClass.ToLower()] = message;
+            RemoveNullValues(PrivClassMessages);
         }
 
         /// <summary>
@@ -144,7 +158,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
         /// <returns>Message for a user. If none, returns null.</returns>
         public string GetIndividualMessage(string username)
         {
-            return IndividualMessages.GetValueOrDefault(username);
+            return IndividualMessages.GetValueOrDefault(username.ToLower());
         }
 
         /// <summary>
@@ -154,7 +168,8 @@ namespace DeviantArt.Chat.Oberon.Plugins
         /// <param name="message">Message to set.</param>
         public void SetIndividualMessage(string username, string message)
         {
-            IndividualMessages[username] = message;
+            IndividualMessages[username.ToLower()] = message;
+            RemoveNullValues(IndividualMessages);
         }
 
         /// <summary>
@@ -202,8 +217,19 @@ namespace DeviantArt.Chat.Oberon.Plugins
     /// <summary>
     /// Collection of welcome message setttings.
     /// </summary>
+    [Serializable()]
     internal class WelcomeSettingsCollection : Dictionary<string, WelcomeSettings>
     {
+        /// <summary>
+        /// Empty constructor.
+        /// </summary>
+        public WelcomeSettingsCollection() { }
+
+        /// <summary>
+        /// Constructor to allow serialization.
+        /// </summary>
+        public WelcomeSettingsCollection(SerializationInfo info, StreamingContext context) : base(info, context) { }
+
         /// <summary>
         /// Retrieves welcome message settings for chatroom. If there isn't any, creates one.
         /// </summary>

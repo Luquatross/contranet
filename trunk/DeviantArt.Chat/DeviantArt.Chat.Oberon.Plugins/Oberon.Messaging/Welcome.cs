@@ -128,6 +128,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             else if (!welcomeSettings.AllowIndividualSettings)
             {
                 Respond(ns, from, "You don't have the ability to set a welcome message in " + ns + ".");
+                return;
             }
             string[] args = GetArgs(message);
             string say = string.Empty;
@@ -154,7 +155,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 else
                 {                    
                     welcomeSettings.SetIndividualMessage(from, message);
-                    say = "Welcome sest! Your welcome message is as follows:<br />" + message;
+                    say = "Welcome set! Your welcome message is as follows:<br />" + message;
                 }
             }
             SaveSettings();
@@ -172,7 +173,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             {
                 room = args[0];
                 // strip room from string and reset args
-                message = message.Substring(0, message.IndexOf(' ')) + message.Substring(message.IndexOf(room) + room.Length);
+                message = message.Substring(message.IndexOf(room) + room.Length).Trim();
                 args = GetArgs(message);
             }
             string subCommand = GetArg(args, 0);
@@ -197,14 +198,14 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     else
                     {
                         welcomeSettings.AddAllMessage(message);
-                        say.AppendFormat("Welcome message for {0} set to \"{1}\".", room, message);
+                        say.AppendFormat("Welcome message \"{0}\" was added for {1}.", message, room);
                     }
                     break;
                 case "list":
                     List<string> allUserList = welcomeSettings.GetAllMessageList();
                     say.Append("<b><u>Welcomes for all users:</u></b>:<sub><br />");
-                    foreach (string welcomeMsg in allUserList)
-                        say.AppendFormat("{0}<br />", welcomeMsg);
+                    for (int i = 0; i < allUserList.Count; i++)
+                        say.AppendFormat("[{0}] - {1}<br />", i, allUserList[i]);
                     say.Append("</sub>");
                     break;
                 case "remove":
@@ -248,7 +249,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                         else
                         {
                             welcomeSettings.SetPrivClassMessage(pc, message);
-                            say.AppendFormat("Welcome message set.");
+                            say.AppendFormat("Welcome message set for {0}.", pc);
                         }
                     }
                     break;
@@ -282,7 +283,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     }
                     break;
                 case "settings":
-                    say.AppendFormat("<b><u>Welcome settings for {0}</u></b>:<br /><sub>");
+                    say.AppendFormat("<b><u>Welcome settings for {0}</u></b>:<br /><sub>", room);
                     say.AppendFormat("Welcome messages are turned <b>{0}</b><br />", welcomeSettings.Enabled == true ? "on" : "off");
                     say.AppendFormat("Welcome messages for individuals are turned <b>{0}</b><br />", welcomeSettings.AllowIndividualSettings == true ? "on" : "off");
                     Chat foundChat = Bot.GetChatroom(room);
@@ -291,7 +292,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                         foreach (string privClass in foundChat.PrivClasses.Keys)
                         {
                             string privStatus = string.IsNullOrEmpty(welcomeSettings.GetPrivClassMessage(privClass)) ? "off" : "on";
-                            say.AppendFormat("Welcome messages for {0} members are turned <b>{0}</b><br />", privClass, privStatus);
+                            say.AppendFormat("Welcome messages for {0} members are turned <b>{1}</b><br />", privClass, privStatus);
                         }
                     }
                     say.Append("</sub>");

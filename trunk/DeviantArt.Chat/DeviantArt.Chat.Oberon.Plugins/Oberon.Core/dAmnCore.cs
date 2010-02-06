@@ -190,7 +190,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             {
                 dAmnPacket subPacket = packet.GetSubPacket();
                 string username = subPacket.args["from"];
-                room.Log(string.Format("<{0}> {1}", username, subPacket.body));
+                room.Log("<" + username + "> " + subPacket.body);                        
             }
         }
 
@@ -264,10 +264,23 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
             dAmnPacket subPacket = packet.GetSubPacket();
             string username = subPacket.param;
-            // user may exist already (bot can user can sign on at same time)
+            // user may exist already (bot and user can sign on at same time)
             if (chat[username] == null)
             {
-                chat.RegisterUser(new User { Username = username });
+                // get user details from  arg list from the packet                
+                dAmnPacket.dAmnArgs a = dAmnPacket.dAmnArgs.getArgsNData(subPacket.body);
+
+                // create new user
+                User u = new User
+                {
+                    Username = username,
+                    PrivClass = a.args["pc"],
+                    Symbol = a.args["symbol"],
+                    Realname = a.args["realname"],
+                    Description = a.args["typename"],
+                    ServerPrivClass = a.args["gpc"]
+                };
+                chat.RegisterUser(u);
             }
             else
             {
