@@ -655,7 +655,7 @@ namespace DeviantArt.Chat.Oberon
         }
 
         /// <summary>
-        /// Compiles the source files from into assemblies.
+        /// Compiles the source files into assemblies.
         /// </summary>
         /// <param name="sourceFiles">Source files to compile.</param>
         /// <returns>Compiled assemblies.</returns>
