@@ -85,7 +85,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
             RegisterCommand("botback", new BotCommandEvent(BotIsBack), new CommandHelp(
                 "Sets a bot so it is no longer away.",
-                "botbak (#room | all) - sets bot as back<br />" +
+                "botback (#room | all) - sets bot as back<br />" +
                 "<b>Example:</b> !botback all"),
                 (int)PrivClassDefaults.Owner);
 
