@@ -71,12 +71,12 @@ namespace DeviantArt.Chat.Oberon
 
         public void Log(string message)
         {
-            Logger.InfoFormat(message);
+            Logger.Info(message);
         }
 
         public void Debug(string message)
         {
-            Logger.DebugFormat(message);
+            Logger.Debug(message);
         }
 
         public string GetValueFromConsole(string message)
