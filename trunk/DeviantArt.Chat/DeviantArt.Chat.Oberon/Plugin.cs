@@ -344,7 +344,7 @@ namespace DeviantArt.Chat.Oberon
         /// <summary>
         /// Save settings to the file system.
         /// </summary>
-        protected void SaveSettings()
+        public void SaveSettings()
         {
             if (Settings.Count == 0)
                 return;
@@ -359,6 +359,14 @@ namespace DeviantArt.Chat.Oberon
             {
                 fs.Close();
             }
+        }
+
+        /// <summary>
+        /// Removes all stored settings from the plugin.
+        /// </summary>
+        public void ClearSettings()
+        {
+            Settings.Clear();
         }
 
         /// <summary>

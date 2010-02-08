@@ -337,6 +337,7 @@ namespace DeviantArt.Chat.Oberon.Plugins {
         ///plugins reload - reload plugins
         ///plugins [plugin key] info - plugin information
         ///plugins [plugin key] turn [on or off] - turn plugin on or off
+        ///plugins [plugin key] settings [clear or save] - delete or save settings
         ///plugins all turn [on or off] - turn all plugins on or off at once
         ///&lt;b&gt;Exmaple:&lt;/b&gt; !plugins system info.
         /// </summary>

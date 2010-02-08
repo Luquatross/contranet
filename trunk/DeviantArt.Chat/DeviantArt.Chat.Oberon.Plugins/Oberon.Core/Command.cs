@@ -610,7 +610,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             string[] args = GetArgs(message);
             string command = string.Empty;
             string pluginKey = string.Empty;
-            string status = string.Empty; ;
+            string status = string.Empty;
             Plugin plugin;
 
             // get args
@@ -707,6 +707,32 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
                         Bot.SetPluginStatus(plugin.PluginName, pluginStatus);
                         output.Append(string.Format("** status for plugin '{0}' was set to {1} *", pluginKey, pluginStatus.ToString("G")));
+                    }
+                    break;
+                case "settings":
+                    plugin = (from p in Bot.GetPlugins()
+                              where p.GetPluginKey().ToLower() == pluginKey.ToLower()
+                              select p).SingleOrDefault();
+                    if (plugin == null)
+                    {
+                        Respond(ns, from, "** the plugin with key " + pluginKey + " does not exist *");
+                        return;
+                    }
+
+                    if (status == "clear")
+                    {
+                        plugin.ClearSettings();
+                        output.AppendFormat("** settings for plugin '{0}' have been cleared *", pluginKey);
+                    }
+                    else if (status == "save")
+                    {
+                        plugin.SaveSettings();
+                        output.AppendFormat("** settings for plugin '{0}' have been saved *", pluginKey);
+                    }
+                    else
+                    {
+                        Respond(ns, from, "the valid options for settings are 'clear' or 'save'.");
+                        return;
                     }
                     break;
                 default:
