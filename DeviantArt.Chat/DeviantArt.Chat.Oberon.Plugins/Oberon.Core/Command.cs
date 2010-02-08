@@ -71,6 +71,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             RegisterCommand("say", new BotCommandEvent(Say), GetCommandHelp("Say.Summary", "Say.Usage"), (int)PrivClassDefaults.Members);
             RegisterCommand("saveconfig", new BotCommandEvent(SaveConfig), GetCommandHelp("SaveConfig.Summary", "SaveConfig.Usage"), (int)PrivClassDefaults.Operators);
             RegisterCommand("sudo", new BotCommandEvent(Sudo), GetCommandHelp("Sudo.Summary", "Sudo.Usage"), (int)PrivClassDefaults.Owner);
+            RegisterCommand("debug", new BotCommandEvent(Debug), GetCommandHelp("Debug.Summary", "Debug.Usage"), (int)PrivClassDefaults.Operators);
         }
         #endregion
 
@@ -775,6 +776,23 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
             // send it to the bot
             Bot.TriggerCommand(commandName, ns, targetUser, newMessage);
+        }
+
+        private void Debug(string ns, string from, string message)
+        {
+            if (string.Compare(message, "on") != 0 &&
+               string.Compare(message, "off") != 0)
+            {
+                ShowHelp(ns, from, "debug");
+                return;
+            }
+
+            // set bot status
+            bool debugStatus = message.ToLower() == "on" ? true : false;
+            Bot.ChangeDebugStatus(debugStatus);
+
+            // notify user
+            Respond(ns, from, string.Format("** Bot debug staus has been set to '{0}' *", message));
         }
         #endregion
     }

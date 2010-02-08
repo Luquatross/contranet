@@ -280,4 +280,10 @@ delprivclass [name]
     <value>sudo [user] [command]  - Execute [command] as if it was from [user].&lt;br /&gt;
 &lt;b&gt;Example:&lt;/b&gt; sudo devartuser ping</value>
   </data>
+  <data name="Debug.Summary" xml:space="preserve">
+    <value>Sets the bot debug status to on or off.</value>
+  </data>
+  <data name="Debug.Usage" xml:space="preserve">
+    <value>debug [on | off]</value>
+  </data>
 </root>
