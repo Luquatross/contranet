@@ -154,6 +154,68 @@ namespace DeviantArt.Chat.Oberon
         {
             return System.Text.RegularExpressions.Regex.Replace(PluginName, "[^a-zA-Z_]", "");
         }
+
+        /// <summary>
+        /// Load settings from the file system.
+        /// </summary>
+        public void LoadSettings()
+        {
+            if (!File.Exists(SettingsFile))
+                return;
+
+            FileStream fs = new FileStream(SettingsFile, FileMode.Open, FileAccess.Read);
+            try
+            {
+                BinaryFormatter bf = new BinaryFormatter();
+                Settings = (Hashtable)bf.Deserialize(fs);
+            }
+            catch (SerializationException ex)
+            {
+                // log error loading settings
+                Bot.Console.Warning(string.Format("Error loading plugin settings for plugin '{0}'. See bot log for details.", PluginName));
+                Bot.Console.Log("Error loading plugin settings. " + ex.ToString() + " Settings file will be backed up.");
+                fs.Close();
+
+                // if old backup exists, delete it
+                if (File.Exists(SettingsFile + ".bak"))
+                    File.Delete(SettingsFile + ".bak");
+
+                // rename file
+                File.Move(SettingsFile, SettingsFile + ".bak");
+            }
+            finally
+            {
+                fs.Close();
+            }
+        }
+
+        /// <summary>
+        /// Save settings to the file system.
+        /// </summary>
+        public void SaveSettings()
+        {
+            if (Settings.Count == 0)
+                return;
+
+            FileStream fs = new FileStream(SettingsFile, FileMode.OpenOrCreate, FileAccess.Write);
+            try
+            {
+                BinaryFormatter bf = new BinaryFormatter();
+                bf.Serialize(fs, Settings);
+            }
+            finally
+            {
+                fs.Close();
+            }
+        }
+
+        /// <summary>
+        /// Removes all stored settings from the plugin.
+        /// </summary>
+        public void ClearSettings()
+        {
+            Settings.Clear();
+        }
         #endregion
 
         #region Protected Methods
@@ -305,69 +367,7 @@ namespace DeviantArt.Chat.Oberon
         protected void RegisterEvent(dAmnPacketType packetType, BotServerPacketEvent eventMethod)
         {
             Bot.AddEventListener(packetType, this, eventMethod);
-        }
-
-        /// <summary>
-        /// Load settings from the file system.
-        /// </summary>
-        protected void LoadSettings()
-        {
-            if (!File.Exists(SettingsFile))
-                return;
-
-            FileStream fs = new FileStream(SettingsFile, FileMode.Open, FileAccess.Read);
-            try
-            {
-                BinaryFormatter bf = new BinaryFormatter();
-                Settings = (Hashtable)bf.Deserialize(fs);
-            }
-            catch (SerializationException ex)
-            {
-                // log error loading settings
-                Bot.Console.Warning(string.Format("Error loading plugin settings for plugin '{0}'. See bot log for details.", PluginName));
-                Bot.Console.Log("Error loading plugin settings. " + ex.ToString() + " Settings file will be backed up.");
-                fs.Close();
-
-                // if old backup exists, delete it
-                if (File.Exists(SettingsFile + ".bak"))
-                    File.Delete(SettingsFile + ".bak");
-
-                // rename file
-                File.Move(SettingsFile, SettingsFile + ".bak");                
-            }
-            finally
-            {
-                fs.Close();
-            }
-        }
-
-        /// <summary>
-        /// Save settings to the file system.
-        /// </summary>
-        public void SaveSettings()
-        {
-            if (Settings.Count == 0)
-                return;
-
-            FileStream fs = new FileStream(SettingsFile, FileMode.OpenOrCreate, FileAccess.Write);
-            try
-            {
-                BinaryFormatter bf = new BinaryFormatter();
-                bf.Serialize(fs, Settings);
-            }
-            finally
-            {
-                fs.Close();
-            }
-        }
-
-        /// <summary>
-        /// Removes all stored settings from the plugin.
-        /// </summary>
-        public void ClearSettings()
-        {
-            Settings.Clear();
-        }
+        }        
 
         /// <summary>
         /// Gets the resource manager for this plugin. Override in plugin class to return
