@@ -264,6 +264,15 @@ namespace DeviantArt.Chat.Oberon
         }
 
         /// <summary>
+        /// Deletes all access levels.
+        /// </summary>
+        public void ClearAccessLevels()
+        {
+            UserAccessLevel.Clear();
+            CommandAccessLevel.Clear();
+        }
+
+        /// <summary>
         /// Load settings from config file.
         /// </summary>
         public void LoadAccessLevels()
