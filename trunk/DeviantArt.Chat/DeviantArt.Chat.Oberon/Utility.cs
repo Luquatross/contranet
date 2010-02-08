@@ -157,6 +157,18 @@ namespace DeviantArt.Chat.Oberon
 
             return result;
         }
+
+        /// <summary>
+        /// Determines if the path contains the provided directory.
+        /// </summary>
+        /// <param name="path">Path to examine.</param>
+        /// <param name="directory">Directory to check for.</param>
+        /// <returns>True if the path containst the provided directory. Otherwise false.</returns>
+        public static bool PathContainsDirectory(string path, string directory)
+        {
+            List<string> directories = new List<string>(path.Split(Path.DirectorySeparatorChar));
+            return directories.Contains(directory);
+        }
         #endregion
 
         #region Extension Methods

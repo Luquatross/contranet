@@ -727,6 +727,7 @@ namespace DeviantArt.Chat.Oberon
 
             // get all assemblies in the plugin folder structure
             string[] assemblies = (from file in Utility.GetFilesRecursive(new DirectoryInfo(PluginPath), "*.dll")
+                                   where Utility.PathContainsDirectory(file.DirectoryName, "_Off") == false
                                    select file.FullName).ToArray();
 
             // find all assemblies that are plugins
@@ -1295,6 +1296,15 @@ namespace DeviantArt.Chat.Oberon
         public void ChangeTrigger(string newTrigger)
         {
             Trigger = newTrigger;
+        }
+
+        /// <summary>
+        /// Changes the debug status for the bot.
+        /// </summary>
+        /// <param name="debugStatus">Debug status to set to.</param>
+        public void ChangeDebugStatus(bool debugStatus)
+        {
+            IsDebug = debugStatus;
         }
 
         /// <summary>
