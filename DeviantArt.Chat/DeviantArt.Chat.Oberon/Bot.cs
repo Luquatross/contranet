@@ -282,6 +282,9 @@ namespace DeviantArt.Chat.Oberon
                 Console.Notice("Bot config file loaded successfully.");
             }
 
+            // Ensure correct directories are present
+            EnsureDirectoryStructure();
+
             // Load the dAmn interface
             dAmn = new dAmnNET();
 
@@ -868,19 +871,34 @@ namespace DeviantArt.Chat.Oberon
         /// </summary>
         public void ReloadPlugins()
         {
+            // first save bot config
+            SaveConfig();
+
+            // then shutdown all of our plugins
+            ShutdownPlugins();
+
             // clear all variables holding commands and events
             commandHelp.Clear();
             commandMap.Clear();
-            eventMap.Clear();
+
+            // clear all event handlers
+            foreach (KeyValuePair<dAmnPacketType, BotEventList> evt in eventMap)
+                evt.Value.Clear();
 
             // clear all plugins
             botPlugins.Clear();
+           
+            // save current access levels
+            Access.SaveAccessLevels();
 
             // load plugins again
             LoadPlugins();
 
+            // clear in memory levels
+            Access.ClearAccessLevels();
+
             // reload access levels for everything
-            Access.LoadAccessLevels();
+            Access.LoadAccessLevels();            
         }
 
         /// <summary>
@@ -916,6 +934,30 @@ namespace DeviantArt.Chat.Oberon
         public void RegisterPluginThread(Thread t)
         {
             pluginThreads.Add(t);
+        }
+
+        /// <summary>
+        /// Shuts down all registered plugins.
+        /// </summary>
+        private void ShutdownPlugins()
+        {
+            // call the close method on each of our plugins
+            Console.Notice("Shutting down plugins. Please wait...");
+            foreach (Plugin plugin in botPlugins.Values.ToArray())
+            {
+                try
+                {
+                    plugin.Close();
+                }
+                catch (Exception ex)
+                {
+                    // log the exception
+                    Console.Log(string.Format("Error occurred during plugin shutdown.\nPlugin Name: {0}\nException: {1}",
+                        plugin.PluginName,
+                        ex.ToString()));
+                }
+            }
+            Console.Notice("All plugins have been shutdown.");
         }
         #endregion
 
@@ -973,9 +1015,16 @@ namespace DeviantArt.Chat.Oberon
                 if (EventListenerSorter != null)
                     listeners.Sort(new Comparison<KeyValuePair<Plugin,BotServerPacketEvent>>(EventListenerSorter));
 
+                // the listeners may be modified so we'll load it up in our own copy
+                Queue<KeyValuePair<Plugin, BotServerPacketEvent>> listenerQueue = new Queue<KeyValuePair<Plugin, BotServerPacketEvent>>(listeners);
+
                 // trigger the event for each listener
-                foreach (KeyValuePair<Plugin, BotServerPacketEvent> listener in listeners)
+                while (listenerQueue.Count > 0)
                 {
+                    // get the next listener
+                    KeyValuePair<Plugin, BotServerPacketEvent> listener = listenerQueue.Dequeue();
+
+                    // get listener components
                     Plugin plugin = listener.Key;
                     BotServerPacketEvent method = listener.Value;
 
@@ -1146,22 +1195,7 @@ namespace DeviantArt.Chat.Oberon
             Access.SaveAccessLevels();
 
             // call the close method on each of our plugins
-            Console.Notice("Shutting down plugins. Please wait...");
-            foreach (Plugin plugin in botPlugins.Values.ToArray())
-            {
-                try
-                {
-                    plugin.Close();
-                }
-                catch (Exception ex)
-                {
-                    // log the exception
-                    Console.Log(string.Format("Error occurred during plugin shutdown.\nPlugin Name: {0}\nException: {1}", 
-                        plugin.PluginName,
-                        ex.ToString()));
-                }
-            }
-            Console.Notice("All plugins have been shutdown.");
+            ShutdownPlugins();
 
             // wait for any plugin threads to complete
             if (IsDebug)
@@ -1315,6 +1349,38 @@ namespace DeviantArt.Chat.Oberon
         public List<Plugin> GetPlugins()
         {
             return botPlugins.Values.ToList();
+        }
+
+        /// <summary>
+        /// Ensures that all required directories are present.
+        /// </summary>
+        private void EnsureDirectoryStructure()
+        {
+            // directories required for operation
+            string[] requiredDirectories = 
+            {
+                Path.Combine(CurrentDirectory, "Plugins"),
+                Path.Combine(CurrentDirectory, "Plugins\\_Off"),
+                Path.Combine(CurrentDirectory, "Logs"),
+                Path.Combine(CurrentDirectory, "Logs\\Core"),
+                Path.Combine(CurrentDirectory, "Logs\\Chats"),
+                Path.Combine(CurrentDirectory, "Config"),
+            };
+
+            try
+            {
+                foreach (string directory in requiredDirectories)
+                {
+                    if (!Directory.Exists(directory))
+                        Directory.CreateDirectory(directory);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Warning("Error! Required directories not present and could not be created.");
+                Console.Log(ex.ToString());
+                throw;
+            }
         }
 
         /// <summary>
