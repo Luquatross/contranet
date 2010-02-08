@@ -197,6 +197,24 @@ namespace DeviantArt.Chat.Oberon.Plugins {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Sets the bot debug status to on or off..
+        /// </summary>
+        internal static string Debug_Summary {
+            get {
+                return ResourceManager.GetString("Debug.Summary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to debug [on | off].
+        /// </summary>
+        internal static string Debug_Usage {
+            get {
+                return ResourceManager.GetString("Debug.Usage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Displays help information about a particular command..
         /// </summary>
         internal static string Help_Summary {
