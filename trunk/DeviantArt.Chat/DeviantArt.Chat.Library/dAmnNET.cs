@@ -141,6 +141,16 @@ namespace DeviantArt.Chat.Library
                 Logger.Warn("Unable to read from connection.", ex);
                 return "disconnect\ne=socket closed\n";
             }
+            // If we've reached here we've tried to read from the socket.
+            // The Connected property only reflects what the status of the 
+            // LAST I/O operation. So if our read was unsuccessful we
+            // will know by checking the connected status.
+            if (!Socket.Connected)
+            {
+                Logger.Warn("Connection has been closed.");
+                return "disconnect\ne=socket closed\n";
+            }
+
             return sb.ToString();
         }
         
