@@ -238,6 +238,11 @@ namespace DeviantArt.Chat.Oberon
         /// The amount of time to wait for a plugin thread to terminate.
         /// </summary>
         private TimeSpan pluginThreadWaitTime = TimeSpan.FromMinutes(1.00);
+
+        /// <summary>
+        /// The amount of time to wait for a new packet to arrive.
+        /// </summary>
+        private TimeSpan packetWaitTime = TimeSpan.FromMinutes(5.00);
         #endregion
 
         #region Constructor and Singleton Methods
@@ -970,6 +975,7 @@ namespace DeviantArt.Chat.Oberon
         {
             ListeningStoppedEvent.Reset();
             Console.Notice("Bot has started listening for data.");
+            DateTime lastPacket = DateTime.Now;
 
             while (KeepListening == true)
             {
@@ -988,12 +994,24 @@ namespace DeviantArt.Chat.Oberon
                 // process packet if it exists
                 if (packet != null)
                 {
+                    lastPacket = DateTime.Now;
                     Console.Debug("packet recevied: " + packet.ToString());
                     ProcessPacket(packet);
                 }
+                else
+                {
+                    // check to see if it's been too long since we've received a packet
+                    if (DateTime.Now - lastPacket > packetWaitTime)
+                    {
+                        // process a connection closed packet
+                        Console.Debug("packet wait time exceeded.");
+                        dAmnServerPacket closedPacket = (dAmnServerPacket)dAmnServerPacket.Parse("disconnect\ne=socket closed\n");
+                        ProcessPacket(closedPacket);
+                    }
+                }
 
                 // sleep for a second (in case loop needs to be interrupted)
-                Thread.Sleep(1);
+                Thread.Sleep(1);                
             }
             
             ListeningStoppedEvent.Set();
