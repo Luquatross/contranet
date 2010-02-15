@@ -143,6 +143,9 @@ namespace DeviantArt.Chat.Oberon.Plugins
                             message = message.Substring(message.IndexOf(command + " ") + command.Length + 1);
                         else
                             message = message.Substring(message.IndexOf(command) + command.Length);
+
+                        // message may have some html sent by a dAmn brownser extension. remove it
+                        message = Regex.Replace(message, "<abbr title=\"(.*?)\"></abbr>", "");
                     }
                     catch (ArgumentNullException ex)
                     {
