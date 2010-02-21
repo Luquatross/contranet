@@ -132,6 +132,7 @@ namespace DeviantArt.Chat.Library
         /// <returns>String received from stream. If no data returns empty string.</returns>
         public string Read()
         {
+            Logger.Debug("Attempgint to read from socket.");
             StringBuilder sb = new StringBuilder();
             try
             {
@@ -143,6 +144,8 @@ namespace DeviantArt.Chat.Library
                         break;
                     else
                         sb.Append((char)tmp);
+
+                    Logger.Debug("Reading data from socket...");
                 }
             }
             catch (IOException ex)
@@ -165,6 +168,7 @@ namespace DeviantArt.Chat.Library
                 return "disconnect\ne=socket closed\n";
             }
 
+            Logger.Debug("Data read from socket successfully.");
             return sb.ToString();
         }
         
