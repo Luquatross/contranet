@@ -39,7 +39,6 @@ namespace DeviantArt.Chat.Library
             }
         }
         
-
         /// <summary>
         /// Client name.
         /// </summary>
@@ -75,6 +74,15 @@ namespace DeviantArt.Chat.Library
             get { return _Trigger; }
             set { _Trigger = value; }
         }
+
+        /// <summary>
+        /// Amount of time to wait to read data from the socket.
+        /// </summary>
+        public TimeSpan ReadTimeout
+        {
+            get { return _ReadTimeout; }
+            set { _ReadTimeout = value; }
+        }
         #endregion
 
         #region Private Variables
@@ -87,13 +95,14 @@ namespace DeviantArt.Chat.Library
         private string _Agent = "damnNET/3.5";
         private string _Owner = "bigmanhaywood";
         private string _Trigger = "!";   
+        private TimeSpan _ReadTimeout = TimeSpan.FromMinutes(5.00);
 
         private ILog Logger = LogManager.GetLogger(typeof(dAmnNET));
         private TcpClient Socket;
         private StreamReader StreamReader;
         private StreamWriter StreamWriter;
         private string AuthToken;
-        private byte[] readBuffer = new byte[1024];        
+        private byte[] readBuffer = new byte[1024];              
         #endregion
 
         #region Send / Receive Methods
@@ -135,6 +144,11 @@ namespace DeviantArt.Chat.Library
                     else
                         sb.Append((char)tmp);
                 }
+            }
+            catch (IOException ex)
+            {
+                Logger.Warn("Connection timed out.", ex);
+                return "disconnect\ne=timed out\n";
             }
             catch (Exception ex)
             {
@@ -352,6 +366,7 @@ namespace DeviantArt.Chat.Library
 
             // connect to the server
             Socket = new TcpClient("chat.deviantart.com", 3900);
+            Socket.ReceiveTimeout = ReadTimeout.Milliseconds;
 
             // create writers
             StreamWriter = new StreamWriter(Socket.GetStream());
