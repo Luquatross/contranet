@@ -134,6 +134,7 @@ namespace DeviantArt.Chat.Library
             this.param = packet.param;
             this.args = packet.args;
             this.body = packet.body;
+            this.raw = packet.raw;
         }
         #endregion
 
