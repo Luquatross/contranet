@@ -1005,7 +1005,7 @@ namespace DeviantArt.Chat.Oberon
                     {
                         // process a connection closed packet
                         Console.Debug("packet wait time exceeded.");
-                        dAmnServerPacket closedPacket = (dAmnServerPacket)dAmnServerPacket.Parse("disconnect\ne=socket closed\n");
+                        dAmnServerPacket closedPacket = new dAmnServerPacket(dAmnServerPacket.Parse("disconnect\ne=socket closed\n"));
                         ProcessPacket(closedPacket);
                     }
                 }
