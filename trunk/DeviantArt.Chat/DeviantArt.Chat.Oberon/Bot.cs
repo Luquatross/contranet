@@ -1140,7 +1140,18 @@ namespace DeviantArt.Chat.Oberon
         private void StartBot()
         {
             // try to connect!
-            if (dAmn.Connect(Username, Password))
+            bool connectSucess = false;
+            try
+            {
+                connectSucess = dAmn.Connect(Username, Password);
+            }
+            catch (Exception ex)
+            {
+                Console.Log("Error connecting to the dAmn servers. " + ex.ToString());
+            }
+
+            // see results of trying to connect
+            if (connectSucess)
             {
                 KeepListening = true;
 
@@ -1173,6 +1184,9 @@ namespace DeviantArt.Chat.Oberon
                 else
                 {
                     Console.Warning("Unable to connect to dAmn server!");
+                    Console.Warning("Check the bot core logs for any errors and try again.");
+                    Console.Warning("Bot will shutdown in 10 seconds.");
+                    Thread.Sleep(TimeSpan.FromSeconds(10.0));
                     return;
                 }
             }
