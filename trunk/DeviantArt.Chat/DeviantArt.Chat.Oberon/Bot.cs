@@ -869,6 +869,8 @@ namespace DeviantArt.Chat.Oberon
         {
             if (IsDebug)
                 Console.Notice(string.Format("The plugin '{0}' was created/modified/deleted.", e.Name));
+            Console.Log("Plugin directory has changed. Reloading plugins.");
+            ReloadPlugins();
         }
 
         /// <summary>
