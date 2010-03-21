@@ -49,6 +49,11 @@ namespace DeviantArt.Chat.Oberon
         /// Date the current log file was initialized.
         /// </summary>
         private DateTime LogInitDate;
+
+        /// <summary>
+        /// Reference to current bot instance.
+        /// </summary>
+        private Bot Bot;
         #endregion
 
         #region Public Properties
@@ -66,10 +71,12 @@ namespace DeviantArt.Chat.Oberon
         /// Constructor.
         /// </summary>
         /// <param name="chatroomName">Name of the chatroom.</param>
-        public Chat(string chatroomName)
+        /// <param name="bot">Bot.</param>
+        public Chat(string chatroomName, Bot bot)
         {
             // init variables
             Name = chatroomName;
+            Bot = bot;
             LogInitDate = DateTime.Now;
             LogFile = GetLogFileWriter();            
         }
@@ -97,7 +104,7 @@ namespace DeviantArt.Chat.Oberon
             try
             {
                 string logFile = string.Format("{0}\\{0}_{1}.log", Name.TrimStart('#'), LogInitDate.ToString("yyyy-MM-dd"));
-                string logFilePath = Path.Combine(Bot.Instance.CurrentDirectory, "Logs\\Chats\\" + logFile);
+                string logFilePath = Path.Combine(Bot.CurrentDirectory, "Logs\\Chats\\" + logFile);
 
                 // make sure directory exists
                 if (!Directory.Exists(Path.GetDirectoryName(logFilePath)))
@@ -107,10 +114,10 @@ namespace DeviantArt.Chat.Oberon
             }
             catch (IOException ex)
             {
-                Bot.Instance.Console.Warning(string.Format(
+                Bot.Console.Warning(string.Format(
                     "Error writing to the log file for the chatroom {0}. See bot log file for more information.",
                     Name));
-                Bot.Instance.Console.Log("Error writing to chat room log file. " + ex.ToString());
+                Bot.Console.Log("Error writing to chat room log file. " + ex.ToString());
                 return null;
             }
         }

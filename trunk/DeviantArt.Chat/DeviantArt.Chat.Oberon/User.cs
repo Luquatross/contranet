@@ -11,6 +11,7 @@ namespace DeviantArt.Chat.Oberon
     [Serializable()]
     public class User
     {
+        #region Public Properties
         /// <summary>
         /// The deviantart username.
         /// </summary>
@@ -54,10 +55,30 @@ namespace DeviantArt.Chat.Oberon
         {
             get
             {
-                return Bot.Instance.Access.GetUserLevel(Username);
+                return Bot.Access.GetUserLevel(Username);
             }
         }
+        #endregion
 
+        #region Private Variables
+        /// <summary>
+        /// Reference to current bot instance.
+        /// </summary>
+        private Bot Bot;
+        #endregion
+
+        #region Constructor
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="bot">Bot.</param>
+        public User(Bot bot)
+        {
+            Bot = bot;
+        }
+        #endregion
+
+        #region Public Methods
         /// <summary>
         /// Returns true if the user as access to the command. Otherwise false.
         /// </summary>
@@ -65,7 +86,8 @@ namespace DeviantArt.Chat.Oberon
         /// <returns>True if authorized, otherwise false.</returns>
         public bool HasAccess(string command)
         {
-            return (AccessLevel >= Bot.Instance.Access.GetCommandLevel(command));
+            return (AccessLevel >= Bot.Access.GetCommandLevel(command));
         }
+        #endregion
     }
 }

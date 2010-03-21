@@ -9,6 +9,9 @@ using System.IO;
 
 namespace DeviantArt.Chat.Oberon
 {
+    /// <summary>
+    /// Default access levels for privclasses.
+    /// </summary>
     public enum PrivClassDefaults
     {
         Owner = 100,
@@ -19,6 +22,9 @@ namespace DeviantArt.Chat.Oberon
         Banned = 1
     }
 
+    /// <summary>
+    /// Class that represents a privclass.
+    /// </summary>
     public class PrivClass
     {
         /// <summary>
@@ -48,7 +54,10 @@ namespace DeviantArt.Chat.Oberon
         }
     }
 
-    public class AccessLevel
+    /// <summary>
+    /// Class that controls access to plugins and commands.
+    /// </summary>
+    public class AccessLevel : IAccessLevel
     {
         /// <summary>
         /// Holds list of user access levels.
@@ -66,8 +75,8 @@ namespace DeviantArt.Chat.Oberon
         private string AccessFile
         {
             get { return System.IO.Path.Combine(Bot.CurrentDirectory, "Config\\Access.config"); }
-        }
-
+        }     
+   
         /// <summary>
         /// Reference to bot.
         /// </summary>
@@ -98,13 +107,21 @@ namespace DeviantArt.Chat.Oberon
         /// <summary>
         /// Constructor.
         /// </summary>
-        public AccessLevel(Bot bot)
+        public AccessLevel()
+        {            
+        }
+
+        /// <summary>
+        /// Call to initialize settings based on other bot settings.
+        /// </summary>
+        /// <param name="bot">Bot to use to configure.</param>
+        public void InitializeFor(Bot bot)
         {
             Bot = bot;
 
             // set bot owner to have maximum privileges no matter what
             SetUserLevel(Bot.Owner, (int)PrivClassDefaults.Owner);
-        }        
+        }
 
         /// <summary>
         /// Gets the user access level.

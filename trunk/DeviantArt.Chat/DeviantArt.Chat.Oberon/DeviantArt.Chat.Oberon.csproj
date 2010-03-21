@@ -37,6 +37,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\ThirdPartyDlls\log4net.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Practices.ObjectBuilder2, Version=2.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Practices.Unity, Version=1.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -57,6 +59,8 @@
     <Compile Include="Chat.cs" />
     <Compile Include="Collections\RoomSettingCollection.cs" />
     <Compile Include="Console.cs" />
+    <Compile Include="Interfaces\IAccessLevel.cs" />
+    <Compile Include="Interfaces\IConsole.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

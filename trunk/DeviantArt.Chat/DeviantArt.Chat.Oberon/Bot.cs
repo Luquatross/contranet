@@ -12,6 +12,7 @@ using DeviantArt.Chat.Library;
 using System.Text;
 using System.Diagnostics;
 using System.CodeDom.Compiler;
+using Microsoft.Practices.Unity;
 
 namespace DeviantArt.Chat.Oberon
 {
@@ -103,7 +104,14 @@ namespace DeviantArt.Chat.Oberon
     public class Bot
     {
         #region Public Properties
+        /// <summary>
+        /// Time this instance of the bot was started.
+        /// </summary>
         public DateTime Start { get; private set; }
+
+        /// <summary>
+        /// General info about the bot.
+        /// </summary>
         public Dictionary<string, string> Info = new Dictionary<string, string>
         {
             { "Name", "Oberon" },
@@ -112,17 +120,67 @@ namespace DeviantArt.Chat.Oberon
             { "Release", "public" },
             { "Author", "bigmanhaywood" }
         };
+
+        /// <summary>
+        /// Username to log onto the chat network.
+        /// </summary>
         public string Username { get; private set; }
+
+        /// <summary>
+        /// Password used to log onto the chat network.
+        /// </summary>
         public string Password { get; private set; }
+
+        /// <summary>
+        /// The username for owner of the bot. 
+        /// </summary>
         public string Owner { get; private set; }
+
+        /// <summary>
+        /// Trigger to activate bot commands.
+        /// </summary>
         public string Trigger { get; private set; }
+
+        /// <summary>
+        /// String to describe this bot.
+        /// </summary>
         public string AboutString { get; private set; }
+
+        /// <summary>
+        /// Collection of chatrooms the bot will autojoin.
+        /// </summary>
         public string[] AutoJoin { get; private set; }
+
+        /// <summary>
+        /// The authentication cookie created when logging onto the server.
+        /// </summary>
         public HttpCookie AuthCookie { get; private set; }
-        public Console Console { get; private set; }
+
+        /// <summary>
+        /// Reference to class that outputs messages to the 
+        /// console window.
+        /// </summary>
+        public IConsole Console { get; private set; }
+
+        /// <summary>
+        /// The operating system version and information.
+        /// </summary>
         public string SystemString { get; private set; }
+
+        /// <summary>
+        /// The current session ID. Each time the bot is launched a 
+        /// new session ID will be generated.
+        /// </summary>
         public string Session { get; private set; }
+
+        /// <summary>
+        /// True if running in debug, otherwise false.
+        /// </summary>
         public bool IsDebug { get; private set; }
+
+        /// <summary>
+        /// Pointer to the console window instance.
+        /// </summary>
         public IntPtr ConsoleWindow { get; private set; }
 
         /// <summary>
@@ -142,7 +200,7 @@ namespace DeviantArt.Chat.Oberon
         /// <summary>
         /// Access levels for users and commands.
         /// </summary>
-        public AccessLevel Access;
+        public IAccessLevel Access;
 
         /// <summary>
         /// The current directory for the executing assembly.
@@ -173,6 +231,11 @@ namespace DeviantArt.Chat.Oberon
         #endregion
 
         #region Private Variables
+        /// <summary>
+        /// Inversion of control container.
+        /// </summary>
+        private IUnityContainer Container = new UnityContainer();
+
         /// <summary>
         /// Reference to dAmn library.
         /// </summary>
@@ -245,11 +308,13 @@ namespace DeviantArt.Chat.Oberon
         private TimeSpan packetWaitTime = TimeSpan.FromMinutes(5.00);
         #endregion
 
-        #region Constructor and Singleton Methods
+        #region Constructor
         /// <summary>
         /// Constructor. Initializes variables needed for bot.
         /// </summary>
-        private Bot()
+        /// <param name="access">AccessLevel manager.</param>
+        /// <param name="console">Console manager.</param>
+        public Bot(IAccessLevel access, IConsole console)
         {
             // Generate a session ID code.
             this.Session = Utility.SHA1(DateTime.Now.Ticks.ToString());
@@ -260,8 +325,8 @@ namespace DeviantArt.Chat.Oberon
             // System information string
             this.SystemString = Utility.GetOperatingSystemVersion();
 
-            // Get a new console interface
-            this.Console = new Console();
+            // Get a the console interface
+            this.Console = console;
 
             // set the reference to the console window itself
             this.ConsoleWindow = Process.GetCurrentProcess().MainWindowHandle;
@@ -292,6 +357,7 @@ namespace DeviantArt.Chat.Oberon
 
             // Load the dAmn interface
             dAmn = new dAmnNET();
+            dAmn.ReadTimeout = TimeSpan.FromSeconds(30.0);
 
             // get cookie information if needed
             if (!authTokenFromConfig)
@@ -322,7 +388,8 @@ namespace DeviantArt.Chat.Oberon
             InitializeEventMap();
 
             // create access level object
-            Access = new AccessLevel(this);
+            Access = access;
+            Access.InitializeFor(this);
             Access.DefaultUserAccessLevel = (int)PrivClassDefaults.Guests;
 
             // Now we're ready to get some work done!
@@ -331,17 +398,6 @@ namespace DeviantArt.Chat.Oberon
             // set up app domain resolve (needed for loading plugins!
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
         }
-
-        /// <summary>
-        /// Singleton instance of this class. Lazy-loading and thread-safe.
-        /// </summary>
-        /// <remarks>See http://www.yoda.arachsys.com/csharp/singleton.html</remarks>
-        public static readonly Bot Instance = new Bot();
-
-        /// <summary>
-        /// Explicit static constructor to tell C# compiler not to mark type as beforefieldinit.
-        /// </summary>
-        static Bot() { }
         #endregion
 
         #region Bot Config Methods
@@ -1122,7 +1178,7 @@ namespace DeviantArt.Chat.Oberon
                 IsRestarting = false;
 
                 // run until we the listening thread has stopped
-                if (listenThread.IsAlive)
+                if (listenThread != null && listenThread.IsAlive)
                 {
                     // listening thread has exited
                     ListeningStoppedEvent.WaitOne();
@@ -1437,6 +1493,42 @@ namespace DeviantArt.Chat.Oberon
                 }
             }
             return ayResult;
+        }
+        #endregion
+
+        #region Static Bootstrap Methods
+        /// <summary>
+        /// The running bot instance. WARNING! Use this sparingly, it introduces stronger
+        /// coupling into the system. 
+        /// </summary>
+        public static Bot Instance
+        {
+            get
+            {
+                if (_Instance == null)
+                    throw new NullReferenceException("The bot instance is null. You must call Setup() prior to using this instance.");
+                return _Instance;
+            }
+            set
+            {
+                _Instance = value;
+            }
+        }
+        private static Bot _Instance;
+
+        /// <summary>
+        /// Call this method to setup dependency injection for the Bot.
+        /// </summary>
+        /// <param name="container">Container to use.</param>
+        public static void Setup(IUnityContainer container)
+        {
+            // set up
+            container.RegisterType<IAccessLevel, AccessLevel>();
+            container.RegisterType<IConsole, Console>(new InjectionConstructor());
+            container.RegisterType<Bot>(new ContainerControlledLifetimeManager());     
+            
+            // save reference
+            Instance = container.Resolve<Bot>();
         }
         #endregion
     }

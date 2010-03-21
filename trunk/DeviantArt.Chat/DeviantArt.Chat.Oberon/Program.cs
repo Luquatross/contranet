@@ -6,11 +6,17 @@ using DeviantArt.Chat.Library;
 using System.Web;
 using System.Collections;
 using System.Runtime.InteropServices;
+using Microsoft.Practices.Unity;
+using System.Diagnostics;
 
 namespace DeviantArt.Chat.Oberon
 {
+    /// <summary>
+    /// Console interface for bot.
+    /// </summary>
     class Program
     {
+        #region Private Variables
         /// <summary>
         /// Reference to main bot.
         /// </summary>
@@ -20,7 +26,9 @@ namespace DeviantArt.Chat.Oberon
         /// Delegate for handling the console close event.
         /// </summary>
         private static ConsoleCloseEventHandler consoleCloseHandler;
+        #endregion
 
+        #region Main method
         /// <summary>
         /// Main.
         /// </summary>
@@ -29,8 +37,23 @@ namespace DeviantArt.Chat.Oberon
         {            
             try
             {
-                // create bot and start it
-                bot = Bot.Instance;
+                // ensure we only have one instance running
+                if (IsPriorProcessRunning())
+                {
+                    System.Console.WriteLine("HEY! Only one instance of the application can be started.");
+                    System.Console.WriteLine("Shutting down in 10 seconds.");
+                    System.Threading.Thread.Sleep(TimeSpan.FromSeconds(10.0));
+                    return;
+                }
+
+                // create on IoC container
+                IUnityContainer GlobalContainer = new UnityContainer();
+
+                // setup the default bot dependencies
+                Bot.Setup(GlobalContainer);
+
+                // get a reference to the bot
+                bot = GlobalContainer.Resolve<Bot>();
 
                 // set up the close handler
                 consoleCloseHandler = new ConsoleCloseEventHandler(Close);
@@ -44,8 +67,42 @@ namespace DeviantArt.Chat.Oberon
             }
             catch (Exception ex)
             {
+                // errors shouldn't bubble up to here, but if they do, fail gracfully.
                 System.Console.WriteLine(ex);
+                System.Threading.Thread.Sleep(TimeSpan.FromSeconds(10));
+                System.Console.WriteLine("Fatal Error occurred. Shutting down in 10 seconds...");
+
+                // dump exception to log file
+                try
+                {
+                    string currentDirectory = System.IO.Path.GetDirectoryName(
+                        System.Reflection.Assembly.GetExecutingAssembly().Location);
+                    string errorFile = System.IO.Path.Combine(currentDirectory, "error.log");
+                    System.IO.File.WriteAllText(errorFile, ex.ToString());
+                }
+                catch { }
             }
+        }
+        #endregion
+
+        #region Hrlper Methods
+        /// <summary>
+        /// Returns true if a prior process from the same executable is running. 
+        /// Otherwise false.
+        /// </summary>
+        /// <returns>True if a prior process from the same executable is running. 
+        /// Otherwise false.</returns>
+        static bool IsPriorProcessRunning()
+        {
+            Process curr = Process.GetCurrentProcess();
+            Process[] procs = Process.GetProcessesByName(curr.ProcessName);
+            foreach (Process p in procs)
+            {
+                if ((p.Id != curr.Id) &&
+                    (p.MainModule.FileName == curr.MainModule.FileName))
+                    return true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -78,6 +135,7 @@ namespace DeviantArt.Chat.Oberon
 
             return false;
         }
+        #endregion
 
         #region Unmanaged Code
         // Declare the SetConsoleCtrlHandler function
