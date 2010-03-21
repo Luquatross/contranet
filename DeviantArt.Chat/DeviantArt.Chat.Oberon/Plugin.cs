@@ -33,11 +33,6 @@ namespace DeviantArt.Chat.Oberon
 
         #region Protected Variables & Properties
         /// <summary>
-        /// Reference to the Bot instance that is running
-        /// </summary>
-        protected Bot Bot = Bot.Instance;
-
-        /// <summary>
         /// Settings for this plugin.
         /// </summary>
         protected Hashtable Settings = new Hashtable();        
@@ -60,6 +55,11 @@ namespace DeviantArt.Chat.Oberon
         #endregion
 
         #region Public Properties
+        /// <summary>
+        /// Reference to the Bot instance that is running
+        /// </summary>
+        public Bot Bot = Bot.Instance;
+
         /// <summary>
         /// Reference to the dAmn library, so we can send and received from the servers.
         /// </summary>
@@ -167,7 +167,9 @@ namespace DeviantArt.Chat.Oberon
             try
             {
                 BinaryFormatter bf = new BinaryFormatter();
+                OnPreSettingsDeserialization();
                 Settings = (Hashtable)bf.Deserialize(fs);
+                OnSettingsDeserialization();
             }
             catch (SerializationException ex)
             {
@@ -394,6 +396,18 @@ namespace DeviantArt.Chat.Oberon
                 ResourceManager.GetString(summaryKey),
                 ResourceManager.GetString(usageKey));
         }
+
+        /// <summary>
+        /// This method call occurs right before deserializing settings.
+        /// </summary>
+        protected virtual void OnPreSettingsDeserialization()
+        { }
+
+        /// <summary>
+        /// This method call occurs right after settings have been deserialized.
+        /// </summary>
+        protected virtual void OnSettingsDeserialization()
+        { }
         #endregion
     }
 }
