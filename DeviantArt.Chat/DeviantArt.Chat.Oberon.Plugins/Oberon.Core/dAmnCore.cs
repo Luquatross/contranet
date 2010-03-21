@@ -233,7 +233,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             }
             Bot.Console.Notice(string.Format("*** Bot has joined {0} *", chatroom));
             if (Bot.GetChatroom(chatroom) == null)
-                Bot.RegisterChatroom(chatroom, new Chat(chatroom));                
+                Bot.RegisterChatroom(chatroom, new Chat(chatroom, Bot));                
         }
 
         /// <summary>
@@ -274,7 +274,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 dAmnPacket.dAmnArgs a = dAmnPacket.dAmnArgs.getArgsNData(subPacket.body);
 
                 // create new user
-                User u = new User
+                User u = new User(Bot) 
                 {
                     Username = username,
                     PrivClass = a.args["pc"],
@@ -408,7 +408,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 dAmnPacket p = dAmnPacket.Parse(subPacket);
                 if (chat[p.param] == null)
                 {
-                    chat.RegisterUser(new User
+                    chat.RegisterUser(new User(Bot)
                     {
                         Username = p.param,
                         Realname = p.args["realname"],
