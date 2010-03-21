@@ -370,11 +370,15 @@ namespace DeviantArt.Chat.Library
 
             // connect to the server
             Socket = new TcpClient("chat.deviantart.com", 3900);
-            Socket.ReceiveTimeout = ReadTimeout.Milliseconds;
+            Socket.ReceiveTimeout = ReadTimeout.Milliseconds;  
+          
+            // set timeout on stream
+            NetworkStream stream = Socket.GetStream();
+            stream.ReadTimeout = Convert.ToInt32(ReadTimeout.TotalMilliseconds);
 
             // create writers
-            StreamWriter = new StreamWriter(Socket.GetStream());
-            StreamReader = new StreamReader(Socket.GetStream());
+            StreamWriter = new StreamWriter(stream);
+            StreamReader = new StreamReader(stream);            
 
             // do handshake
             PerformHandshake();
