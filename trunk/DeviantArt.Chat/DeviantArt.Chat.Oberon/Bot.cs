@@ -316,6 +316,12 @@ namespace DeviantArt.Chat.Oberon
         /// <param name="console">Console manager.</param>
         public Bot(IAccessLevel access, IConsole console)
         {
+            // check our variables
+            if (access == null)
+                throw new ArgumentNullException("access", "IAccessLevel cannot be null.");
+            if (console == null)
+                throw new ArgumentNullException("console", "IConsole cannot be null.");
+
             // Generate a session ID code.
             this.Session = Utility.SHA1(DateTime.Now.Ticks.ToString());
 
