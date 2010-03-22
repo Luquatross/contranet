@@ -95,7 +95,7 @@ namespace DeviantArt.Chat.Library
         private string _Agent = "damnNET/3.5";
         private string _Owner = "bigmanhaywood";
         private string _Trigger = "!";   
-        private TimeSpan _ReadTimeout = TimeSpan.FromMinutes(5.00);
+        private TimeSpan _ReadTimeout = TimeSpan.FromMinutes(1.00);
 
         private ILog Logger = LogManager.GetLogger(typeof(dAmnNET));
         private TcpClient Socket;
