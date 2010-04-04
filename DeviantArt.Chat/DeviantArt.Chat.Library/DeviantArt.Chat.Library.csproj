@@ -60,6 +60,7 @@
     <Compile Include="dAmnNET.cs" />
     <Compile Include="dAmnPacket.cs" />
     <Compile Include="dAmnServerPacket.cs" />
+    <Compile Include="dAmnSocket.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StringHelper.cs" />
   </ItemGroup>

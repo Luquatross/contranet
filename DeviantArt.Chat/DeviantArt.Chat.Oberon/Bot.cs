@@ -314,7 +314,8 @@ namespace DeviantArt.Chat.Oberon
         /// </summary>
         /// <param name="access">AccessLevel manager.</param>
         /// <param name="console">Console manager.</param>
-        public Bot(IAccessLevel access, IConsole console)
+        /// <param name="dAmn">dAmnNET connector.</param>
+        public Bot(IAccessLevel access, IConsole console, dAmnNET dAmn)
         {
             // check our variables
             if (access == null)
@@ -362,8 +363,8 @@ namespace DeviantArt.Chat.Oberon
             EnsureDirectoryStructure();
 
             // Load the dAmn interface
-            dAmn = new dAmnNET();
-            dAmn.ReadTimeout = TimeSpan.FromSeconds(30.0);
+            this.dAmn = dAmn;
+            this.dAmn.ReadTimeout = TimeSpan.FromSeconds(30.0);
 
             // get cookie information if needed
             if (!authTokenFromConfig)
@@ -1236,6 +1237,13 @@ namespace DeviantArt.Chat.Oberon
                     // if we got the auth token from the config it may have expired.
                     // in that case, get a new one.
                     AuthCookie = dAmn.GetAuthCookie(Username, Password);
+                    if (AuthCookie == null)
+                    {
+                        // something happened where we couldn't retrieve the cookie...have to shut it down
+                        Console.Warning("Unable to retrieve login cookie from dAmn servers.");
+                        DisplayShutdownWarning();
+                        return;
+                    }
                     dAmn.AuthCookie = AuthCookie;
                     authTokenFromConfig = false;
 
@@ -1247,10 +1255,7 @@ namespace DeviantArt.Chat.Oberon
                 }
                 else
                 {
-                    Console.Warning("Unable to connect to dAmn server!");
-                    Console.Warning("Check the bot core logs for any errors and try again.");
-                    Console.Warning("Bot will shutdown in 10 seconds.");
-                    Thread.Sleep(TimeSpan.FromSeconds(10.0));
+                    DisplayShutdownWarning();
                     return;
                 }
             }
@@ -1319,6 +1324,17 @@ namespace DeviantArt.Chat.Oberon
 
             // show that we're not running any more
             IsAlive = false;
+        }
+
+        /// <summary>
+        /// Displays a shutdown warning to the user.
+        /// </summary>
+        private void DisplayShutdownWarning()
+        {
+            Console.Warning("Unable to connect to dAmn server!");
+            Console.Warning("Check the bot core logs for any errors and try again.");
+            Console.Warning("Bot will shutdown in 10 seconds.");
+            Thread.Sleep(TimeSpan.FromSeconds(10.0));
         }
         #endregion
 
@@ -1531,6 +1547,7 @@ namespace DeviantArt.Chat.Oberon
             // set up
             container.RegisterType<IAccessLevel, AccessLevel>();
             container.RegisterType<IConsole, Console>(new InjectionConstructor());
+            container.RegisterType<IdAmnSocket, dAmnSocket>();
             container.RegisterType<Bot>(new ContainerControlledLifetimeManager());     
             
             // save reference

@@ -92,4 +92,8 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <PropertyGroup>
+    <PostBuildEvent>xcopy /y *.exe ..\..\..\Executables\Debug\
+xcopy /y *.dll ..\..\..\Executables\Debug\</PostBuildEvent>
+  </PropertyGroup>
 </Project>

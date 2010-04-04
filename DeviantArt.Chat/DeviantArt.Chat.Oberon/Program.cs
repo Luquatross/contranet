@@ -68,9 +68,9 @@ namespace DeviantArt.Chat.Oberon
             catch (Exception ex)
             {
                 // errors shouldn't bubble up to here, but if they do, fail gracfully.
-                System.Console.WriteLine(ex);
-                System.Threading.Thread.Sleep(TimeSpan.FromSeconds(10));
+                System.Console.WriteLine(ex);               
                 System.Console.WriteLine("Fatal Error occurred. Shutting down in 10 seconds...");
+                System.Threading.Thread.Sleep(TimeSpan.FromSeconds(10));
 
                 // dump exception to log file
                 try
