@@ -98,11 +98,22 @@ namespace DeviantArt.Chat.Library
         private TimeSpan _ReadTimeout = TimeSpan.FromMinutes(1.00);
 
         private ILog Logger = LogManager.GetLogger(typeof(dAmnNET));
-        private TcpClient Socket;
+        private IdAmnSocket Socket;
         private StreamReader StreamReader;
         private StreamWriter StreamWriter;
         private string AuthToken;
         private byte[] readBuffer = new byte[1024];              
+        #endregion
+
+        #region Constructor
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="socket">Socket to use for the connection.</param>
+        public dAmnNET(IdAmnSocket socket)
+        {
+            Socket = socket;
+        }
         #endregion
 
         #region Send / Receive Methods
@@ -369,8 +380,8 @@ namespace DeviantArt.Chat.Library
             }
 
             // connect to the server
-            Socket = new TcpClient("chat.deviantart.com", 3900);
-            Socket.ReceiveTimeout = ReadTimeout.Milliseconds;  
+            Socket.Open();
+            Socket.ReceiveTimeout = Convert.ToInt32(ReadTimeout.TotalMilliseconds);
           
             // set timeout on stream
             NetworkStream stream = Socket.GetStream();
