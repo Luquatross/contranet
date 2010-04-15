@@ -364,7 +364,7 @@ namespace DeviantArt.Chat.Oberon
 
             // Load the dAmn interface
             this.dAmn = dAmn;
-            this.dAmn.ReadTimeout = TimeSpan.FromSeconds(30.0);
+            this.dAmn.ReadTimeout = TimeSpan.FromMinutes(5.0);
 
             // get cookie information if needed
             if (!authTokenFromConfig)
