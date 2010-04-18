@@ -169,6 +169,22 @@ namespace DeviantArt.Chat.Oberon
             List<string> directories = new List<string>(path.Split(Path.DirectorySeparatorChar));
             return directories.Contains(directory);
         }
+
+        /// <summary>
+        /// Replaces the tokens {channel}, {ns}, {from} with their substitutions.
+        /// </summary>
+        /// <param name="message">Message to format.</param>
+        /// <param name="chatroom">Chatroom.</param>
+        /// <param name="from">Message is from.</param>
+        /// <returns>Formatted string with tokens replaced.</returns>
+        public static string FormatMessage(string message, string chatroom, string from)
+        {
+            message = message.Replace("{channel}", chatroom);
+            message = message.Replace("{ns}", chatroom);
+            message = message.Replace("{from}", from);
+
+            return message;
+        }
         #endregion
 
         #region Extension Methods
