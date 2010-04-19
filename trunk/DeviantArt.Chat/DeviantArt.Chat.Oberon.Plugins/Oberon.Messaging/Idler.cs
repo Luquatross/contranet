@@ -114,6 +114,16 @@ namespace DeviantArt.Chat.Oberon.Plugins
         public List<string> KickMessages { get; set; }
 
         /// <summary>
+        /// Users who are excluded from idle messages.
+        /// </summary>
+        public List<string> ExcludedUsers { get; set; }
+
+        /// <summary>
+        /// Priv classes which are excluded from idle messages.
+        /// </summary>
+        public List<string> ExcludedPrivClasses { get; set; }
+
+        /// <summary>
         /// Maximum amount of time a user can idle before getting
         /// messaged or kicked.
         /// </summary>
@@ -133,6 +143,8 @@ namespace DeviantArt.Chat.Oberon.Plugins
             Enabled = false;
             IdleMessages = new List<string>();
             KickMessages = new List<string>();
+            ExcludedUsers = new List<string>();
+            ExcludedPrivClasses = new List<string>();
             MaxIdleTime = TimeSpan.MaxValue;
             Action = IdlerAction.NotSet;
         }
@@ -159,6 +171,27 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 return string.Empty;
             else
                 return KickMessages[Randomizer.Next(KickMessages.Count)];
+        }
+
+        /// <summary>
+        /// Returns true if the user is excluded from idle message. Otherwise false.
+        /// </summary>
+        /// <param name="username">Username to check.</param>
+        /// <param name="room">Room to check for.</param>
+        /// <returns>True if the user is excluded from idle message. Otherwise false.</returns>
+        public bool IsUserExcluded(string username, string room)
+        {
+            // first check users
+            if (ExcludedUsers.Contains(username))
+                return true;
+
+            // next check privclass
+            Chat chat = Bot.Instance.GetChatroom(room);
+            User user = chat.GetUser(username);
+            if (user == null)
+                return true; // if the user has signed off in the time it took to check, then yeah, they're excluded            
+            else
+                return ExcludedPrivClasses.Contains(user.PrivClass);            
         }
     }
 
@@ -235,7 +268,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     continue;
 
                 // if idling is enabled and enough time has elapsed
-                if (settings.Enabled && DateTime.Now - idleData.TimeOfLastChat > settings.MaxIdleTime)
+                if (settings.Enabled && !settings.IsUserExcluded(user, room) && DateTime.Now - idleData.TimeOfLastChat > settings.MaxIdleTime)
                 {
                     string message = null;
                     switch (settings.Action)
@@ -449,11 +482,19 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     say.Append("** Idle messages have been turned off. *");
                     break;
                 case "settings":
+                    string excludedUsers = string.Join(", ", settings.ExcludedUsers.ToArray());
+                    excludedUsers = excludedUsers.Length == 0 ? "no users" : excludedUsers;
+
+                    string excludedPrivs = string.Join(", ", settings.ExcludedPrivClasses.ToArray());
+                    excludedPrivs = excludedPrivs.Length == 0 ? "no priv classes" : excludedPrivs;
+
                     say.Append("<u><b>Idle settings</b></u>:<sub><br />");
                     say.AppendFormat("enabled : <b>{0}</b><br />", settings.Enabled);
                     say.AppendFormat("time : <b>{0} minute(s)</b><br />", Math.Round(settings.MaxIdleTime.TotalMinutes));
                     say.AppendFormat("action : <b>{0}</b><br />", GetIdleActionString(settings.Action));
-                    say.AppendFormat("msgs : <b>{0} msgs, {1} kick msgs</b><br />", settings.IdleMessages.Count, settings.KickMessages.Count);                    
+                    say.AppendFormat("msgs : <b>{0} msgs, {1} kick msgs</b><br />", settings.IdleMessages.Count, settings.KickMessages.Count);
+                    say.AppendFormat("excluded users : <b>{0}</b><br />", excludedUsers);
+                    say.AppendFormat("excluded privs : <b>{0}</b><br />", excludedPrivs);
                     break;
                 case "list":
                     say.Append("<u><b>Idle messages:</b></u>:<sub><br />");
@@ -519,6 +560,34 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     settings.KickMessages.Add(addKickMsg);
                     say.Append("New message has been added to kick messages successfully.");
                     break;
+                case "add-exclude-user":
+                    if (string.IsNullOrEmpty(var1))
+                    {
+                        Respond(ns, from, "Please provide a username.");
+                        return;
+                    }
+                    if (settings.ExcludedUsers.Contains(var1))
+                    {
+                        Respond(ns, from, "User is alrady in the exlude list.");
+                        return;
+                    }
+                    settings.ExcludedUsers.Add(var1);
+                    say.AppendFormat("User '{0}' added to exclude list successfully.", var1);
+                    break;
+                case "add-exclude-priv":
+                    if (string.IsNullOrEmpty(var1))
+                    {
+                        Respond(ns, from, "Please provide a priv class.");
+                        return;
+                    }
+                    if (settings.ExcludedPrivClasses.Contains(var1))
+                    {
+                        Respond(ns, from, "Priv class is alrady in the exlude list.");
+                        return;
+                    }
+                    settings.ExcludedPrivClasses.Add(var1);
+                    say.AppendFormat("Priv class '{0}' added to exclude list successfully.", var1);
+                    break;
                 case "remove":
                     int removeIndex = -1;
                     bool removeIndexResult = int.TryParse(var1, out removeIndex);
@@ -541,6 +610,28 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     settings.KickMessages.RemoveAt(removeIndex2);
                     say.AppendFormat("Kick message at index {0} was successfully removed.", removeIndex2);
                     break;
+                case "remove-exclude-user":
+                    int removeIndex3 = -1;
+                    bool removeIndexResult3 = int.TryParse(var1, out removeIndex3);
+                    if (removeIndexResult3 == false || removeIndex3 < 0 || removeIndex3 >= settings.ExcludedUsers.Count)
+                    {
+                        Respond(ns, from, "Invalid index!");
+                        return;
+                    }
+                    settings.ExcludedUsers.RemoveAt(removeIndex3);
+                    say.AppendFormat("Exluded user at index {0} was successfully removed.", removeIndex3);
+                    break;
+                case "remove-exclude-priv":
+                    int removeIndex4 = -1;
+                    bool removeIndexResult4 = int.TryParse(var1, out removeIndex4);
+                    if (removeIndexResult4 == false || removeIndex4 < 0 || removeIndex4 >= settings.ExcludedPrivClasses.Count)
+                    {
+                        Respond(ns, from, "Invalid index!");
+                        return;
+                    }
+                    settings.ExcludedPrivClasses.RemoveAt(removeIndex4);
+                    say.AppendFormat("Exluded priv class at index {0} was successfully removed.", removeIndex4);
+                    break;  
                 default:
                     ShowHelp(ns, from, "idle");
                     return;
