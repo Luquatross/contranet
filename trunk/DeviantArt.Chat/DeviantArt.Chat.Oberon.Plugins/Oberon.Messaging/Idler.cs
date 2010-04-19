@@ -216,7 +216,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
         }
         #endregion
 
-        #region Helper Methods        
+        #region Helper Methods
         private void TimerElapsed(object sender, EventArgs e)
         {
             foreach (KeyValuePair<string, IdleData> item in IdleTracking)
