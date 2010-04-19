@@ -37,6 +37,9 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Speech">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -51,6 +54,7 @@
     <Compile Include="MsnNotify.cs" />
     <Compile Include="ImNotifyBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="VoiceNotify.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\DeviantArt.Chat.Library\DeviantArt.Chat.Library.csproj">
