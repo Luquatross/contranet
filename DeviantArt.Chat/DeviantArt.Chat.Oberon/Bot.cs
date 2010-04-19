@@ -1007,6 +1007,30 @@ namespace DeviantArt.Chat.Oberon
         }
 
         /// <summary>
+        /// Restarts all registered plugins.
+        /// </summary>
+        private void RestartPlugins()
+        {
+            // call the restart method on each of our plugins
+            Console.Notice("Restarting plugins. Please wait...");
+            foreach (Plugin plugin in botPlugins.Values.ToArray())
+            {
+                try
+                {
+                    plugin.Restart();
+                }
+                catch (Exception ex)
+                {
+                    // log the exception
+                    Console.Log(string.Format("Error occurred during plugin restart.\nPlugin Name: {0}\nException: {1}",
+                        plugin.PluginName,
+                        ex.ToString()));
+                }
+            }
+            Console.Notice("All plugins have been restarted.");
+        }
+
+        /// <summary>
         /// Shuts down all registered plugins.
         /// </summary>
         private void ShutdownPlugins()
@@ -1176,6 +1200,9 @@ namespace DeviantArt.Chat.Oberon
 
                     // output debug message
                     Console.Debug("IsRestarting set to true. Restarting bot.");
+
+                    // restart plugins
+                    RestartPlugins();
                 }
 
                 // start up the bot

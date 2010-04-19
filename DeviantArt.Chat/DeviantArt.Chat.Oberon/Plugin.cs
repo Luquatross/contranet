@@ -146,6 +146,14 @@ namespace DeviantArt.Chat.Oberon
         }
 
         /// <summary>
+        /// This method is called when the bot has restarted. Plugin authors can override
+        /// this method to run custom functionality after a bot restart.
+        /// </summary>
+        public virtual void Restart()
+        {
+        }
+
+        /// <summary>
         /// Get a unique key for this plugin. Is the plugin name with all spaces and special 
         /// characters removed.
         /// </summary>
