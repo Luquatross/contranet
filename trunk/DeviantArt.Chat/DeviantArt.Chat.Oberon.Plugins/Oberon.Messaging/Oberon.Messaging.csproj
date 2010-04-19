@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{D69237F5-2D8A-4212-BC02-28E22018D3AC}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="AwayMessage.cs" />
     <Compile Include="BotAway.cs" />
+    <Compile Include="Idler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Welcome.cs" />
     <Compile Include="WelcomeSettings.cs" />
