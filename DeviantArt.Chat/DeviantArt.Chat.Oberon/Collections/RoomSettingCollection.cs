@@ -41,17 +41,6 @@ namespace DeviantArt.Chat.Oberon.Collections
         public Dictionary<string, bool> AllowPrivClassSettings = new Dictionary<string, bool>();
         #endregion
 
-        #region Public Variables
-        /// <summary>
-        /// Reference to the Bot.
-        /// </summary>
-        public Bot Bot
-        {
-            get;
-            set;
-        }
-        #endregion
-
         #region Constructor
         /// <summary>
         /// Constructor.
@@ -91,7 +80,7 @@ namespace DeviantArt.Chat.Oberon.Collections
         public T Get(string chatroom, string username)
         {
             // get the user 
-            User user = Bot.GetChatroom(chatroom)[username];
+            User user = Bot.Instance.GetChatroom(chatroom)[username];
 
             // get room string
             string room = "room_" + chatroom + "_";
