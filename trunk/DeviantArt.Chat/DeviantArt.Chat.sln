@@ -14,6 +14,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{69C050B3-9588-4EFA-9193-E4E0E02623BB}"
 	ProjectSection(SolutionItems) = preProject
 		Oberon.build = Oberon.build
+		Readme.txt = Readme.txt
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "HelperProjects", "HelperProjects", "{9D9AEE3A-27E0-464B-8FDF-C9D193AD3114}"
@@ -31,6 +32,11 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSNPSharp", "HelperProjects\MsnpSharp\MSNPSharp\MSNPSharp.csproj", "{97CB2DC7-2FE8-4AF5-84D0-6B9872A5E960}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Oberon.DeviantInfo", "DeviantArt.Chat.Oberon.Plugins\Oberon.DeviantInfo\Oberon.DeviantInfo.csproj", "{EC4772AB-E142-4089-BC05-D5CA18D79496}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{DE162B2E-6FCF-4E45-85D9-343CB32E683D}"
+	ProjectSection(SolutionItems) = preProject
+		Documentation\Documentation.build = Documentation\Documentation.build
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
