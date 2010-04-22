@@ -21,3 +21,7 @@
 .wikistyle pre.console code{padding:0!important;font-size:100%!important;background-color:black!important;border:none!important;color:white!important;}
 .wikistyle pre.console span{color:#888!important;}
 .wikistyle pre.console span.command{color:yellow!important;}
+.wikistyle .toc{background-color: #efefef;border:solid 1px #ccc;}
+.wikistyle .toc h4{color:#555;font-size:1.12em;font-weight:bold;}
+.wikistyle .toc ol { padding-left:0px;}
+.wikistyle ul{padding-left:10px;}
