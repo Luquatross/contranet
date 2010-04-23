@@ -42,35 +42,15 @@
 			in any way they see fit. Oberon is very simple to set up and comes with a wide array of plugins ready for use, right out of the box. Plugins that are difficult or just
 			straight impossible to create using a web-server based bot.</p>
 			
-			<p>Sounds pretty sweet, eh?</p>
+			
 						
         </div>
-
-		<div id="toc" class="span-6 wikistyle last">
-			<div class="toc padding-10">
-				<h4>Contents at a Glance</h4>			
-				<ol>
-					<li><a href="#disclaimer">Disclaimer</a></li>
-					<li><a href="#features">Features</a></li>
-					<li><a href="#installation">Installation</a>
-						<ol>
-							<li><a href="#files">Files for Oberon</a></li>
-						</ol>
-					</li>
-					<li><a href="#config">Configuration</a>
-						<ol>
-							<li><a href="#first-time-config">1st-time Bot Configuration</a></li>
-							<li><a href="#norma-config">Normal Bot Configuration</a></li>
-							<li><a href="#logging-config">Logging Configuration</a></li>
-						</ol>
-					</li>					
-				</ol>
-			</div>
-		</div>
 		
-		<div id="content" class="span-17 wikistyle padding-10 last">
-			<p>First things first...</p>
-			
+	  <div id="content" class="span-17 wikistyle padding-10 last" style="padding-left:0px">
+        	<p>Sounds pretty sweet, eh?</p>
+            
+            <p>Well, before we dive in, let's get the necessaries out of the way...</p>
+        	
 			<h2>Disclaimer</h2><a name="disclaimer"></a>
 			<p>By using the software, you accept these terms. If you do not accept them, do not use the software.</p>
 			<p>Install at your own risk. This is beta software that is not guaranteed to be stable. This software may
@@ -95,15 +75,13 @@
 			
 			<h2>Installation</h2><a name="installation"></a>
 			
-			<p>Download the Oberon zip file to wherever you want the files to live. Make sure that <a href="http://www.microsoft.com/downloads/details.aspx?FamilyId=333325fd-ae52-4e35-b531-508d977d32a6&displaylang=en">Microsoft .NET Framework 3.5</a>
-			is installed on your system. 
-			</p>
+			<p>First, make sure that <a href="http://www.microsoft.com/downloads/details.aspx?FamilyId=333325fd-ae52-4e35-b531-508d977d32a6&amp;displaylang=en">Microsoft .NET Framework 3.5</a> is installed on your system. Then download the Oberon zip file to wherever you want the files to live. Extract all the files to a directory.			</p>
 			
-			<p>You're all set!</p>
+		  <p>You're all set!</p>
 		
 			<h3>Files for Oberon</h3>
 		
-			<p>The bot has a few files and directories that need to be present in order to run correctly. Make sure the below are all present.</p>
+			<p>The bot has a few files and directories that need to be present in order to run correctly. If you are having problems with the bot not starting or behaving incorrectly, then make sure the files below are all present.</p>
 			<p><strong>Main files:</strong></p>
 			<ul>
 				<li>Oberon.exe</li>
@@ -136,13 +114,57 @@
 			
 			<a name="normal-config"></a>
 			<h3>Normal Bot Configuraton:</h3>
-			<p>There's nothing in this section that you are required to change. But you can if you want! After running for the first time the bot will save some config files. In the <code>/Config</code> directory open <code>Bot.config</code>.</p>
-			<img src="SupportingFiles/botconfig.gif" alt="Configuration Example" class="padding-5" />
+			<p>There's nothing essential to the running of the bot you are required to change. It will run fine as-is. But if you want to tweak some settings here's how to do it. After running for the first time the bot will save some config files. In the <code>/Config</code> directory open <code>Bot.config</code>.</p>
+		  <pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;<br />&lt;botSettings&gt;<br />  &lt;general&gt;<br />    &lt;add key=&quot;username&quot; value=&quot;botusername&quot; /&gt;<br />    &lt;add key=&quot;password&quot; value=&quot;botpassword&quot; /&gt;<br />    &lt;add key=&quot;trigger&quot; value=&quot;%%&quot; /&gt;<br />    &lt;add key=&quot;owner&quot; value=&quot;muysername&quot; /&gt;<br />    &lt;add key=&quot;debug&quot; value=&quot;true&quot; /&gt;<br />  &lt;/general&gt;<br />  &lt;about&gt;&lt;![CDATA[&lt;b&gt;%N% %V%%S%&lt;/b&gt; (%R% release)&lt;br/&gt;&lt;sub&gt;&lt;b&gt;Author:&lt;/b&gt; :dev%A%:; &lt;b&gt;Owner:&lt;/b&gt; :dev%O%:; &lt;b&gt;Trigger:&lt;/b&gt; %T%&lt;br/&gt;&lt;b&gt;%D%&lt;/b&gt;&lt;/sub&gt;]]&gt;&lt;/about&gt;<br />  &lt;autoJoins&gt;<br />    &lt;add channel=&quot;thefreechat&quot; /&gt;<br />  &lt;/autoJoins&gt;<br />  &lt;cookieData&gt;<br />    &lt;add key=&quot;uniqueid&quot; value=&quot;3cc137a69e23188725e4bed9229aca50&quot; /&gt;<br />    &lt;add key=&quot;visitcount&quot; value=&quot;0&quot; /&gt;<br />    &lt;add key=&quot;visittime&quot; value=&quot;0&quot; /&gt;<br />    &lt;add key=&quot;username&quot; value=&quot;botusername&quot; /&gt;<br />    &lt;add key=&quot;authtoken&quot; value=&quot;3d63872ee10f3b20bc989536a2e0b614&quot; /&gt;<br />  &lt;/cookieData&gt;<br/>&lt;/botSettings&gt;</pre>
 			<p>Here you can modify all the settings you put in the first time: username, password, trigger, autojoin rooms, etc. You can also change
 			the about string so that when a user asks about the bot, it will respond with that information.</p>
 			
 			<a name="logging-config"></a>
 			<h3>Logging Configuration</h3>
+            <p>Oberon uses the library<a href="http://logging.apache.org/log4net/index.html"> log4net</a> to handle all of it's internal logging. The configuration for log4net live in the <code>/Config/Log.config</code> file. The only setting need to be tweaked in this config file is the debugging level. In that config file you may see some XML similar to this:</p>
+            <pre>&lt;level value=&quot;INFO&quot; /&gt;</pre>
+            <p>You can change this value to any of the following:</p>
+            <ul>
+            	<li>ALL</li>
+            	<li>DEBUG</li>
+            	<li>INFO</li>
+            	<li>WARN</li>
+            	<li>ERROR</li>
+            	<li>FATAL</li>
+            	<li>OFF</li>
+            </ul>
+			<p>I suggest using the setting "INFO". If you are have some strange behavior from the bot, set it to "DEBUG" to get extensive logging data. See the <a href="http://logging.apache.org/log4net/release/manual/introduction.html">online manual</a> for a detailed explanation of rhe different logging levels.</p>
+            
+        <h2>Commands</h2>
+            
+            <p>We've covered the installation and configuration, let's get down now to the nitty gritty. The way to manually interact with the bot via a chatroom is by using commands. A command is any string that a user writes in the chatroom that starts with the bot's trigger. The bot's trigger is configured when you first run the bot, and can be changed by changing the <code>/Config/Bot.config</code> file. It can be any string. So for example, let's say our bot's trigger wa &quot;~&quot;. A command might be:</p>
+            <pre>13:18:14 &lt;bigmanhaywood&gt; ~time</pre>
+            <p>What we've done here is ask the bot what it's current time is. It saw the trigger at the start of the message and knew that we were talking to it. Now that we've "triggered" a response, in the chatroom, the bot will respond with it's current time.</p>
+            
+            <h3>Command Help</h3>
+            <p>Keeping track of each command in the system and what it does can be nearly impossible. And that's where command help comes in.</p>
+	  </div>
+      
+      <div id="toc" class="span-6 wikistyle last">
+			<div class="toc padding-10">
+				<h4>Contents at a Glance</h4>			
+				<ol>
+					<li><a href="#disclaimer">Disclaimer</a></li>
+					<li><a href="#features">Features</a></li>
+					<li><a href="#installation">Installation</a>
+						<ol>
+							<li><a href="#files">Files for Oberon</a></li>
+						</ol>
+					</li>
+					<li><a href="#config">Configuration</a>
+						<ol>
+							<li><a href="#first-time-config">1st-time Bot Configuration</a></li>
+							<li><a href="#norma-config">Normal Bot Configuration</a></li>
+							<li><a href="#logging-config">Logging Configuration</a></li>
+						</ol>
+					</li>					
+				</ol>
+			</div>
 		</div>
 	</div>
   </body>
