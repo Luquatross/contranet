@@ -228,6 +228,11 @@ namespace DeviantArt.Chat.Oberon
         /// Sorter for event listeners so that events are relayed in the correct order.
         /// </summary>
         public BotEventSorter EventListenerSorter { get; set; }
+
+        /// <summary>
+        /// List of users who the bot will ignore.
+        /// </summary>
+        public List<string> IgnoredUsers { get; private set; }
         #endregion
 
         #region Private Variables
@@ -305,7 +310,7 @@ namespace DeviantArt.Chat.Oberon
         /// <summary>
         /// The amount of time to wait for a new packet to arrive.
         /// </summary>
-        private TimeSpan packetWaitTime = TimeSpan.FromMinutes(5.00);
+        private TimeSpan packetWaitTime = TimeSpan.FromMinutes(5.00);        
         #endregion
 
         #region Constructor
@@ -337,6 +342,9 @@ namespace DeviantArt.Chat.Oberon
 
             // set the reference to the console window itself
             this.ConsoleWindow = Process.GetCurrentProcess().MainWindowHandle;
+
+            // init ignored user list
+            this.IgnoredUsers = new List<string>();
 
             // Some introduction messages! We've already done quite a bit but only introduce things here...
             this.Console.Notice("Hey thar!");
@@ -397,7 +405,7 @@ namespace DeviantArt.Chat.Oberon
             // create access level object
             Access = access;
             Access.InitializeFor(this);
-            Access.DefaultUserAccessLevel = (int)PrivClassDefaults.Guests;
+            Access.DefaultUserAccessLevel = (int)PrivClassDefaults.Guests;            
 
             // Now we're ready to get some work done!
             Console.Notice("Ready!");
@@ -448,6 +456,12 @@ namespace DeviantArt.Chat.Oberon
             foreach (XmlNode data in cookieData)
                 AuthCookie.Values.Add(data.Attributes["key"].Value, data.Attributes["value"].Value);
 
+            // get ignored users
+            IgnoredUsers.Clear();
+            XmlNodeList ignoredUserNodes = root.SelectNodes("ignoredUsers/add");
+            foreach (XmlNode ignoreNode in ignoredUserNodes)
+                IgnoredUsers.Add(ignoreNode.Attributes["username"].Value);
+
             return true;
         }
 
@@ -471,6 +485,11 @@ namespace DeviantArt.Chat.Oberon
             foreach (Plugin plugin in botPlugins.Values)
                 pluginElements.Add(new XElement("add", new XAttribute("key", plugin.PluginName), new XAttribute("value", plugin.Status.ToString("G"))));
 
+            // get ignored users
+            List<XElement> ignoredUserElements = new List<XElement>();
+            foreach (string ignoredUser in IgnoredUsers)
+                ignoredUserElements.Add(new XElement("add", new XAttribute("username", ignoredUser)));
+
             // construct document in linq to xml
             XDocument botConfig = new XDocument(
                 new XDeclaration("1.0", "utf-8", ""),
@@ -491,7 +510,8 @@ namespace DeviantArt.Chat.Oberon
                             new XElement("add", new XAttribute("key", "username"), new XAttribute("value", AuthCookie.Values["username"])),
                             new XElement("add", new XAttribute("key", "authtoken"), new XAttribute("value", AuthCookie.Values["authtoken"]))
                         ),
-                        new XElement("plugins", pluginElements)
+                        new XElement("plugins", pluginElements),
+                        new XElement("ignoredUsers", ignoredUserElements)
                     )
                 );
             botConfig.Save(ConfigPath);

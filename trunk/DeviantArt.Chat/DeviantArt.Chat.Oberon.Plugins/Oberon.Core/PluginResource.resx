@@ -287,4 +287,12 @@ delprivclass [name]
   <data name="Debug.Usage" xml:space="preserve">
     <value>debug [on | off]</value>
   </data>
+  <data name="Ignore.Summary" xml:space="preserve">
+    <value>Manages users the bot is set to ignore.</value>
+  </data>
+  <data name="Ignore.Usage" xml:space="preserve">
+    <value>ignore list - Lists ignored users
+ignore add [user] - Adds a user to the ignore list
+ignore remove [user] - Removes a user from the ignore list</value>
+  </data>
 </root>

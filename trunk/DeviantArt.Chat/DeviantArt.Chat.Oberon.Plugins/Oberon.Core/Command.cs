@@ -72,6 +72,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             RegisterCommand("saveconfig", new BotCommandEvent(SaveConfig), GetCommandHelp("SaveConfig.Summary", "SaveConfig.Usage"), (int)PrivClassDefaults.Operators);
             RegisterCommand("sudo", new BotCommandEvent(Sudo), GetCommandHelp("Sudo.Summary", "Sudo.Usage"), (int)PrivClassDefaults.Owner);
             RegisterCommand("debug", new BotCommandEvent(Debug), GetCommandHelp("Debug.Summary", "Debug.Usage"), (int)PrivClassDefaults.Operators);
+            RegisterCommand("ignore", new BotCommandEvent(Ignore), GetCommandHelp("Ignore.Summary", "Ignore.Usage"), (int)PrivClassDefaults.Operators);
         }
         #endregion
 
@@ -819,6 +820,59 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
             // notify user
             Respond(ns, from, string.Format("** Bot debug staus has been set to '{0}' *", message));
+        }
+
+        private void Ignore(string ns, string from, string message)
+        {
+            string[] args = GetArgs(message);
+            string subCommand = GetArg(args, 0);
+            string value = GetArg(args, 1);
+
+            switch (subCommand)
+            {
+                case "list":
+                    if (Bot.IgnoredUsers.Count == 0)
+                    {
+                        Respond(ns, from, "The ignored user list is empty.");
+                        return;
+                    }
+                    else
+                    {
+                        StringBuilder output = new StringBuilder("<b><u>Ignored Users</u></b>:<ul>");
+                        foreach (string username in Bot.IgnoredUsers)
+                            output.AppendFormat("<li><sub>{0}</sub></li>", username);
+                        output.Append("</ul>");
+                    }
+                    break;
+                case "add":
+                    if (string.IsNullOrEmpty(value))
+                    {
+                        Respond(ns, from, "Please provide a username to add.");
+                        return;
+                    }
+                    if (Bot.IgnoredUsers.Contains(value))
+                    {
+                        Respond(ns, from, "This username is already in the ignored list.");
+                        return;
+                    }
+                    Bot.IgnoredUsers.Add(value);
+                    Respond(ns, from, string.Format("** The username '{0}' has been added to the ignore list *", value));
+                    break;
+                case "remove":
+                    if (string.IsNullOrEmpty(value))
+                    {
+                        Respond(ns, from, "Please provide a username to remove.");
+                        return;
+                    }
+                    if (!Bot.IgnoredUsers.Contains(value))
+                    {
+                        Respond(ns, from, "This username is not in the ignored list.");
+                        return;
+                    }
+                    Bot.IgnoredUsers.Remove(value);
+                    Respond(ns, from, string.Format("** The username '{0}' has been removed from the ignore list *", value));
+                    break;
+            }
         }
         #endregion
     }

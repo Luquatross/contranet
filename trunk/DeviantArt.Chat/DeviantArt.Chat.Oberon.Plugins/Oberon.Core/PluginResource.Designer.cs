@@ -233,6 +233,26 @@ namespace DeviantArt.Chat.Oberon.Plugins {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Manages users the bot is set to ignore..
+        /// </summary>
+        internal static string Ignore_Summary {
+            get {
+                return ResourceManager.GetString("Ignore.Summary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ignore list - Lists ignored users
+        ///ignore add [user] - Adds a user to the ignore list
+        ///ignore remove [user] - Removes a user from the ignore list.
+        /// </summary>
+        internal static string Ignore_Usage {
+            get {
+                return ResourceManager.GetString("Ignore.Usage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Makes the bot join the provided chatroom..
         /// </summary>
         internal static string Join_Summary {
