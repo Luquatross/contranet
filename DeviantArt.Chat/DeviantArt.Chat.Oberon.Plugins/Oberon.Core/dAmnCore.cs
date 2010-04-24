@@ -104,6 +104,13 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 out target,
                 out eventResponse);
 
+            // if message is from a user on our ignore list, throw it out
+            if (Bot.IgnoredUsers.Contains(from))
+            {
+                Bot.Console.Debug(string.Format("Received message from ignored user '{0}'.", from));
+                return;
+            }
+
             // if we find the trigger we have detected a command
             string trigger = Bot.Trigger;
 
