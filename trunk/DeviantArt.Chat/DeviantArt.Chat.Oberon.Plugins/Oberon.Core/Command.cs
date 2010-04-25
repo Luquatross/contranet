@@ -842,6 +842,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                         foreach (string username in Bot.IgnoredUsers)
                             output.AppendFormat("<li><sub>{0}</sub></li>", username);
                         output.Append("</ul>");
+                        Say(ns, output.ToString());
                     }
                     break;
                 case "add":

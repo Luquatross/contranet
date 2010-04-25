@@ -727,12 +727,17 @@ namespace DeviantArt.Chat.Oberon
                 // check to see if this type inherits from the plugin class
                 if (typeof(Plugin).IsAssignableFrom(t) && !t.IsAbstract)
                 {
+                    Console.Debug(string.Format("{0} from assembly {1} has been detected as a plugin. Attempting to create plugin.", t.Name, a.FullName));
+
                     try
                     {
                         // create plugin
                         Plugin p = (Plugin)Activator.CreateInstance(t);
                         p.dAmn = dAmn;
                         plugins.Add(p);
+
+                        // log success
+                        Console.Debug(string.Format("Plugin {0} created successfully.", t.Name));
                     }
                     catch (Exception ex)
                     {
@@ -825,7 +830,18 @@ namespace DeviantArt.Chat.Oberon
             foreach (string assembly in assemblies)
             {    
                 // create plugin from assembly
-                Assembly a = Assembly.LoadFrom(assembly);
+                Console.Debug("Inspecting assembly " + assembly);
+                Assembly a = null;
+                try
+                {
+                    a = Assembly.LoadFrom(assembly);
+                }
+                catch (Exception ex)
+                {
+                    Console.Warning(string.Format("Error loading assembly {0}. See bot log for details.", assembly));
+                    Console.Debug(ex.ToString());
+                    continue;
+                }
                 CreatePluginsFromAssembly(a, plugins);
             }
 
