@@ -38,3 +38,4 @@ using System.Runtime.InteropServices;
 // Change Log
 // Version 0.8.0.* - Base version.
 // Version 0.8.1.* - Added ability to ignore users
+//                 - Added debug messages when loading plugins
