@@ -1352,8 +1352,9 @@ namespace DeviantArt.Chat.Oberon
             // disconnect from the server
             dAmn.Disconnect();
 
-            // save our master config
-            SaveConfig();
+            // save our master config - if authcookie is null we never connected
+            if (AuthCookie != null)
+                SaveConfig();
 
             // save access levels
             Access.SaveAccessLevels();
