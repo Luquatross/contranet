@@ -13,6 +13,7 @@ using System.Text;
 using System.Diagnostics;
 using System.CodeDom.Compiler;
 using Microsoft.Practices.Unity;
+using System.Net;
 
 namespace DeviantArt.Chat.Oberon
 {
@@ -112,7 +113,7 @@ namespace DeviantArt.Chat.Oberon
         /// <summary>
         /// General info about the bot.
         /// </summary>
-        public Dictionary<string, string> Info = new Dictionary<string, string>
+        public static Dictionary<string, string> Info = new Dictionary<string, string>
         {
             { "Name", "Oberon" },
             { "Version", Assembly.GetExecutingAssembly().GetName().Version.ToString() },
@@ -236,6 +237,8 @@ namespace DeviantArt.Chat.Oberon
         #endregion
 
         #region Private Variables
+        private const string UpdateUrl = "http://oberon.thehomeofjon.net/bin/latest-version.txt";
+
         /// <summary>
         /// Inversion of control container.
         /// </summary>
@@ -349,10 +352,10 @@ namespace DeviantArt.Chat.Oberon
             // Some introduction messages! We've already done quite a bit but only introduce things here...
             this.Console.Notice("Hey thar!");
             this.Console.Notice(string.Format("Loading {0} {1}{2} by {3}",
-                this.Info["Name"],
-                this.Info["Version"],
-                this.Info["Status"],
-                this.Info["Author"]));
+                Info["Name"],
+                Info["Version"],
+                Info["Status"],
+                Info["Author"]));
             Console.Notice("Loading bot config file.");
             // Loading the config file
             if (!LoadConfig())
@@ -1616,6 +1619,51 @@ namespace DeviantArt.Chat.Oberon
             
             // save reference
             Instance = container.Resolve<Bot>();
+        }
+
+        /// <summary>
+        /// Returns true if there was an update available. Otherwise, false.
+        /// </summary>
+        /// <returns>True if there was an update available. Otherwise, false.</returns>
+        public static bool CheckForUpdate()
+        {
+            bool updateExists = false;
+
+            try
+            {                     
+                // get the file contents
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(UpdateUrl);
+                request.Method = "GET";
+                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                StreamReader sr = new StreamReader(response.GetResponseStream(), System.Text.Encoding.UTF8);
+                string result = sr.ReadToEnd();  
+                sr.Close();
+                response.Close();
+
+                // make sure we got a valid response
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    // make sure we don't have an empty string
+                    if (string.IsNullOrEmpty(result))
+                        throw new NullReferenceException("The file version contents were empty or null.");
+
+                    // get the two versions
+                    string updateVersion = result.Trim();
+                    string botVersion = Bot.Info["Version"].Trim();
+
+                    // make sure retrived version is actually a version number
+                    string pattern = @"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}";
+                    if (!System.Text.RegularExpressions.Regex.IsMatch(updateVersion, pattern))
+                        throw new ArgumentException("The retrieved bot version is invalid.");
+
+                    // since updateVersion will always have the latest version, if
+                    // the two strings don't match, we have an update!
+                    updateExists = updateVersion != botVersion;
+                }
+            }
+            catch { } // we'll swallow the error - we don't want an failure to get an update crash the bot
+
+            return updateExists;
         }
         #endregion
     }
