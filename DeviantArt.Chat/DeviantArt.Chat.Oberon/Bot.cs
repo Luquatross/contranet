@@ -106,6 +106,16 @@ namespace DeviantArt.Chat.Oberon
     {
         #region Public Properties
         /// <summary>
+        /// URL to download the lastest version of this bot.
+        /// </summary>
+        public const string DownloadUpdateUrl = "http://oberon.thehomeofjon.net/bin/latest.zip";
+
+        /// <summary>
+        /// Url to get the latest version number of this bot.
+        /// </summary>
+        public const string VersionUpdateUrl = "http://oberon.thehomeofjon.net/bin/latest-version.txt";
+
+        /// <summary>
         /// Time this instance of the bot was started.
         /// </summary>
         public DateTime Start { get; private set; }
@@ -237,8 +247,6 @@ namespace DeviantArt.Chat.Oberon
         #endregion
 
         #region Private Variables
-        private const string UpdateUrl = "http://oberon.thehomeofjon.net/bin/latest-version.txt";
-
         /// <summary>
         /// Inversion of control container.
         /// </summary>
@@ -1632,7 +1640,7 @@ namespace DeviantArt.Chat.Oberon
             try
             {                     
                 // get the file contents
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(UpdateUrl);
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(VersionUpdateUrl);
                 request.Method = "GET";
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
                 StreamReader sr = new StreamReader(response.GetResponseStream(), System.Text.Encoding.UTF8);
