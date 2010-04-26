@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using Microsoft.Practices.Unity;
 using System.Diagnostics;
 using System.Windows.Forms;
+using System.IO;
 
 namespace DeviantArt.Chat.Oberon
 {
@@ -58,7 +59,8 @@ namespace DeviantArt.Chat.Oberon
                         MessageBoxButtons.YesNo);
                     if (result == DialogResult.Yes)
                     {
-                        // TODO - Launch updater
+                        // Launch updater to update files
+                        LaunchUpdater();
 
                         // exit!
                         return;
@@ -94,17 +96,16 @@ namespace DeviantArt.Chat.Oberon
                 // dump exception to log file
                 try
                 {
-                    string currentDirectory = System.IO.Path.GetDirectoryName(
-                        System.Reflection.Assembly.GetExecutingAssembly().Location);
-                    string errorFile = System.IO.Path.Combine(currentDirectory, "error.log");
-                    System.IO.File.WriteAllText(errorFile, ex.ToString());
+                    string currentDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                    string errorFile = Path.Combine(currentDirectory, "error.log");
+                    File.WriteAllText(errorFile, ex.ToString());
                 }
                 catch { }
             }
         }
         #endregion
 
-        #region Hrlper Methods
+        #region Helper Methods
         /// <summary>
         /// Returns true if a prior process from the same executable is running. 
         /// Otherwise false.
@@ -122,6 +123,29 @@ namespace DeviantArt.Chat.Oberon
                     return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// Launches the updater application.
+        /// </summary>
+        static void LaunchUpdater()
+        {
+            // get current directory
+            string currentDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            // get path to updateer
+            string updaterPath = Path.Combine(currentDirectory, "Updater.exe");
+            // get temp directory
+            string tempDirectory = Path.GetTempPath();
+            // copy updater path in the temp folder
+            string updaterTempPath = Path.Combine(tempDirectory, Path.GetFileNameWithoutExtension(Path.GetRandomFileName()) + ".exe");
+            // copy updater to temp path
+            File.Copy(updaterPath, updaterTempPath, true);
+
+            // create process and start it
+            Process p = new Process();
+            p.StartInfo.FileName = updaterTempPath;
+            p.StartInfo.Arguments = Bot.DownloadUpdateUrl + " \"" + currentDirectory + "\"";
+            p.Start();
         }
 
         /// <summary>
