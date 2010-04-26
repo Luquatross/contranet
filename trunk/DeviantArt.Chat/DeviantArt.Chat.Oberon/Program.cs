@@ -8,6 +8,7 @@ using System.Collections;
 using System.Runtime.InteropServices;
 using Microsoft.Practices.Unity;
 using System.Diagnostics;
+using System.Windows.Forms;
 
 namespace DeviantArt.Chat.Oberon
 {
@@ -44,6 +45,24 @@ namespace DeviantArt.Chat.Oberon
                     System.Console.WriteLine("Shutting down in 10 seconds.");
                     System.Threading.Thread.Sleep(TimeSpan.FromSeconds(10.0));
                     return;
+                }
+
+                // check for updates
+                bool haveUpdate = Bot.CheckForUpdate();
+                if (haveUpdate)
+                {
+                    // see if user wants to update
+                    DialogResult result = MessageBox.Show(
+                        "The version of Oberon is out of date. Do you want to update automatically?", 
+                        "Oberon", 
+                        MessageBoxButtons.YesNo);
+                    if (result == DialogResult.Yes)
+                    {
+                        // TODO - Launch updater
+
+                        // exit!
+                        return;
+                    }
                 }
 
                 // create on IoC container
