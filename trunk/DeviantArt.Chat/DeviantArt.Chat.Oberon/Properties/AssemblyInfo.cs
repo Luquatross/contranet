@@ -5,13 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("DeviantArt.Chat.Oberon")]
-[assembly: AssemblyDescription("DeviantArt chat bot to that connects to the dAmn chat network.")]
+[assembly: AssemblyTitle("Oberon - DeviantArt Chatbot")]
+[assembly: AssemblyDescription("DeviantArt chat bot that connects to the dAmn chat network.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("DeviantArt.Chat.Oberon")]
-[assembly: AssemblyCopyright("Copyright ©  2009")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCompany("Shadowbox Solutions")]
+[assembly: AssemblyProduct("Oberon - DeviantArt Chatbot")]
+[assembly: AssemblyCopyright("Copyright ©  2009-2010 Jon Haywood, Shadowbox Solutions (http://www.thehomeofjon.net)")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
