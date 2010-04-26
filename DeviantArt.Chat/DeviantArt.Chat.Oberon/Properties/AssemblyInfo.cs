@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Shadowbox Solutions")]
 [assembly: AssemblyProduct("Oberon - DeviantArt Chatbot")]
-[assembly: AssemblyCopyright("Copyright ©  2009-2010 Jon Haywood, Shadowbox Solutions (http://www.thehomeofjon.net)")]
+[assembly: AssemblyCopyright("Copyright ©  2009-2010 Jon Haywood, Shadowbox Solutions (http://oberon.thehomeofjon.net/)")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
