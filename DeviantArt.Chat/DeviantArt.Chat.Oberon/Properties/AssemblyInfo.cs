@@ -39,3 +39,4 @@ using System.Runtime.InteropServices;
 // Version 0.8.0.* - Base version.
 // Version 0.8.1.* - Added ability to ignore users
 //                 - Added debug messages when loading plugins
+//                 - Added try/catch around assembly loading so bot wouldn't crash on one dll
