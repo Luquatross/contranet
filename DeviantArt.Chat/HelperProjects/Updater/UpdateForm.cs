@@ -15,6 +15,9 @@ using System.Diagnostics;
 
 namespace Updater
 {
+    /// <summary>
+    /// Oberon Update Manager form.
+    /// </summary>
     public partial class UpdateForm : Form
     {
         #region Private Variables
