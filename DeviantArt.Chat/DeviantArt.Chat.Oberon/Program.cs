@@ -130,20 +130,23 @@ namespace DeviantArt.Chat.Oberon
         /// </summary>
         static void LaunchUpdater()
         {
-            // get current directory
+            // files to copy
+            string[] files = new string[] { "Updater.exe", "Ionic.Zip.dll" };
+
+            // get directories
             string currentDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            // get path to updateer
-            string updaterPath = Path.Combine(currentDirectory, "Updater.exe");
-            // get temp directory
-            string tempDirectory = Path.GetTempPath();
-            // copy updater path in the temp folder
-            string updaterTempPath = Path.Combine(tempDirectory, Path.GetFileNameWithoutExtension(Path.GetRandomFileName()) + ".exe");
-            // copy updater to temp path
-            File.Copy(updaterPath, updaterTempPath, true);
+            string tempDirectory = Path.GetTempPath();            
+
+            // copy files from current directory to temp
+            foreach (string file in files)
+                File.Copy(
+                    Path.Combine(currentDirectory, file),
+                    Path.Combine(tempDirectory, file),
+                    true);
 
             // create process and start it
             Process p = new Process();
-            p.StartInfo.FileName = updaterTempPath;
+            p.StartInfo.FileName = Path.Combine(tempDirectory, files.First());
             p.StartInfo.Arguments = Bot.DownloadUpdateUrl + " \"" + currentDirectory + "\"";
             p.Start();
         }

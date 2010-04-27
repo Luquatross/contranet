@@ -1656,20 +1656,14 @@ namespace DeviantArt.Chat.Oberon
                         throw new NullReferenceException("The file version contents were empty or null.");
 
                     // get the two versions
-                    string updateVersion = result.Trim();
-                    string botVersion = Bot.Info["Version"].Trim();
+                    Version updateVersion = new Version(result.Trim());
+                    Version currentVersion = new Version(Bot.Info["Version"].Trim());
 
-                    // make sure retrived version is actually a version number
-                    string pattern = @"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}";
-                    if (!System.Text.RegularExpressions.Regex.IsMatch(updateVersion, pattern))
-                        throw new ArgumentException("The retrieved bot version is invalid.");
-
-                    // since updateVersion will always have the latest version, if
-                    // the two strings don't match, we have an update!
-                    updateExists = updateVersion != botVersion;
+                    // we have an update if the update version is higher
+                    updateExists = updateVersion > currentVersion;
                 }
             }
-            catch { } // we'll swallow the error - we don't want an failure to get an update crash the bot
+            catch { } // we'll swallow the error - we don't want a failure to get an update to crash the bot
 
             return updateExists;
         }

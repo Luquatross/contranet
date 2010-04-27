@@ -23,11 +23,13 @@
     <property name="build.dir" value="bin\${config}" />
     <property name="out.dir" value="Executables\${config}" />
     <property name="doc.dir" value="Documentation" />
+    <property name="helper.dir" value="HelperProjects"/>
     
     <!-- Assembly names -->
     <property name="library.dll" value="${library.dir}\${build.dir}\${project::get-name()}.Library.dll" />
-    <property name="console.exe" value="${console.dir}\${build.dir}\${bot.name}.exe" />    
-
+    <property name="console.exe" value="${console.dir}\${build.dir}\${bot.name}.exe" />
+    <property name="updater.exe" value="${helper.dir}\Updater\${build.dir}\Updater.exe" />
+    
     <sysinfo />
 
     <if test="${verbose}">
@@ -81,7 +83,9 @@
         <include name="**/${library.dir}.pdb" if="${debug}" />
         <include name="**/${console.exe}" />
         <include name="**/${bot.name}.pdb" if="${debug}" />
-        <include name="**/ThirdPartyDlls/*.dll" />        
+        <include name="**/ThirdPartyDlls/*.dll" />
+        <include name="**/${updater.exe}" />
+        <include name="**/Updater.pdb" if="${debug}" />
       </fileset>
     </copy>
 
