@@ -8,6 +8,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Resources;
 using System.Runtime.Serialization;
+using DeviantArt.Chat.Oberon.Plugins;
 
 namespace DeviantArt.Chat.Oberon
 {
@@ -92,6 +93,15 @@ namespace DeviantArt.Chat.Oberon
         public abstract string FolderName
         {
             get;
+        }
+
+        /// <summary>
+        /// Manifest information for this plugin.
+        /// </summary>
+        public Manifest Manifest
+        {
+            get;
+            set;
         }
         #endregion
 
@@ -197,6 +207,30 @@ namespace DeviantArt.Chat.Oberon
             {
                 fs.Close();
             }
+        }
+
+        /// <summary>
+        /// Loads the plugin manifest file.
+        /// </summary>
+        public virtual void LoadPluginManifest()
+        {
+            Bot.Console.Debug("Loading manifest for plugin of type " + GetType().ToString());
+            string manifestFile = Path.Combine(PluginPath, "manifest.xml");
+
+            // make sure manifest is valid
+            Exception[] validationErrors;
+            if (!Manifest.IsValidManifest(manifestFile, out validationErrors))
+            {
+                // log exceptions
+                foreach (Exception validationError in validationErrors)
+                    Bot.Console.Log("Manifest validation error: " + validationError.Message);
+
+                // throw error
+                throw new Exception(string.Format("Invalid manifest for plugin of type '{0}'.", GetType()));
+            }
+
+            // it's valid, so load it up
+            this.Manifest = Manifest.Create(manifestFile);
         }
 
         /// <summary>
@@ -415,7 +449,7 @@ namespace DeviantArt.Chat.Oberon
         /// This method call occurs right after settings have been deserialized.
         /// </summary>
         protected virtual void OnSettingsDeserialization()
-        { }
+        { }        
         #endregion
     }
 }
