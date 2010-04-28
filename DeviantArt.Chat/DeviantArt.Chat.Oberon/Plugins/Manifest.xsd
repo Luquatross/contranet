@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema attributeFormDefault="unqualified" elementFormDefault="qualified" version="1.0" targetNamespace="http://oberon.thehomeofjon.net" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <xsd:element name="manifest">
+    <xsd:complexType>
+      <xsd:all>	    
+		<xsd:element name="name" type="xsd:string" />
+		<xsd:element name="description" type="xsd:string" minOccurs="0" />
+		<xsd:element name="author" type="xsd:string" />
+		<xsd:element name="contributors" type="xsd:string" minOccurs="0" />
+		<xsd:element name="homepageUrl" type="xsd:anyURI" minOccurs="0" />
+		<xsd:element name="version" type="xsd:string" />
+		<xsd:element name="updates">
+		  <xsd:complexType>
+			<xsd:all>
+			  <xsd:element name="minBotVersion" type="xsd:string" />
+			  <xsd:element name="maxBotVersion" type="xsd:string" />
+			  <xsd:element name="updateManifestUrl" type="xsd:anyURI" />
+			  <xsd:element name="updateUrl" type="xsd:anyURI" />
+			</xsd:all>
+		  </xsd:complexType>
+		</xsd:element>
+	  </xsd:all>      
+    </xsd:complexType>
+  </xsd:element>
+</xsd:schema>

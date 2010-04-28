@@ -745,6 +745,7 @@ namespace DeviantArt.Chat.Oberon
                         // create plugin
                         Plugin p = (Plugin)Activator.CreateInstance(t);
                         p.dAmn = dAmn;
+                        p.LoadPluginManifest();
                         plugins.Add(p);
 
                         // log success
