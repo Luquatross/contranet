@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.Xml;
 using System.Xml.Schema;
 
-namespace DeviantArt.Chat.Oberon.Plugins
+namespace DeviantArt.Chat.Oberon
 {
     /// <summary>
     /// Manifest data for a bot plugin.

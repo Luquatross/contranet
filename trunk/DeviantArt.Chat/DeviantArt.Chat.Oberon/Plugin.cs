@@ -8,7 +8,6 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Resources;
 using System.Runtime.Serialization;
-using DeviantArt.Chat.Oberon.Plugins;
 
 namespace DeviantArt.Chat.Oberon
 {
