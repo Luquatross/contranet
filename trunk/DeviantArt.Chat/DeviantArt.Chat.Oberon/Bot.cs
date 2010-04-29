@@ -756,9 +756,9 @@ namespace DeviantArt.Chat.Oberon
                         p.LoadPluginManifest();
 
                         // check plugin compatability
-                        if (this.AssemblyVersion < p.Manifest.Updates.MinBotAssemblyVersion ||
-                            this.AssemblyVersion > p.Manifest.Updates.MaxBotAssemblyVersion)
-                            throw new Exception(string.Format("Plugin '{0}' is not compatible with this version of the bot.", p.Manifest.Name));
+                        if (this.AssemblyVersion < p.Manifest.MinBotVersion ||
+                            this.AssemblyVersion > p.Manifest.MaxBotVersion)
+                            throw new Exception(string.Format("Plugin '{0}' is not compatible with this version of the bot.", p.PluginName));
 
                         // add to our list
                         plugins.Add(p);
