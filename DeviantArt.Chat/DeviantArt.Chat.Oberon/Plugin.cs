@@ -100,7 +100,7 @@ namespace DeviantArt.Chat.Oberon
         public Manifest Manifest
         {
             get;
-            set;
+            private set;
         }
         #endregion
 
@@ -216,6 +216,10 @@ namespace DeviantArt.Chat.Oberon
             Bot.Console.Debug("Loading manifest for plugin of type " + GetType().ToString());
             string manifestFile = Path.Combine(PluginPath, "manifest.xml");
 
+            // make sure manifest file exists
+            if (!File.Exists(manifestFile))
+                throw new FileNotFoundException(string.Format("The manifest.xml file for the plugin '{0}' could not be found.", this.PluginName));
+
             // make sure manifest is valid
             Exception[] validationErrors;
             if (!Manifest.IsValidManifest(manifestFile, out validationErrors))
@@ -229,7 +233,7 @@ namespace DeviantArt.Chat.Oberon
             }
 
             // it's valid, so load it up
-            this.Manifest = Manifest.Create(manifestFile);
+            this.Manifest = Manifest.Create(this.PluginName, manifestFile);
         }
 
         /// <summary>

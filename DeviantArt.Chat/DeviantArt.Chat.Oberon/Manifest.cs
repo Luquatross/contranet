@@ -6,99 +6,126 @@ using System.Xml.Serialization;
 using System.Diagnostics;
 using System.Xml;
 using System.Xml.Schema;
+using System.Xml.Linq;
 
 namespace DeviantArt.Chat.Oberon
 {
     /// <summary>
-    /// Manifest data for a bot plugin.
+    /// Class to assist with manipulating the plugin manifest xml.
     /// </summary>
-    [Serializable]
-    [DebuggerStepThrough] 
-    [XmlType(AnonymousType = true, Namespace = "http://oberon.thehomeofjon.net")]
-    [XmlRoot(Namespace="http://oberon.thehomeofjon.net", ElementName = "manifest", IsNullable = false)]
-    public partial class Manifest 
-    {                
+    public partial class Manifest
+    {
+        #region Public Properties
+        /// <summary>
+        /// Description for this plugin. Optional.
+        /// </summary>
+        public string Description { get; private set; }
+
+        /// <summary>
+        /// Author of the plugin.
+        /// </summary>
+        public string Author { get; private set; }
+
+        /// <summary>
+        /// Users who contributed to making the plugin. Optional.
+        /// </summary>
+        public string Contributors { get; private set; }
+
+        /// <summary>
+        /// URL for the plugin. Optional.
+        /// </summary>
+        public string HomepageUrl { get; private set; }
+
+        /// <summary>
+        /// Url that contains the latest manifest file for this plugin.
+        /// </summary>
+        public string UpdateManifestUrl { get; private set; }
+
+        /// <summary>
+        /// URL that contains the latest package for this plugin.
+        /// </summary>
+        public string UpdateUrl { get; private set; }
+
+        /// <summary>
+        /// Version for this plugin.
+        /// </summary>
+        public Version Version { get; private set; }
+
+        /// <summary>
+        /// Minimum version of the bot this plugin supports.
+        /// </summary>
+        public Version MinBotVersion { get; private set; }
+
+        /// <summary>
+        /// Maximum version of the bot this plugin supports.
+        /// </summary>
+        public Version MaxBotVersion { get; private set; }
+        #endregion
+
         #region Constructor
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public Manifest()
+        private Manifest()
         {
-            // init variables to defaults
-            this.Name = "";
-            this.Description = "";
-            this.Author = "";
-            this.Contributors = "";
-            this.HomepageUrl = "";
-            this.Version = "";
-            this.Updates = new ManifestUpdates();
-        }
-        #endregion
-
-        #region Properties
-        [XmlElement("name")]
-        public string Name { get; set; }
-        
-        [XmlElement("description")]
-        public string Description { get; set; }
-        
-        [XmlElement("author")]
-        public string Author { get; set; }
-        
-        [XmlElement("contributors")]
-        public string Contributors { get; set; }
-        
-        /// <remarks/>
-        [XmlElement("homepageUrl", DataType="anyURI")]
-        public string HomepageUrl { get; set; }
-        
-        [XmlElement("version")]
-        public string Version { get; set; }
-        
-        [XmlElement("updates")]
-        public ManifestUpdates Updates { get; set; }
-        #endregion
-
-        #region Virtual Properties
-        /// <summary>
-        /// .NET version of the plugin.
-        /// </summary>
-        [XmlIgnore]
-        public Version AssemblyVersion
-        {
-            get { return new Version(Version); }
         }
         #endregion
 
         #region Static Helper Methods
         /// <summary>
-        /// Creates a manifest object from the provided stream.
+        /// List of all manifests xml data that has been read. The key is the manifest file path, and the value is the manifest xml.
+        /// We cache the manifest xml because multiple plugins can use the same manifest file if they are all located in the
+        /// same assembly. If that's the case, we don't wan't to read the xml multiple times.
         /// </summary>
-        /// <param name="filepath">Path to the manifest xml file.</param>
-        /// <returns>Manifest.</returns>
-        public static Manifest Create(string filepath)
-        {
-            return Create(System.IO.File.OpenRead(filepath)); // overload method will close stream
-        }
+        private static Dictionary<string, XDocument> ManifestXmlData = new Dictionary<string, XDocument>();
 
         /// <summary>
-        /// Creates a manifest object from the provided stream.
+        /// Creates an instance of the manifest data from manifest xml.
         /// </summary>
-        /// <param name="manifestStream">Stream containing manifest xml.</param>
+        /// <param name="pluginName">Plugin name to load manifest for.</param>
+        /// <param name="manifestFile">Path to the manifest file.</param>
         /// <returns>Manifest.</returns>
-        public static Manifest Create(System.IO.Stream manifestStream)
+        public static Manifest Create(string pluginName, string manifestFile)
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(Manifest));
-            Manifest manifest = null;
-            try
+            // get xml document
+            XDocument doc = null;
+            if (ManifestXmlData.ContainsKey(manifestFile))
             {
-                manifest = (Manifest)serializer.Deserialize(manifestStream);
+                doc = ManifestXmlData[manifestFile];
             }
-            finally
+            else
             {
-                manifestStream.Close();
+                // create doc and add it to cache
+                doc = XDocument.Load(manifestFile);                
+                ManifestXmlData.Add(manifestFile, doc);
             }
-            return manifest;
+
+            // get the namespace
+            string ns = "{" + doc.Root.Name.Namespace + "}";
+
+            // create manifest using linq to xml
+            // note: we are casting XElement objects to strings. The element is not required by the schema
+            // so it might not be in the xml. If that's the case, the cast will result in a null value.
+            var manifest = from p in doc.Descendants(ns + "plugin")
+                                where p.Element(ns + "name").Value == pluginName
+                                select new Manifest
+                                {
+                                    Author = (string)p.Element(ns + "author"),
+                                    Contributors = (string)p.Element(ns + "contributors"), 
+                                    Description = (string)p.Element(ns + "description"),
+                                    HomepageUrl = (string)p.Element(ns + "homepageUrl"),
+                                    Version = new Version((string)doc.Descendants(ns + "version").First()),
+                                    MinBotVersion = new Version((string)doc.Descendants(ns + "minBotVersion").First()),
+                                    MaxBotVersion = new Version((string)doc.Descendants(ns + "maxBotVersion").First()),
+                                    UpdateManifestUrl = (string)doc.Descendants(ns + "updateManifestUrl").First(),
+                                    UpdateUrl = (string)doc.Descendants(ns + "updateUrl").First()
+                                };
+
+            // make sure we found something
+            if (manifest.Count() == 0)
+                throw new ArgumentOutOfRangeException(string.Format("Unable to find plugin with name '{0}' in the manifest file '{1}'.", pluginName, manifestFile));
+
+            return manifest.Single();
         }
 
         /// <summary>
@@ -186,62 +213,6 @@ namespace DeviantArt.Chat.Oberon
                 // close the stream
                 xmlStream.Close();
             }
-        }
-        #endregion
-    }
-
-    /// <remarks/>    
-    [Serializable]
-    [DebuggerStepThrough]
-    [XmlType(AnonymousType = true, Namespace = "http://oberon.thehomeofjon.net")]
-    public partial class ManifestUpdates
-    {
-        #region Constructor
-        /// <summary>
-        /// Default constructor.
-        /// </summary>
-        public ManifestUpdates()
-        {
-            // init default values
-            this.MinBotVersion = "";
-            this.MaxBotVersion = "";
-            this.UpdateManifestUrl = "";
-            this.UpdateUrl = "";
-        }
-        #endregion
-
-        #region Properties
-        [XmlElement("minBotVersion")]
-        public string MinBotVersion { get; set; }
-
-        [XmlElement("maxBotVersion")]
-        public string MaxBotVersion { get; set; }
-
-        /// <remarks/>
-        [XmlElement("updateManifestUrl", DataType = "anyURI")]
-        public string UpdateManifestUrl { get; set; }
-
-        [XmlElement("updateUrl", DataType = "anyURI")]
-        public string UpdateUrl { get; set; }
-        #endregion
-
-        #region Virtual Properties
-        /// <summary>
-        /// Minimum version of the bot the plugin is compatible with.
-        /// </summary>
-        [XmlIgnore]
-        public Version MinBotAssemblyVersion
-        {
-            get { return new Version(MinBotVersion); }
-        }
-
-        /// <summary>
-        /// Maximum version of the bot the plugin is compatible with.
-        /// </summary>
-        [XmlIgnore]
-        public Version MaxBotAssemblyVersion
-        {
-            get { return new Version(MaxBotVersion); }
         }
         #endregion
     }
