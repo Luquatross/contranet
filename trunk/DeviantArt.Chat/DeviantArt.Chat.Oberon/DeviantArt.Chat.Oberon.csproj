@@ -87,7 +87,6 @@
   <ItemGroup>
     <Folder Include="Logs\Chats\" />
     <Folder Include="Logs\Core\" />
-    <Folder Include="Plugins\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
