@@ -133,6 +133,14 @@ namespace DeviantArt.Chat.Oberon
         };
 
         /// <summary>
+        /// The .NET version of this executable.
+        /// </summary>
+        public Version AssemblyVersion
+        {
+            get { return new Version(Info["Version"]); }
+        }
+
+        /// <summary>
         /// Username to log onto the chat network.
         /// </summary>
         public string Username { get; private set; }
@@ -746,6 +754,13 @@ namespace DeviantArt.Chat.Oberon
                         Plugin p = (Plugin)Activator.CreateInstance(t);
                         p.dAmn = dAmn;
                         p.LoadPluginManifest();
+
+                        // check plugin compatability
+                        if (this.AssemblyVersion < p.Manifest.Updates.MinBotAssemblyVersion ||
+                            this.AssemblyVersion > p.Manifest.Updates.MaxBotAssemblyVersion)
+                            throw new Exception(string.Format("Plugin '{0}' is not compatible with this version of the bot.", p.Manifest.Name));
+
+                        // add to our list
                         plugins.Add(p);
 
                         // log success
@@ -846,7 +861,16 @@ namespace DeviantArt.Chat.Oberon
                 Assembly a = null;
                 try
                 {
-                    a = Assembly.LoadFrom(assembly);
+                    using (FileStream assemblyStream = File.OpenRead(assembly))
+                    {
+                        // read assembly in a byte array
+                        byte[] assemblyBytes = new byte[assemblyStream.Length];
+                        assemblyStream.Read(assemblyBytes, 0, Convert.ToInt32(assemblyStream.Length));
+
+                        // load assembly - loading it this way prevents the locking of the file, so 
+                        // we can overwrite the original file as needed.
+                        a = Assembly.Load(assemblyBytes);                        
+                    }
                 }
                 catch (Exception ex)
                 {

@@ -59,6 +59,17 @@ namespace DeviantArt.Chat.Oberon.Plugins
         public ManifestUpdates Updates { get; set; }
         #endregion
 
+        #region Virtual Properties
+        /// <summary>
+        /// .NET version of the plugin.
+        /// </summary>
+        [XmlIgnore]
+        public Version AssemblyVersion
+        {
+            get { return new Version(Version); }
+        }
+        #endregion
+
         #region Static Helper Methods
         /// <summary>
         /// Creates a manifest object from the provided stream.
@@ -212,6 +223,26 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
         [XmlElement("updateUrl", DataType = "anyURI")]
         public string UpdateUrl { get; set; }
+        #endregion
+
+        #region Virtual Properties
+        /// <summary>
+        /// Minimum version of the bot the plugin is compatible with.
+        /// </summary>
+        [XmlIgnore]
+        public Version MinBotAssemblyVersion
+        {
+            get { return new Version(MinBotVersion); }
+        }
+
+        /// <summary>
+        /// Maximum version of the bot the plugin is compatible with.
+        /// </summary>
+        [XmlIgnore]
+        public Version MaxBotAssemblyVersion
+        {
+            get { return new Version(MaxBotVersion); }
+        }
         #endregion
     }
 }
