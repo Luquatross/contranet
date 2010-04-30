@@ -921,7 +921,7 @@ namespace DeviantArt.Chat.Oberon
         }
 
         /// <summary>
-        /// Load all of our plugins
+        /// Load all of our plugins.
         /// </summary>
         private void LoadPlugins()
         {
@@ -1714,14 +1714,17 @@ namespace DeviantArt.Chat.Oberon
             List<string> pluginsWithUpdates = new List<string>();
 
             // get all manifests for existing plugins
-            WebClient client = new WebClient();
             foreach (Plugin plugin in GetPlugins())
             {
                 // get xml
                 try
                 {
-                    string manifestXml = client.DownloadString(plugin.Manifest.UpdateManifestUrl);
-                    Manifest manifest = Manifest.Create(plugin.PluginName, XDocument.Load(new StringReader(manifestXml)));
+                    // if we don't have a manifest URL skip
+                    if (string.IsNullOrEmpty(plugin.Manifest.UpdateManifestUrl))
+                        continue;
+
+                    // create manifest using xml
+                    Manifest manifest = Manifest.Create(plugin.PluginName, XDocument.Load(plugin.Manifest.UpdateManifestUrl));
 
                     // if we have a newer version, and it is compatible with the bot, add to list
                     if (plugin.Manifest.Version < manifest.Version &&

@@ -26,8 +26,8 @@
                         <xsd:all>
                             <xsd:element name="minBotVersion" type="xsd:string" />
                             <xsd:element name="maxBotVersion" type="xsd:string" />
-                            <xsd:element name="updateManifestUrl" type="xsd:anyURI" />
-                            <xsd:element name="updateUrl" type="xsd:anyURI" />
+                            <xsd:element name="updateManifestUrl" type="xsd:anyURI" minOccurs="0" />
+                            <xsd:element name="updateUrl" type="xsd:anyURI" minOccurs="0" />
                         </xsd:all>
                     </xsd:complexType>
                 </xsd:element>

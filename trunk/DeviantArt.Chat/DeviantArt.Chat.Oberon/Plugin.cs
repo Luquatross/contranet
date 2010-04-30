@@ -87,7 +87,7 @@ namespace DeviantArt.Chat.Oberon
         }
 
         /// <summary>
-        /// Folder name for this module
+        /// Folder name for this module.
         /// </summary>
         public abstract string FolderName
         {

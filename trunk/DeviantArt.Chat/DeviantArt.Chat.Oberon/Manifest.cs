@@ -131,25 +131,37 @@ namespace DeviantArt.Chat.Oberon
             // note: we are casting XElement objects to strings. The element is not required by the schema
             // so it might not be in the xml. If that's the case, the cast will result in a null value.
             var manifest = from p in doc.Descendants(ns + "plugin")
-                                where p.Element(ns + "name").Value == pluginName
-                                select new Manifest
-                                {
-                                    Author = (string)p.Element(ns + "author"),
-                                    Contributors = (string)p.Element(ns + "contributors"), 
-                                    Description = (string)p.Element(ns + "description"),
-                                    HomepageUrl = (string)p.Element(ns + "homepageUrl"),
-                                    Version = new Version((string)doc.Descendants(ns + "version").First()),
-                                    MinBotVersion = new Version((string)doc.Descendants(ns + "minBotVersion").First()),
-                                    MaxBotVersion = new Version((string)doc.Descendants(ns + "maxBotVersion").First()),
-                                    UpdateManifestUrl = (string)doc.Descendants(ns + "updateManifestUrl").First(),
-                                    UpdateUrl = (string)doc.Descendants(ns + "updateUrl").First()
-                                };
+                            where p.Element(ns + "name").Value == pluginName
+                            select new Manifest
+                            {
+                                Author = (string)p.Element(ns + "author"),
+                                Contributors = (string)p.Element(ns + "contributors"), 
+                                Description = (string)p.Element(ns + "description"),
+                                HomepageUrl = (string)p.Element(ns + "homepageUrl"),
+                                Version = new Version((string)doc.Descendants(ns + "version").First()),
+                                MinBotVersion = new Version((string)doc.Descendants(ns + "minBotVersion").First()),
+                                MaxBotVersion = new Version((string)doc.Descendants(ns + "maxBotVersion").First()),
+                                UpdateManifestUrl = (string)doc.Descendants(ns + "updateManifestUrl").First(),
+                                UpdateUrl = (string)doc.Descendants(ns + "updateUrl").First()
+                            };
 
-            // make sure we found something
-            if (manifest.Count() == 0)
+            // get manifest
+            Manifest m = null;
+            try
+            {
+                // execute linq-to-xml query
+                m = manifest.Single();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(string.Format("Error processing manifest file for plugin '{0}'.", pluginName), ex);
+            }
+
+            // make sure we found something (if we were provided with the wrong pluginName)
+            if (m == null)
                 throw new ArgumentOutOfRangeException(string.Format("Unable to find plugin with name '{0}' in the manifest.", pluginName));
-            
-            return manifest.Single();
+
+            return m;
         }
 
         /// <summary>
@@ -160,7 +172,7 @@ namespace DeviantArt.Chat.Oberon
         {
             // get the stream for the file
             System.IO.Stream str = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream(
-                "DeviantArt.Chat.Oberon.Plugins.Manifest.xsd");
+                "DeviantArt.Chat.Oberon.Manifest.xsd");
 
             // create schema from embeddeded schema file
             using (XmlReader reader = XmlTextReader.Create(str))
