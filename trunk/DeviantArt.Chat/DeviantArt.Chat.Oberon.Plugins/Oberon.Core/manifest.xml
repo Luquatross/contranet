@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<manifest xmlns="http://oberon.thehomeofjon.net"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://oberon.thehomeofjon.net/bin/xsd/manifest-v1.xsd">
+    <plugins>
+        <plugin>
+            <name>dAmn Core Plugin</name>
+            <description>
+                <![CDATA[Plugin that handles the core system events that come from the dAmn server.
+                Enables basic functionality for the Bot (chatroom handling, users joining / leaving,
+                chatroom logging, etc).]]>
+            </description>
+            <author>bigmanhaywood</author>            
+            <homepageUrl>http://oberon.thehomeofjon.net/plugins/core/</homepageUrl>
+        </plugin>
+        <plugin>
+            <name>Oberon Commands Plugin</name>
+            <description>
+                <![CDATA[This class encapsulates all internal Oberon commands. Whereas the dAmnCore.cs class allows
+                basic functionality in the bot, this class enables non-built-in dAmn functionality.]]>
+            </description>
+            <author>bigmanhaywood</author>            
+            <homepageUrl>http://oberon.thehomeofjon.net/plugins/core/</homepageUrl>
+        </plugin>
+    </plugins>
+    <version>1.0.0.0</version>
+    <updates>
+        <!-- The min and max bot version this plugin is compatible with -->
+        <minBotVersion>0.1</minBotVersion>
+        <maxBotVersion>0.8.9</maxBotVersion>
+
+        <!-- This is a text file which contains the latest version of your plugin -->
+        <updateManifestUrl>http://oberon.thehomeofjon.net/bin/plugins/core/manifest.xml</updateManifestUrl>
+
+        <!-- This is where this version of the plugin will be downloaded from -->
+        <updateUrl>http://oberon.thehomeofjon.net/bin/plugins/core/dAmnCore.zip</updateUrl>
+    </updates>
+</manifest>
