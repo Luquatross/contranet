@@ -12,7 +12,8 @@
     <copy todir="../../${out.dir}/Plugins/${folder.name}" flatten="true" overwrite="true">
       <fileset>
         <include name="**/${project::get-name()}.dll" />
-        <include name="**/${project::get-name()}.pdb" if="${debug}" />        
+        <include name="**/${project::get-name()}.pdb" if="${debug}" />
+        <include name="**/manifest.xml" />       
       </fileset>
     </copy>
   </target>

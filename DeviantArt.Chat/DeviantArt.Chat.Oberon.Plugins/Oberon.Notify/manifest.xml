@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<manifest xmlns="http://oberon.thehomeofjon.net"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://oberon.thehomeofjon.net/bin/xsd/manifest-v1.xsd">
+    <plugins>
+        <plugin>
+            <name>Flash Notify</name>
+            <description>
+                <![CDATA[Plugin that will flash the taskbar button when the bot owner receives a message.]]>
+            </description>
+            <author>bigmanhaywood</author>
+            <homepageUrl>http://oberon.thehomeofjon.net/plugins/notify/</homepageUrl>
+        </plugin>
+        <plugin>
+            <name>MSN Notify</name>
+            <description>
+                <![CDATA[Plugin that will message an MSN user when the bot owner is sent a message.]]>
+            </description>
+            <author>bigmanhaywood</author>
+            <homepageUrl>http://oberon.thehomeofjon.net/plugins/notify/</homepageUrl>
+        </plugin>
+        <plugin>
+            <name>Voice Notify</name>
+            <description>
+                <![CDATA[Plugin that will speak the notification.]]>
+            </description>
+            <author>bigmanhaywood</author>
+            <homepageUrl>http://oberon.thehomeofjon.net/plugins/notify/</homepageUrl>
+        </plugin>
+    </plugins>
+    <version>1.0.0.0</version>
+    <updates>
+        <!-- The min and max bot version this plugin is compatible with -->
+        <minBotVersion>0.1</minBotVersion>
+        <maxBotVersion>0.8.9</maxBotVersion>
+
+        <!-- This is a text file which contains the latest version of your plugin -->
+        <updateManifestUrl>http://oberon.thehomeofjon.net/bin/plugins/notify/manifest.xml</updateManifestUrl>
+
+        <!-- This is where this version of the plugin will be downloaded from -->
+        <updateUrl>http://oberon.thehomeofjon.net/bin/plugins/notify/notify.zip</updateUrl>
+    </updates>
+</manifest>

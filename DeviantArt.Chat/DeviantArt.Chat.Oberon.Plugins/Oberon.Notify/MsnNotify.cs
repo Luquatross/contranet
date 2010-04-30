@@ -6,6 +6,9 @@ using MSNPSharp;
 
 namespace DeviantArt.Chat.Oberon.Plugins
 {
+    /// <summary>
+    /// Plugin that will message an MSN user when the bot owner is sent a message.
+    /// </summary>
     public class MsnNotify : ImNotifyBase
     {
         #region Private Variables

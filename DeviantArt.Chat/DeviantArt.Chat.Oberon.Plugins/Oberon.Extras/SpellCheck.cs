@@ -9,6 +9,9 @@ using System.Text.RegularExpressions;
 
 namespace DeviantArt.Chat.Oberon.Plugins
 {
+    /// <summary>
+    /// Plugin that checks the proper spelling of a word.
+    /// </summary>
     public class SpellCheck : Plugin
     {
         #region Private Variables
