@@ -71,6 +71,18 @@ namespace DeviantArt.Chat.Oberon
         }
         #endregion
 
+        #region Helper Methods
+        /// <summary>
+        /// Returns true if version is compatible with bot version.
+        /// </summary>
+        /// <param name="botVersion">The bot version.</param>
+        /// <returns>True if compatible, otherwise false.</returns>
+        public bool IsCompatible(Version botVersion)
+        {
+            return (botVersion > MinBotVersion && botVersion < MaxBotVersion);
+        }
+        #endregion
+
         #region Static Helper Methods
         /// <summary>
         /// List of all manifests xml data that has been read. The key is the manifest file path, and the value is the manifest xml.
@@ -96,10 +108,22 @@ namespace DeviantArt.Chat.Oberon
             else
             {
                 // create doc and add it to cache
-                doc = XDocument.Load(manifestFile);                
+                doc = XDocument.Load(manifestFile);
                 ManifestXmlData.Add(manifestFile, doc);
             }
 
+            // create manifest
+            return Create(pluginName, doc);
+        }
+
+        /// <summary>
+        /// Creates an instance of the manifest data from manifest xml.
+        /// </summary>
+        /// <param name="pluginName">Plugin name to load manifest for.</param>
+        /// <param name="doc">XDocument containing manifest xml.</param>
+        /// <returns>Manifest.</returns>
+        public static Manifest Create(string pluginName, XDocument doc)
+        {            
             // get the namespace
             string ns = "{" + doc.Root.Name.Namespace + "}";
 
@@ -123,8 +147,8 @@ namespace DeviantArt.Chat.Oberon
 
             // make sure we found something
             if (manifest.Count() == 0)
-                throw new ArgumentOutOfRangeException(string.Format("Unable to find plugin with name '{0}' in the manifest file '{1}'.", pluginName, manifestFile));
-
+                throw new ArgumentOutOfRangeException(string.Format("Unable to find plugin with name '{0}' in the manifest.", pluginName));
+            
             return manifest.Single();
         }
 
