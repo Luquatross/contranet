@@ -329,7 +329,12 @@ namespace DeviantArt.Chat.Oberon
         /// <summary>
         /// The amount of time to wait for a new packet to arrive.
         /// </summary>
-        private TimeSpan packetWaitTime = TimeSpan.FromMinutes(5.00);        
+        private TimeSpan packetWaitTime = TimeSpan.FromMinutes(5.00);
+
+        /// <summary>
+        /// Thread to check for plugin updates.
+        /// </summary>
+        private Thread pluginUpdateThread;
         #endregion
 
         #region Constructor
@@ -1253,6 +1258,10 @@ namespace DeviantArt.Chat.Oberon
             // load all of our plugins for the system
             LoadPlugins();
 
+            // create a new thread to check for plugins
+            pluginUpdateThread = new Thread(CheckForPluginUpdates);
+            pluginUpdateThread.Start();
+
             // load saved access levels from file if there is one
             Access.LoadAccessLevels();
             
@@ -1417,6 +1426,17 @@ namespace DeviantArt.Chat.Oberon
             }
             if (IsDebug && pluginThreads.Count > 0)
                 Console.Notice("All plugin threads have terminated.");
+
+            // wait for update thread to complete
+            if (pluginUpdateThread.IsAlive)
+            {
+                if (!pluginUpdateThread.Join(pluginThreadWaitTime))
+                {
+                    // if update thread is hanging, kill it
+                    pluginUpdateThread.Abort();
+                    pluginUpdateThread.Join();
+                }
+            }
 
             // display parting message
             foreach (string str in ShutDownString)
@@ -1652,8 +1672,10 @@ namespace DeviantArt.Chat.Oberon
             
             // save reference
             Instance = container.Resolve<Bot>();
-        }
+        }        
+        #endregion
 
+        #region Update Methods
         /// <summary>
         /// Returns true if there was an update available. Otherwise, false.
         /// </summary>
@@ -1663,13 +1685,13 @@ namespace DeviantArt.Chat.Oberon
             bool updateExists = false;
 
             try
-            {                     
+            {
                 // get the file contents
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(VersionUpdateUrl);
                 request.Method = "GET";
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
                 StreamReader sr = new StreamReader(response.GetResponseStream(), System.Text.Encoding.UTF8);
-                string result = sr.ReadToEnd();  
+                string result = sr.ReadToEnd();
                 sr.Close();
                 response.Close();
 
@@ -1691,6 +1713,47 @@ namespace DeviantArt.Chat.Oberon
             catch { } // we'll swallow the error - we don't want a failure to get an update to crash the bot
 
             return updateExists;
+        }
+
+        /// <summary>
+        /// Checks for new updates for existing plugins.
+        /// </summary>
+        public void CheckForPluginUpdates()
+        {
+            List<string> pluginsWithUpdates = new List<string>();
+
+            // get all manifests for existing plugins
+            WebClient client = new WebClient();
+            foreach (Plugin plugin in GetPlugins())
+            {
+                // get xml
+                try
+                {
+                    string manifestXml = client.DownloadString(plugin.Manifest.UpdateManifestUrl);
+                    Manifest manifest = Manifest.Create(plugin.PluginName, XDocument.Load(new StringReader(manifestXml)));
+
+                    // if we have a newer version, and it is compatible with the bot, add to list
+                    if (plugin.Manifest.Version < manifest.Version &&
+                        manifest.IsCompatible(AssemblyVersion))
+                        pluginsWithUpdates.Add(plugin.PluginName);
+                }
+                catch (Exception ex)
+                {
+                    Console.Warning("Error retrieving plugin update. See bot log for details.");
+                    Console.Log(string.Format("Error retrieving update for plugin '{0}': {1}", plugin.PluginName, ex.ToString()));
+                    continue;
+                }
+            }
+
+            // if there are updates, notify the user
+            if (pluginsWithUpdates.Count > 0)
+            {
+                string pluginNames = string.Join(",", pluginsWithUpdates.ToArray());
+                Console.Notice(string.Format("{0} new plugin updates founds for the plugins {1}.",
+                    pluginsWithUpdates.Count,
+                    pluginNames));
+                Console.Notice("Run oberon.exe -plugin-update to update active plugins.");
+            }
         }
         #endregion
     }
