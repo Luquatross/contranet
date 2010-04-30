@@ -150,7 +150,7 @@ namespace DeviantArt.Chat.Oberon
             try
             {
                 // execute linq-to-xml query
-                m = manifest.Single();
+                m = manifest.SingleOrDefault();
             }
             catch (Exception ex)
             {

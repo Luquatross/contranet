@@ -1732,8 +1732,7 @@ namespace DeviantArt.Chat.Oberon
                         pluginsWithUpdates.Add(plugin.PluginName);
                 }
                 catch (Exception ex)
-                {
-                    Console.Warning("Error retrieving plugin update. See bot log for details.");
+                {                    
                     Console.Log(string.Format("Error retrieving update for plugin '{0}': {1}", plugin.PluginName, ex.ToString()));
                     continue;
                 }

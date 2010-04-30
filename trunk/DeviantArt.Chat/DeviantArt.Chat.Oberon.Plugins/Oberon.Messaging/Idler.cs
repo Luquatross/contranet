@@ -8,6 +8,7 @@ using DeviantArt.Chat.Oberon.Collections;
 
 namespace DeviantArt.Chat.Oberon.Plugins
 {
+    #region Helper Classes
     /// <summary>
     /// Action to take after idle time expires.
     /// </summary>
@@ -201,8 +202,11 @@ namespace DeviantArt.Chat.Oberon.Plugins
     [Serializable]
     class IdleRoomSettingCollection : Dictionary<string, IdleRoomSettings>
     { }
+    #endregion
 
-    // Plugin to allow room administrators to perform an action on users who idle for too long.
+    /// <summary>
+    /// Plugin to allow room administrators to perform an action on users who idle for too long.
+    /// </summary>
     class Idler : Plugin
     {
         #region Private Variables

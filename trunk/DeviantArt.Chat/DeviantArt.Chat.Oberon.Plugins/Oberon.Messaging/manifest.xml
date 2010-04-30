@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<manifest xmlns="http://oberon.thehomeofjon.net"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://oberon.thehomeofjon.net/bin/xsd/manifest-v1.xsd">
+    <plugins>
+        <plugin>
+            <name>Away Message</name>
+            <description>
+                <![CDATA[Plugin that allows users in a chatroom to use the bot to manage their away message.]]>
+            </description>
+            <author>bigmanhaywood</author>
+            <homepageUrl>http://oberon.thehomeofjon.net/plugins/messaging/</homepageUrl>
+        </plugin>
+        <plugin>
+            <name>Bot Away</name>
+            <description>
+                <![CDATA[Plugin that allows the bot to be used for away messages.]]>
+            </description>
+            <author>bigmanhaywood</author>
+            <homepageUrl>http://oberon.thehomeofjon.net/plugins/messaging/</homepageUrl>
+        </plugin>
+        <plugin>
+            <name>Idler</name>
+            <description>
+                <![CDATA[Plugin to allow room administrators to perform an action on users who idle for too long.]]>
+            </description>
+            <author>bigmanhaywood</author>
+            <homepageUrl>http://oberon.thehomeofjon.net/plugins/messaging/</homepageUrl>
+        </plugin>
+        <plugin>
+            <name>Welcome Message</name>
+            <description>
+                <![CDATA[Welcome plugin to allow welcome message for a chatroom.]]>
+            </description>
+            <author>bigmanhaywood</author>
+            <homepageUrl>http://oberon.thehomeofjon.net/plugins/messaging/</homepageUrl>
+        </plugin>
+    </plugins>
+    <version>1.0.0.0</version>
+    <updates>
+        <!-- The min and max bot version this plugin is compatible with -->
+        <minBotVersion>0.1</minBotVersion>
+        <maxBotVersion>0.8.9</maxBotVersion>
+
+        <!-- This is a text file which contains the latest version of your plugin -->
+        <updateManifestUrl>http://oberon.thehomeofjon.net/bin/plugins/messaging/messaging.xml</updateManifestUrl>
+
+        <!-- This is where this version of the plugin will be downloaded from -->
+        <updateUrl>http://oberon.thehomeofjon.net/bin/plugins/messaging/messaging.zip</updateUrl>
+    </updates>
+</manifest>

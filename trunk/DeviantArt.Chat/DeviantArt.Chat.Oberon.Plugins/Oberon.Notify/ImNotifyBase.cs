@@ -14,7 +14,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
     public abstract class ImNotifyBase : Plugin
     {
         #region Protected Variables
-        protected const string _FolderName = "Messaging";
+        protected const string _FolderName = "Notify";
         #endregion
 
         #region Protected Properties

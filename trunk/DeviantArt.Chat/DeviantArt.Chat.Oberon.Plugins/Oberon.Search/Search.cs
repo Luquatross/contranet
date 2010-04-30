@@ -13,7 +13,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
     {
         #region Private Variables
         private string _PluginName = "Search";
-        private string _FolderName = "Extras";
+        private string _FolderName = "Search";
 
         /// <summary>
         /// SOAP Search client object.

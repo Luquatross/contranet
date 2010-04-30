@@ -13,6 +13,7 @@
       <fileset>
         <include name="**/${project::get-name()}.dll" />
         <include name="**/${project::get-name()}.pdb" if="${debug}" />
+        <include name="**/manifest.xml" />
         
         <!-- Add supporting assemblies -->
         <include name="**/info.lundin.Math.dll" />
