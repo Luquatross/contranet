@@ -317,14 +317,15 @@ namespace DeviantArt.Chat.Oberon
         private volatile bool IsRestarting = false;
 
         /// <summary>
-        /// Threads created by plugins.
+        /// Threads created by plugins or the bot that the bot will wait on
+        /// when shutting down.
         /// </summary>
-        private List<Thread> pluginThreads = new List<Thread>();
+        private List<Thread> threadPool = new List<Thread>();
 
         /// <summary>
-        /// The amount of time to wait for a plugin thread to terminate.
+        /// The amount of time to wait for a thread in our threadpool list to terminate.
         /// </summary>
-        private TimeSpan pluginThreadWaitTime = TimeSpan.FromMinutes(1.00);
+        private TimeSpan threadJoinWaitTime = TimeSpan.FromMinutes(1.00);
 
         /// <summary>
         /// The amount of time to wait for a new packet to arrive.
@@ -1080,7 +1081,7 @@ namespace DeviantArt.Chat.Oberon
         /// <param name="t">Thread to register.</param>
         public void RegisterPluginThread(Thread t)
         {
-            pluginThreads.Add(t);
+            threadPool.Add(t);
         }
 
         /// <summary>
@@ -1259,7 +1260,8 @@ namespace DeviantArt.Chat.Oberon
             LoadPlugins();
 
             // create a new thread to check for plugins
-            pluginUpdateThread = new Thread(CheckForPluginUpdates);
+            Thread pluginUpdateThread = new Thread(CheckForPluginUpdates);
+            threadPool.Add(pluginUpdateThread);
             pluginUpdateThread.Start();
 
             // load saved access levels from file if there is one
@@ -1407,16 +1409,16 @@ namespace DeviantArt.Chat.Oberon
             // call the close method on each of our plugins
             ShutdownPlugins();
 
-            // wait for any plugin threads to complete
+            // wait for any extra threads to complete
             if (IsDebug)
-                Console.Notice("Stopping plugin threads...");
-            foreach (Thread t in pluginThreads)
+                Console.Notice("Stopping threads in thread pool...");
+            foreach (Thread t in threadPool)
             {
                 if (t.IsAlive)
                 {
-                    if (!t.Join(pluginThreadWaitTime))
+                    if (!t.Join(threadJoinWaitTime))
                     {
-                        Console.Log(string.Format("Plugin Thread '{0}' has not shut down within 1 min. Aborting execution.",
+                        Console.Log(string.Format("Thread '{0}' has not shut down within 1 min. Aborting execution.",
                             t.Name));
                         // abort thread and wait for it to terminate
                         t.Abort();
@@ -1424,19 +1426,8 @@ namespace DeviantArt.Chat.Oberon
                     }
                 }
             }
-            if (IsDebug && pluginThreads.Count > 0)
-                Console.Notice("All plugin threads have terminated.");
-
-            // wait for update thread to complete
-            if (pluginUpdateThread.IsAlive)
-            {
-                if (!pluginUpdateThread.Join(pluginThreadWaitTime))
-                {
-                    // if update thread is hanging, kill it
-                    pluginUpdateThread.Abort();
-                    pluginUpdateThread.Join();
-                }
-            }
+            if (IsDebug && threadPool.Count > 0)
+                Console.Notice("All threads have completed.");
 
             // display parting message
             foreach (string str in ShutDownString)
