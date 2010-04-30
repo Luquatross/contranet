@@ -1711,20 +1711,36 @@ namespace DeviantArt.Chat.Oberon
         /// </summary>
         public void CheckForPluginUpdates()
         {
+            // get all plugins that have an update manifest url
+            var plugins = from p in GetPlugins()
+                          where !string.IsNullOrEmpty(p.Manifest.UpdateManifestUrl)
+                          select p;
+            // create a list of manifests we've downloaded (so we don't download them multiple times)
+            Dictionary<string, XDocument> downloadedManifests = new Dictionary<string, XDocument>();
+            // create list of plugin names that have an update
             List<string> pluginsWithUpdates = new List<string>();
 
             // get all manifests for existing plugins
-            foreach (Plugin plugin in GetPlugins())
+            foreach (var plugin in plugins)
             {
                 // get xml
                 try
                 {
-                    // if we don't have a manifest URL skip
-                    if (string.IsNullOrEmpty(plugin.Manifest.UpdateManifestUrl))
-                        continue;
+                    // get xml doc
+                    string url = plugin.Manifest.UpdateManifestUrl;
+                    XDocument doc = null;
+                    if (downloadedManifests.ContainsKey(url))
+                    {
+                        doc = downloadedManifests[url]; // pull from cache if we have it
+                    }
+                    else
+                    {
+                        doc = XDocument.Load(url);  // download it and add to cache
+                        downloadedManifests.Add(url, doc);
+                    }
 
                     // create manifest using xml
-                    Manifest manifest = Manifest.Create(plugin.PluginName, XDocument.Load(plugin.Manifest.UpdateManifestUrl));
+                    Manifest manifest = Manifest.Create(plugin.PluginName, doc);
 
                     // if we have a newer version, and it is compatible with the bot, add to list
                     if (plugin.Manifest.Version < manifest.Version &&
