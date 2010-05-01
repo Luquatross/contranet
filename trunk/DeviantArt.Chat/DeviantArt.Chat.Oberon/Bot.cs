@@ -762,8 +762,7 @@ namespace DeviantArt.Chat.Oberon
                         p.LoadPluginManifest();
 
                         // check plugin compatability
-                        if (this.AssemblyVersion < p.Manifest.MinBotVersion ||
-                            this.AssemblyVersion > p.Manifest.MaxBotVersion)
+                        if (p.HasManifest && !p.Manifest.IsCompatible(AssemblyVersion))
                             throw new Exception(string.Format("Plugin '{0}' is not compatible with this version of the bot.", p.PluginName));
 
                         // add to our list
@@ -1713,7 +1712,7 @@ namespace DeviantArt.Chat.Oberon
         {
             // get all plugins that have an update manifest url
             var plugins = from p in GetPlugins()
-                          where !string.IsNullOrEmpty(p.Manifest.UpdateManifestUrl)
+                          where p.HasManifest && !string.IsNullOrEmpty(p.Manifest.UpdateManifestUrl)
                           select p;
             // create a list of manifests we've downloaded (so we don't download them multiple times)
             Dictionary<string, XDocument> downloadedManifests = new Dictionary<string, XDocument>();

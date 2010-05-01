@@ -102,6 +102,14 @@ namespace DeviantArt.Chat.Oberon
             get;
             private set;
         }
+
+        /// <summary>
+        /// True if plugin has a manifest, otherwise false.
+        /// </summary>
+        public bool HasManifest
+        {
+            get { return (Manifest != null); }
+        }
         #endregion
 
         #region Constructor
@@ -218,7 +226,10 @@ namespace DeviantArt.Chat.Oberon
 
             // make sure manifest file exists
             if (!File.Exists(manifestFile))
-                throw new FileNotFoundException(string.Format("The manifest.xml file for the plugin '{0}' could not be found.", this.PluginName));
+            {
+                Bot.Console.Log(string.Format("The manifest.xml file for the plugin '{0}' could not be found.", this.PluginName));
+                return;
+            }
 
             // make sure manifest is valid
             Exception[] validationErrors;
