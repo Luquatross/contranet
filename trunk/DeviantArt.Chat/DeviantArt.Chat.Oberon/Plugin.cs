@@ -110,6 +110,19 @@ namespace DeviantArt.Chat.Oberon
         {
             get { return (Manifest != null); }
         }
+
+        /// <summary>
+        /// True if the manifest contains enough data for the bot to retrieve an update.
+        /// </summary>
+        public bool IsUpdateable
+        {
+            get 
+            { 
+                return (HasManifest && 
+                    !string.IsNullOrEmpty(Manifest.UpdateManifestUrl) && 
+                    !string.IsNullOrEmpty(Manifest.UpdateUrl)); 
+            }
+        }
         #endregion
 
         #region Constructor
