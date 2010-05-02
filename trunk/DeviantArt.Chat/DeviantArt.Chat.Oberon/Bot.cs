@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.CodeDom.Compiler;
 using Microsoft.Practices.Unity;
 using System.Net;
+using Ionic.Zip;
 
 namespace DeviantArt.Chat.Oberon
 {
@@ -224,13 +225,13 @@ namespace DeviantArt.Chat.Oberon
         /// <summary>
         /// The current directory for the executing assembly.
         /// </summary>
-        public string CurrentDirectory = System.IO.Path.GetDirectoryName(
+        public static string CurrentDirectory = System.IO.Path.GetDirectoryName(
                     System.Reflection.Assembly.GetExecutingAssembly().Location);
 
         /// <summary>
         /// Path to the bot config file.
         /// </summary>
-        public string ConfigPath
+        public static string ConfigPath
         {
             get { return System.IO.Path.Combine(CurrentDirectory, "Config\\Bot.config"); }
         }
@@ -238,7 +239,7 @@ namespace DeviantArt.Chat.Oberon
         /// <summary>
         /// Path to plugin directory.
         /// </summary>
-        public string PluginPath
+        public static string PluginPath
         {
             get { return System.IO.Path.Combine(CurrentDirectory, "Plugins"); }
         }
@@ -1712,7 +1713,7 @@ namespace DeviantArt.Chat.Oberon
         {
             // get all plugins that have an update manifest url
             var plugins = from p in GetPlugins()
-                          where p.HasManifest && !string.IsNullOrEmpty(p.Manifest.UpdateManifestUrl)
+                          where p.IsUpdateable
                           select p;
             // create a list of manifests we've downloaded (so we don't download them multiple times)
             Dictionary<string, XDocument> downloadedManifests = new Dictionary<string, XDocument>();
@@ -1762,6 +1763,69 @@ namespace DeviantArt.Chat.Oberon
                     pluginNames));
                 Console.Notice("Run oberon.exe -plugin-update to update active plugins.");
             }
+        }
+
+        /// <summary>
+        /// Updates plugins in the system using information from the plugin manifests.
+        /// </summary>
+        public void UpdatePlugins()
+        {
+            Console.Notice("Updating plugins...");
+
+            // init variables
+            WebClient client = new WebClient();
+            string tempPath = Path.GetTempPath();
+
+            // load all of our plugins
+            LoadPlugins();            
+
+            // cycle through each plugin
+            List<string> folderNames = new List<string>();
+            foreach (Plugin plugin in GetPlugins())
+            {
+                // if the plug isn't upadteable, or if we've downloaded the package for another
+                // plugin in the same package, then skip
+                if (!plugin.IsUpdateable || folderNames.Contains(plugin.FolderName))
+                    continue;
+
+                try
+                {
+                    // get new plugin manifest from the web (the manifest class will cache the url content)
+                    Manifest newManifest = Manifest.Create(plugin.PluginName, plugin.Manifest.UpdateManifestUrl);
+
+                    // if the version of the the downloaded manifest is newer, we have an update!
+                    if (newManifest.Version > plugin.Manifest.Version)
+                    {
+                        // get path to where we want the downloaded file
+                        string downloadedFile = Path.Combine(tempPath, Path.GetFileName(plugin.Manifest.UpdateUrl));
+
+                        // download the new package
+                        client.DownloadFile(plugin.Manifest.UpdateUrl, downloadedFile);
+
+                        // extract zip to overwrite existing plugin. we can do this because our current 
+                        // plugins were loaded as byte arrays from the original and shadow-copied to a 
+                        // different location. 
+                        using (ZipFile package = new ZipFile(downloadedFile))
+                        {
+                            package.ExtractAll(
+                                Path.Combine(Bot.PluginPath, plugin.FolderName),
+                                ExtractExistingFileAction.OverwriteSilently);
+                        }
+
+                        // we've downloaded the package, remember folder name
+                        folderNames.Add(plugin.FolderName);
+                    }
+
+                    Console.Notice(string.Format("Plugin '{0}' updated successfully.", plugin.PluginName));
+                }
+                catch (Exception ex)
+                {
+                    Console.Warning(string.Format("Error updating plugin '{0}'. See bot log for more details.", plugin.PluginName));
+                    Console.Log("Error updating plugin: " + ex.ToString());
+                }
+            }
+
+            Console.Notice("Plugin updates complete.");
         }
         #endregion
     }
