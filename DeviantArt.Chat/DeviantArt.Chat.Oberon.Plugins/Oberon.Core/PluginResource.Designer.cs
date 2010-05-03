@@ -377,8 +377,9 @@ namespace DeviantArt.Chat.Oberon.Plugins {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to priv [priv class] [level]
-        ///&lt;b&gt;Example:&lt;/b&gt; !priv guest 1.
+        ///   Looks up a localized string similar to priv list - Lists all named bot priv classes and their access levels
+        ///priv [priv class] [level] - updates an existing priv class with a new access level
+        ///&lt;b&gt;Example:&lt;/b&gt; !priv guest 1 - Sets the priv class &apos;guest&apos; to access level 1.
         /// </summary>
         internal static string Priv_Usage {
             get {
@@ -524,12 +525,12 @@ namespace DeviantArt.Chat.Oberon.Plugins {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to add [user] [level]
-        ///edit [user] [level]
-        ///list
-        ///del [user]
-        ///addprivclass [name] [level]
-        ///delprivclass [name]
+        ///   Looks up a localized string similar to !user add [user] [level]
+        ///!user edit [user] [level]
+        ///!user list
+        ///!user del [user]
+        ///!user addprivclass [name] [level]
+        ///!user delprivclass [name]
         ///&lt;b&gt;Example:&lt;/b&gt; !user add devartuser 50.
         /// </summary>
         internal static string User_Usage {
