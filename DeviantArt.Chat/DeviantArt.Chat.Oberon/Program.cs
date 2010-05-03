@@ -80,11 +80,19 @@ namespace DeviantArt.Chat.Oberon
                 consoleCloseHandler = new ConsoleCloseEventHandler(Close);
                 SetConsoleCtrlHandler(consoleCloseHandler, true);
 
-                // run the bot
-                bot.Run();   
-             
-                // run until bot shuts down
-                while (bot.IsAlive) ;
+                // if in update plugin mode, check for plugin updates
+                if (args.Length > 0 && args[0] == "-update-plugins")
+                {
+                    bot.UpdatePlugins();
+                }
+                else
+                {
+                    // run the bot
+                    bot.Run();
+
+                    // run until bot shuts down
+                    while (bot.IsAlive) ;
+                }
             }
             catch (Exception ex)
             {
