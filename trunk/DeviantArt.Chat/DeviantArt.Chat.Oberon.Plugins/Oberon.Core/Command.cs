@@ -382,6 +382,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     {
                         user = args[1];
                         Bot.Access.RemoveUserLevel(user);
+                        Say(ns, string.Format("** :dev{0}: has been removed from the user list *", user));
                     }
                     else
                     {
@@ -389,11 +390,12 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     }
                     break;
                 case "addprivclass":
-                    if (args.Length == 2)
+                    if (args.Length == 3)
                     {
                         name = args[1];
                         level = Convert.ToInt32(args[2]);
                         Bot.Access.AddPrivClass(PrivClass.Create(name, level));
+                        Say(ns, string.Format("** privclass {0} with access {1} added successfully *", name, level));
                     }
                     else
                     {
@@ -401,10 +403,11 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     }
                     break;
                 case "delprivclass":
-                    if (args.Length == 1)
+                    if (args.Length == 2)
                     {
                         name = args[1];
                         Bot.Access.RemovePrivClass(name);
+                        Say(ns, string.Format("** privclass {0} removed successfully *", name));
                     }
                     else
                     {

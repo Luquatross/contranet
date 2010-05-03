@@ -222,8 +222,9 @@ plugins all turn [on or off] - turn all plugins on or off at once
     <value>Manage bot priv class access levels.</value>
   </data>
   <data name="Priv.Usage" xml:space="preserve">
-    <value>priv [priv class] [level]
-&lt;b&gt;Example:&lt;/b&gt; !priv guest 1</value>
+    <value>priv list - Lists all named bot priv classes and their access levels
+priv [priv class] [level] - updates an existing priv class with a new access level
+&lt;b&gt;Example:&lt;/b&gt; !priv guest 1 - Sets the priv class 'guest' to access level 1</value>
   </data>
   <data name="Quit.Summary" xml:space="preserve">
     <value>Shutdown the bot.</value>
@@ -254,12 +255,12 @@ plugins all turn [on or off] - turn all plugins on or off at once
     <value>Manage users registered to the bot.</value>
   </data>
   <data name="User.Usage" xml:space="preserve">
-    <value>add [user] [level]
-edit [user] [level]
-list
-del [user]
-addprivclass [name] [level]
-delprivclass [name]
+    <value>!user add [user] [level]
+!user edit [user] [level]
+!user list
+!user del [user]
+!user addprivclass [name] [level]
+!user delprivclass [name]
 &lt;b&gt;Example:&lt;/b&gt; !user add devartuser 50</value>
   </data>
   <data name="TrigCheck.Summary" xml:space="preserve">
