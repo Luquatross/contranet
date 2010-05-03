@@ -867,16 +867,20 @@ namespace DeviantArt.Chat.Oberon
                 Assembly a = null;
                 try
                 {
-                    using (FileStream assemblyStream = File.OpenRead(assembly))
-                    {
-                        // read assembly in a byte array
-                        byte[] assemblyBytes = new byte[assemblyStream.Length];
-                        assemblyStream.Read(assemblyBytes, 0, Convert.ToInt32(assemblyStream.Length));
+                    byte[] assemblyBytes = File.ReadAllBytes(assembly);
+                    byte[] symbolBytes = null;
 
-                        // load assembly - loading it this way prevents the locking of the file, so 
-                        // we can overwrite the original file as needed.
-                        a = Assembly.Load(assemblyBytes);                        
-                    }
+                    // see if symbol file exists
+                    string symbolPath = assembly.Substring(0, assembly.LastIndexOf('.')) + ".pdb";
+                    if (File.Exists(symbolPath))
+                        symbolBytes = File.ReadAllBytes(symbolPath);
+
+                    // load assembly - loading it this way prevents the locking of the file, so 
+                    // we can overwrite the original file as needed.
+                    if (symbolBytes == null)
+                        a = Assembly.Load(assemblyBytes);
+                    else
+                        a = Assembly.Load(assemblyBytes, symbolBytes);
                 }
                 catch (Exception ex)
                 {
