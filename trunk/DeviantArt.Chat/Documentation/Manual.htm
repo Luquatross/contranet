@@ -21,7 +21,9 @@
 		
 		#bot { float: left; margin: 0 10px 10px 0; }
 		.hasSubHeading { margin-bottom: 2px; }
-		.subHeading { color: #666; }			
+		.subHeading { color: #666; }
+		.normal	{ font-weight: normal; }
+		dt { background: #eee; padding: 2px 5px; border-top: solid 2px #ddd; }		
 	</style>
   </head>
   <body>	
@@ -94,8 +96,10 @@
 				<li>log4net.dll</li>
 				<li>Microsoft.Practices.Unity.dll</li>
 				<li>Microsoft.Practices.ObjectBuilder2.dll</li>
+				<li>Ionic.Zip.dll</li>
 			</ul>
 			
+			<a name="config"></a>
 			<h2>Configuration</h2>
 		
 			<p>If this is the first time you've configured the bot, follow the instructions below. Otherwise, see <a href="#normal-config">the normal config instructions.</a></p>
@@ -119,9 +123,21 @@
 			<p>Here you can modify all the settings you put in the first time: username, password, trigger, autojoin rooms, etc. You can also change
 			the about string so that when a user asks about the bot, it will respond with that information.</p>
 			
+			<p><strong>Note:</strong> in the about string you can enter some placeholders for bot information. Those place holders are:</p>
+			<ul>
+				<li>%N% - The name of the bot</li>
+				<li>%V% - The bot release version</li>
+				<li>%S% - The bot status</li>
+				<li>%R% - The bot release</li>
+				<li>%O% - The bot owner</li>
+				<li>%A% - The bot author</li>
+				<li>%T% - The bot trigger</li>
+				<li>%D% - Whether or not the bot is running in debug mode</li>
+			</ul>
+			
 			<a name="logging-config"></a>
 			<h3>Logging Configuration</h3>
-            <p>Oberon uses the library<a href="http://logging.apache.org/log4net/index.html"> log4net</a> to handle all of it's internal logging. The configuration for log4net live in the <code>/Config/Log.config</code> file. The only setting need to be tweaked in this config file is the debugging level. In that config file you may see some XML similar to this:</p>
+            <p>Oberon uses the library <a href="http://logging.apache.org/log4net/index.html">log4net</a> to handle all of it's internal logging. The configuration for log4net lives in the <code>/Config/Log.config</code> file. The only setting need to be tweaked in this config file is the debugging level. In that config file you may see some XML similar to this:</p>
             <pre>&lt;level value=&quot;INFO&quot; /&gt;</pre>
             <p>You can change this value to any of the following:</p>
             <ul>
@@ -133,23 +149,26 @@
             	<li>FATAL</li>
             	<li>OFF</li>
             </ul>
-			<p>I suggest using the setting "INFO". If you are have some strange behavior from the bot, set it to "DEBUG" to get extensive logging data. See the <a href="http://logging.apache.org/log4net/release/manual/introduction.html">online manual</a> for a detailed explanation of rhe different logging levels.</p>
+			<p>I suggest using the setting "INFO". If you are have some strange behavior from the bot, set it to "DEBUG" to get extensive logging data. See the log4net <a href="http://logging.apache.org/log4net/release/manual/introduction.html">online manual</a> for a detailed explanation of rhe different logging levels.</p>
             
-			<h2>Command Basics</h2><a name="command-basics"></a>
+			<a name="command-basics"></a>
+			<h2>Command Basics</h2>
             
             <p>We've covered the installation and configuration, let's get down now to the nitty gritty. The way to manually interact with the bot via a chatroom is by using commands. A command is any string that a user writes in the chatroom that starts with the bot's trigger. The bot's trigger is configured when you first run the bot, and can be changed by changing the <code>/Config/Bot.config</code> file. It can be any string. So for example, let's say our bot's trigger wa &quot;~&quot;. A command might be:</p>
             <pre>13:18:14 &lt;bigmanhaywood&gt; ~time</pre>
             <p>What we've done here is ask the bot what it's current time is. It saw the trigger at the start of the message and knew that we were talking to it. Now that we've "triggered" a response, in the chatroom, the bot will respond with it's current time.</p>
             
-            <h3>Command Help</h3><a name="command-help"></a>
-            <p>Keeping track of each command in the system and what it does can be nearly impossible. And that's where command help comes in. Each command has help text associated with it that explains what it does and how to use it. To see help for a particular command type:</p>
+			<a name="command-help"></a>
+            <h3>Command Help</h3>
+            <p>Keeping track of each command in the system and what it does can take a lot of work. And that's where command help comes in. Each command has help text associated with it that explains what it does and how to use it. To see help for a particular command type the bot trigger followed by the word 'help':</p>
 			<pre>03:08:00 PM &lt;bigmanhaywood&gt; !help time<br />03:08:00 PM &lt;OberonBot&gt; bigmanhaywood: <ul><li><strong><u>Summary:</u></strong> Displays the current bot time.</li><li><strong><u>Usage</u></strong>:<br />time</li></ul></pre>
 			<p>Just replace "time" with the command you're interested in. Another way to get command help text is to type:</p>
-			<pre>03:08:00 PM &lt;bigmanhaywood&gt; time ?<br />03:08:00 PM &lt;OberonBot&gt; bigmanhaywood: <ul><li><strong><u>Summary:</u></strong> Displays the current bot time.</li><li><strong><u>Usage</u></strong>:<br />time</li></ul></pre>
+			<pre>03:08:00 PM &lt;bigmanhaywood&gt; !time ?<br />03:08:00 PM &lt;OberonBot&gt; bigmanhaywood: <ul><li><strong><u>Summary:</u></strong> Displays the current bot time.</li><li><strong><u>Usage</u></strong>:<br />time</li></ul></pre>
 			<p>Basically, just the command name followed by a question mark.</p>
 			
-			<h3>Command Security</h3><a name="command-security"></a>
-			<p>The problem with a user issuing a command in the chatroom is that any user can send the command. That is why all commands have an access or <a href="http://en.wikipedia.org/wiki/Principle_of_least_privilege">privilege level</a>. The privilege levels range from 1 to 100. The bot comes with some pre-configured access levels for you to use:</p>
+			<a name="command-security"></a>
+			<h3>Command Security</h3>
+			<p>The problem with a user issuing a command in the chatroom is that any user can send the command. That is why all commands have an access or <a href="http://en.wikipedia.org/wiki/Principle_of_least_privilege">privilege level</a>. The access levels range from 1 to 100. The bot comes with some pre-configured 'priv classes' which are assigned default access levels for you to use:</p>
 			<ul>
 				<li>Owner  - Level: 100</li>
 				<li>Operators - Level: 99</li>
@@ -159,14 +178,162 @@
 				<li>Banned - Level: 1</li>
 			</ul>
 			<p>These of course can be changed as much or little as you want.</p>
-			<p>Whenever an unknown user sends a command to the bot they are recognized as a guest and only have access to commands that are at the gueest level. The bot operator can register users with the bot, each with their own access level.</p>		
+			<p>Whenever an unknown user sends a command to the bot they are recognized as a guest and only have access to commands that are at the guest level. The bot operator can register users with the bot, each with their own access level.</p>		
+			<p><strong>Note:</strong> The bot operator can change the 'Guest' priv class, but anonymous users are slways assigned an access level of 25.</p>
 			
-			<h2>Plugins</h2><a name="plugins"></a>
+			<a name="plugins"></a>
+			<h2>Plugins</h2>
 			
-			<p>The bot contains most of the core structure for the system. But Oberon was designed for flexibility and extension in mind. So all commands reside in a "plugin". A plugin is what it sounds like; a piece of software that extends the capabilities of a larger program. In Oberon, plugins are responsible for making the bot <strong>do</strong> things.</p>			
-			<p>Each command resides inside of a plugin. The Oberon Core plugin is responsible for allowing the bot to do all the normal things a user would do inside a chatroom. The Oberon Commands plugin is responsible for allowing a bot operator to manage the bot's basic settings.</p>
-			<p>An important thing to note is that if a plugin is deactivated <strong>you cannot access it's commands.</strong></p>			
+			<p>The bot code in <code>Oberon.exe</code> contains most of the core structure for the system. But Oberon was designed for flexibility and extension in mind. So all commands reside in a "plugin". A plugin is what it sounds like; a piece of software that extends the capabilities of a larger program. In Oberon, plugins are responsible for making the bot <strong>do</strong> things.</p>			
+			<p>Each command resides inside of a plugin. The <strong>Oberon Core plugin</strong> is responsible for allowing the bot to do all the normal things a user would do inside a chatroom. The <strong>Oberon Commands plugin</strong> is responsible for allowing a bot operator to manage the bot's basic settings.</p>
+			<p>Any plugin (except core plugins) can be activated or deactivated. By default all plugins are deactivated. A bot operator can change the activated status of a plugin at any time. An important thing to note is that if a plugin is deactivated <strong>you cannot access it's commands.</strong></p>			
 			<p>Any plugin located in the <code>/Plugins</code> will be loaded every time the bot runs, even if it's not activated. This may slow down the bot a little. Place a plugin in the <code>/Plugins/_Off</code> directory if you do not want the plugin to be touched by the bot at all.</p>
+			
+			<p>Now that we've touched on the basic of a plugin, let's talk about the major commands in each of the provided plugins.</p>
+			
+			<a name="damn-core-plugin"></a>
+			<h3>dAmn Core Plugin</h3>
+			<p>This plugin handles the core system events. There are no commands for this plugin.</p>
+			
+			<a name="oberon-command-plugin"></a>
+			<h3>Oberon Command Plugin</h3>
+			<p>This class encapsulates all internal Oberon commands. Let's touch on the basic commands for the system.</p>
+			<dl>
+				<dt>help - <span class="normal">Display help on various commands.</span><a name="cmd-help"></a></dt>
+				<dd><br />
+					help [command] - Gives help on commands<br />
+					<br />
+					Example usage: <code>!help access</code></dd>
+				<dt>about - <span class="normal">Display infomation about the bot.</span><a name="cmd-about"></a></dt>
+				<dd><br />
+					about - Display Bot type and owner<br />
+					about uptime -  display the amount of time the bot has been running<br />
+					about system - display information about the operating system<br />
+					<br />
+					Example usage: <code>!about uptime</code></dd>
+				<dt>access - <span class="normal">Changes the access level prileges for a command.</span><a name="cmd-access"></a></dt>
+				<dd><br />
+					access [command] (Range 0 through 100)<br />
+					access [command] default<br />
+					<br />
+					Example: <code>!access ping 0</code><br />
+					Example: <code>!access ping 100</code> - Changes access level for the 'ping' command to level 100. Now only a user with access level privileges of 100 will be able to execute the ping command.</dd>
+				<dt>autojoin - <span class="normal">Adds or removes a chatroom from the auto join list.</span><a name="cmd-autojoin"></a></dt>
+				<dd><br />
+					autojoin add [room] - Adds a room to the autojoin list.<br />
+					autojoin remove [room] - Removes a room from the autojoin list.<br />
+					autojoin list - Displays all rooms set to autojoin.<br />
+					<br />
+					Example usage: <code>!autojoin add botdom</code></dd>
+				<dt>commands - <span class="normal">List of available commands and their access levels.</span><a name="cmd-commands"></a></dt>
+				<dd><br />
+					commands - list of commands you have access to<br />
+					commands all - list all commands<br />
+					commands details - list all commands and the plugin they belong to<br />
+					<br />
+					Example usage: <code>!commands</code></dd>
+				<dt>ctrig - <span class="normal">Temporarily change the bot's trigger.</span><a name="cmd-ctrig"></a></dt>
+				<dd><br />
+					ctrig [trigger]<br />
+					<br />
+					Example usage: <code>!ctrig #</code> - changes the bot's trigger from '!' to '#'</dd>
+				<dt>ignore - <span class="normal">Manages users the bot is set to ignore.</span><a name="cmd-ignore"></a></dt>
+				<dd><br />
+					ignore list - Lists ignored users<br />
+					ignore add [user] - Adds a user to the ignore list<br />
+					ignore remove [user] - Removes a user from the ignore list<br />
+					<br />
+					Example usage: <code>!ignore list</code></dd>
+				<dt>join - <span class="normal">Makes the bot join a chatroom.</span><a name="cmd-join"></a></dt>
+				<dd><br />!join [room]</dd>
+				<dt>part - <span class="normal">Makes the bot leave a chatroom.</span><a name="cmd-part"></a></dt>
+				<dd><br />!part [room]</dd>
+				<dt>kick - <span class="normal">Kicks a user from a chatroom.</span><a name="cmd-kick"></a></dt>
+				<dd><br />
+					kick (#room) [user] (reason) - Kicks a user from the chatroom. '#room' and 'reason' are optional. Bot must have kick privileges.<br />
+					<br />
+					Example usage: <code>!kick botdom devartuser</code></dd>
+				<dt>list - <span class="normal">List the users in a chatroom.</span><a name="cmd-list"></a></dt>
+				<dd><br />!list [room]</dd>
+				<dt>priv - <span class="normal">Manage bot priv class access levels.</span><a name="cmd-priv"></a></dt>
+				<dd><br />
+					priv list - Lists all named bot priv classes and their access levels<br />
+					priv [priv class] [level] - updates an existing priv class with a new access level<br />					
+					<br />
+					Example usage: <code>!priv guest 1</code> - Sets the priv class 'guest' to access level 1. All commands or users who had this level are also updated.<br />
+					Example usage: <code>!priv list</code> - List all named bot priv classes</dd>
+				<dt>quit - <span class="normal">Shuts down the bot.</span><a name="cmd-quit"></a></dt>
+				<dd><br />!quit</dd>
+				<dt>restart - <span class="normal">Restarts down the bot.</span><a name="cmd-restart"></a></dt>
+				<dd><br />!restart</dd>
+				<dt>sudo - <span class="normal">Allows a command to be executed as if it was sent from another user. <strong>Use very carefully.</strong> This command could allow users access to commands they don't usually have access to.</span><a name="cmd-sudo"></a></dt>
+				<dd><br />
+					sudo [user] [command] - Execute [command] as if it was from [user].<br />								
+					<br />					
+					Example usage: <code>sudo devartuser ping</code> - executes the ping command as if 'devartuser' had sent the command.</dd>
+				<dt>user - <span class="normal">Manage users registered to the bot.</span><a name="cmd-user"></a></dt>
+				<dd><br />
+					!user add [user] [level] - Register a user with the bot. Level can be an int or bot privclass.<br />
+					!user edit [user] [level] - Edits a user in the bot user list. Level can be an int or bot privclass.<br />
+					!user list - List all registered users<br />
+					!user del [user] - Remove a user from the bot user list<br />
+					!user addprivclass [name] [level] - Adds a new user priv class<br />
+					!user delprivclass [name] - Removes a user priv class<br />				
+					<br />					
+					Example usage: <code>!user add devartuser 50</code></dd>
+			</dl>
+			
+			<a name="ai-plugin"></a>
+			<h3>Oberon AI</h3>
+			<p>This plugin gives the bot the capability to respond to users. You can manage the bot responses per-chatroom.</p>
+			
+			<a name="extras-plugin"></a>
+			<h3>Extras</h3>
+			<p>This plugin package contains the following plugins:</p>
+			<ul>
+				<li><strong>Banned Words</strong> - Plugin that allows operator to kick users who use banned words within the chatroom.</li>
+				<li><strong>Calc</strong> - Class the performs simple math calculations.</li>
+				<li><strong>Dictionary</strong> - Plugin that lets a user find the definition of a word.</li>
+				<li><strong>Games</strong> - Small chat room games.</li>
+				<li><strong>Regex</strong> - Plugin that lets a user test a regex pattern.</li>
+				<li><strong>Responses</strong> - This is a bot response module for Oberon.</li>
+				<li><strong>Spell Checker</strong> - PPlugin that checks the proper spelling of a word.</li>				
+			</ul>
+			
+			<a name="lastfm-plugin"></a>
+			<h3>Last.fm</h3>
+			<p>This plugin that allows the user to have some Last.fm functionality in the chatroom. Namely, looking up songs, albums, and lyrices.</p>
+			
+			<a name="messaging-plugin"></a>
+			<h3>Messaging</h3>
+			<p>This plugin package contains the following plugins:</p>
+			<ul>
+				<li><strong>Away Message</strong> - Plugin that allows users in a chatroom to use the bot to manage their away message.</li>
+				<li><strong>Bot Away</strong> - Plugin that allows the bot to be used for away messages.</li>
+				<li><strong>Idler</strong> - Plugin to allow room administrators to perform an action on users who idle for too long.</li>
+				<li><strong>Welcome Message</strong> - Welcome plugin to allow welcome message for a chatroom.</li>			
+			</ul>
+			
+			<a name="notify-plugin"></a>
+			<h3>Notify</h3>
+			<p>This plugin package contains the following plugins:</p>
+			<ul>
+				<li><strong>Flash Notify</strong> - Plugin that will flash the taskbar button when the bot owner receives a message.</li>
+				<li><strong>Voice Notify</strong> - Plugin that will speak the notification.</li>		
+			</ul>
+			
+			<a name="search-plugin"></a>
+			<h3>Search</h3>
+			<p>Plugin that allows a user to perform a web search using the Bing API.</p>
+			
+			<a name="faq"></a>
+			<h2>FAQ - Frequently Asked Questions</h2>
+			<p>All righty, so now onto some common questions!</p>
+			
+			<ol>
+				<li><strong>How do I add a user to the bot so my friends can use it?</strong>
+					<p><em>Answer:</em> See the <a href="#cmd-user">user</a> command. You can add users and specify their access levels that way. You can also use the <a href="#cmd-access">access</a> command to make a command accessible for anybody.</p>
+				</li>
 	  </div>
       
       <div id="toc" class="span-6 wikistyle last">
@@ -193,7 +360,35 @@
 							<li><a href="#command-security">Command Security</a></li>														
 						</ol>
 					</li>	
-					<li><a href="#plugins">Plugins</a></li>
+					<li><a href="#plugins">Plugins</a>
+						<ol>
+							<li><a href="#damn-core-plugin">dAmn Core Plugin</a></li>
+							<li><a href="#oberon-command-plugin">Oberon Command Plugin</a>
+								<ol>
+									<li><a href="#cmd-help">help</a></li>
+									<li><a href="#cmd-about">about</a></li>
+									<li><a href="#cmd-access">access</a></li>
+									<li><a href="#cmd-autojoin">autojoin</a></li>
+									<li><a href="#cmd-commands">commands</a></li>
+									<li><a href="#cmd-join">join</a></li>
+									<li><a href="#cmd-part">part</a></li>
+									<li><a href="#cmd-part">kick</a></li>
+									<li><a href="#cmd-list">list</a></li>
+									<li><a href="#cmd-priv">priv</a></li>
+									<li><a href="#cmd-quit">quit</a></li>
+									<li><a href="#cmd-restart">restart</a></li>
+									<li><a href="#cmd-sudo">sudo</a></li>
+									<li><a href="#cmd-user">user</a></li>
+								</ol>
+							</li>
+							<li><a href="#ai-plugin">Oberon AI</a></li>
+							<li><a href="#extras-plugin">Extras</a></li>
+							<li><a href="#lastfm-plugin">Last.fm</a></li>
+							<li><a href="#messaging-plugin">Messaging</a></li>
+							<li><a href="#notify-plugin">Notify</a></li>
+							<li><a href="#search-plugin">Search</a></li>
+						</ol>
+					</li>
 				</ol>
 			</div>
 		</div>
