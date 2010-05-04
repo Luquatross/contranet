@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Oberon Developer's Guide</title>
+	<script src="SupportingFiles/jquery.min.js" type="text/javascript"></script>
+	
+	<link rel="stylesheet" href="SupportingFiles/screen.css" type="text/css" media="screen, projection">
+    <link rel="stylesheet" href="SupportingFiles/print.css" type="text/css" media="print">	
+	<!--[if lt IE 8]><link rel="stylesheet" href="SupportingFiles/ie.css" type="text/css" media="screen, projection"><![endif]-->
+
+	<link rel="stylesheet" href="SupportingFiles/wikistyle.css" type="text/css" media="screen, projection">
+	
+	<!-- code prettifier -->
+	<link href="SupportingFiles/prettify.css" type="text/css" rel="stylesheet" />
+	<script type="text/javascript" src="SupportingFiles/prettify.js"></script>
+	
+	<style type="text/css">
+		.padding-5 { padding: 5px; }
+		.padding-10 { padding: 10px; }
+		.padding-15 { padding: 15px; }
+		.padding-20 { padding: 20px; }
+		
+		#bot { float: left; margin: 0 10px 10px 0; }
+		.hasSubHeading { margin-bottom: 2px; }
+		.subHeading { color: #666; }
+		.normal	{ font-weight: normal; }
+		dt { background: #eee; padding: 2px 5px; border-top: solid 2px #ddd; }			
+	</style>
+	
+	<script type="text/javascript">
+		function collapser()
+		{			
+			$("<p class='collapser'><small><a href='' class='expand'>+ Expand</a> | <a href='' class='collapse'>- Collapse</a></small></p>")
+				.insertBefore(".prettyprint");
+			$("p.collapser").prepend(function() {
+				return "<code>" + $(this).next().attr("title") + "</code>&nbsp;&nbsp;&nbsp;";
+			});
+			$("a.expand").click(function() {
+				$(this).parent().parent().next().show();
+				return false;
+			});
+			$("a.collapse").click(function() {
+				$(this).parent().parent().next().hide();
+				return false;
+			});
+		}
+	</script>
+  </head>
+  <body onload="prettyPrint(); collapser();">	
+	<div class="container">
+		<div id="header" class="span-24 last">		
+			<img src="SupportingFiles/Oberon_72x72.png" alt="Oberon" id="bot" />
+			<h1 class="hasSubHeading">Oberon Developer's Guide</h1>
+			<h4 class="subHeading">The best DeviantArt chat bot this side of the Mississipi.</h4>
+		</div>
+		<hr />
+		
+		<div id="content" class="span-24 wikistyle padding-10 last" style="padding-left:0px">
+			<p>The purpose of this guide is to explain how to extend the functionality of Oberon. You want Oberon to sing and dance? You can do it. You want Oberon to read you a bedtime story? You can do it. You want Oberon to really understand you, to just <em>get</em> you, and accept you as who you are and not try to change you, to meet you in the middle and...I mean...well, I digress. I'm sure you could make Oberon do that to.</p>
+			
+			<h2>What is a plugin?</h2>
+			<p>Let's jump right in. The way to extend Oberon's functionality is to write a <strong>plugin</strong>. A plugin is code that handles a set of bot commands and events.</p>
+			<p>Oberon is written in <a href="http://en.wikipedia.org/wiki/C_Sharp_%28programming_language%29">C#</a>. This guide will be targeted at people who are familiar writing progrems in C#, VB.NET, or other object-oriented languages like Java. Plugins can be written in any .NET language that compiles to <a href="http://en.wikipedia.org/wiki/Common_Language_Runtime">Common Language Runtime</a> assembly. This includes C# and VB.NET. If you've never heard of CLR, or assebmly, or C#, this may not be the guide for you. See <a href="http://msdn.microsoft.com/en-us/vcsharp/aa336766.aspx">this guide</a> if that's the case. </p>
+			<p><strong>Note:</strong> You can build your plugins in any editor that builds a .NET assembly. Most people will be using <a href="http://msdn.microsoft.com/en-us/vstudio/default.aspx">Visual Studio</a>. There is an <a href="http://www.microsoft.com/express/">express</a> verison of Visual Studio that's free if you don't have it already. If you don't like Visual Studio there are other free IDE's for .NET, like <a href="http://www.icsharpcode.net/opensource/sd/">SharpDevelop</a> which are open-source and free. We'll talk about how to build and deploy your plugins later on in the guide.</p>
+			
+			<h2>Where are my plugins?</h2>
+			<p>If you navigate to the directory where Oberon is installed, you will find a folder called <code>/Plugins</code>. Oberon looks for plugins to load in this folder. Any plugins that are in the <code>/_Off</code> folder <strong>will not be loaded</strong>. This is an easy way to deactivate a plugin - simply drag it's folder to the <code>/_Off</code> folder.</p>
+			
+			<h2>Terms</h2>
+			<p>Before we dive into code, there's a few terms you need to know to understand the bot architecture.</p>
+			<dl>
+				<dt>Events</dt>
+				<dd>An "event" within Oberon is the arrival of a new packet from the dAmn servers. Any time a packet is retrieved, the appropriate event is fired in Oberon. There is an event for <em>every</em> packet type. The following are the different packet types within Oberon:
+					<pre class="prettyprint" title="dAmn Packet Types" style="display: none">
+/// <summary>
+/// The types of packets that can be received from the dAmn servers.
+/// </summary>
+public enum dAmnPacketType
+{
+	Unknown,
+	Handshake,
+	Login,
+	Join,
+	Part,
+	Action,        
+	Chat,
+	MemberJoin,
+	MemberPart,
+	MemberList,
+	MemberKick,
+	PrivChange,
+	Topic,
+	Ping,
+	Kicked,
+	Disconnect,
+	Title,
+	PrivClasses,
+	ErrorSend,
+	ErrorKick,
+	ErrorSet,
+	ErrorGet,
+	ErrorKill,
+	Whois,
+	AdminCreate,
+	AdminUpdate,
+	AdminRename,
+	AdminMove,
+	AdminRemove,
+	AdminShow,
+	AdminError
+}</pre>
+				Plugins have the ability to tie into any of these events and execute custom actions when that event occurs. For example, if you wanted to look for the word "bird" in any chat message, you can tie into the Chat event, look for the word "bird" in the string and reply with "b-b-b-bird bird bird, bird is the word!".
+				</dd>
+				
+				<dt>Commands</dt>
+				<dd>A command is a directive sent by a user to the bot to tell it to do something. A plugin tells the bot what commands it can respond to and when the bot detects a command, it sends a notice to your plugin so that it can respond. Oberon comes with a bunch of it's own commands (which reside in the Oberon Commands plugin).</dd>
+				
+				<dt>Namespace</dt>
+				<dd>Namespaces (or ns'es for short) is simply any place on dAmn where people can chat. It's usually refered to as a <em>chatroom</em> or <em>channel</em>.</dd>
+				
+				<h2>Why, hello there world</h2>
+				<p>It's time to code! In the age-old tradition of programming tutorials we will start with a hello world program. When a user types <code>!hello</code>, assuming the bot trigger is !, our plugin will respond with "hello world.". Ready?</p>
+				<pre class="prettyprint" title="Hello World">
+using System;
+using DeviantArt.Chat.Oberon.Plugins;
+
+namespace MyPlugin
+{
+    // Here we create our own class, and extend the Plugin class, defined in the 
+    // namespace DeviantArt.Chat.Oberon.Plugins.
+    public class HelloWorld : Plugin
+    {
+        // this is the name of the plugin - it appears in all sorts of lists.
+        public override string PluginName
+        {
+            get { return "Hello World"; }
+        }
+
+        // this is the folder this plugin resides in. it must be specified here...
+        // we'll explain why later.
+        public override string FolderName
+        {
+            get { return "HelloWorld"; }
+        }
+
+        // function that executes when the bot is first loaded.
+        public override void Load()
+        {            
+            RegisterCommand("hello", new BotCommandEvent(Hello), new CommandHelp(
+                "My first plugin!.", "hello"), (int)PrivClassDefaults.Guests);
+        }
+
+        private void Hello(string ns, string from, string message)
+        {
+            Say(ns, string.Format("{0}: Hello world!", from));
+        }
+    }
+}</pre>
+				
+		</div>
+	</div>
+  </body>
+</html>
