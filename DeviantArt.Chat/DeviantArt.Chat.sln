@@ -36,7 +36,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Oberon.DeviantInfo", "Devia
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{DE162B2E-6FCF-4E45-85D9-343CB32E683D}"
 	ProjectSection(SolutionItems) = preProject
+		Documentation\Developer Guide.htm = Documentation\Developer Guide.htm
 		Documentation\Documentation.build = Documentation\Documentation.build
+		Documentation\Manual.htm = Documentation\Manual.htm
+		Documentation\Quick Start Guide.htm = Documentation\Quick Start Guide.htm
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Updater", "HelperProjects\Updater\Updater.csproj", "{7453AD4C-9E9F-414E-9B21-2E2F977AAF91}"
