@@ -3,97 +3,74 @@
   This project must be called from within the main Oberon.build file since it
   uses properties specific to the type of build being run.
 -->
-<project name="Documentation" default="Sandcastle.Doc" basedir=".">
+<project name="Documentation" default="BuildDoc" basedir="." xmlns="http://nant.sf.net/release/0.86-beta1/nant.xsd">
+  
+  <!-- Initialize the build process -->
+  <target name="InitDoc">
+    <!-- Presentation -->
+    <property  name="presentation.name" value="vs2005" />
+    <!-- Directories -->
+    <property name="sandcastle.dir" value="C:\Program Files\Sandcastle" />
+    <property name="sandcastle.workingdir" value="${project::get-base-directory()}\Documentation\SandcastleWorkingDir" />
+    <property name="sandcastle.output.dir" value="${sandcastle.workingdir}\Output" />
+    <property name="documentation.dir" value="${project::get-base-directory()}\Documentation\Xml" />
+    <!-- Executables -->
+    <property name="sandcastle.mrefbuilder.exe" value="${sandcastle.dir}\productiontools\mrefbuilder.exe" />
+    <property name="sandcastle.buildassembler.exe" value="${sandcastle.dir}\productiontools\buildassembler.exe" />
+    <property name="sandcastle.xsltransform.exe" value="${sandcastle.dir}\productiontools\xsltransform.exe" />
+    <!-- Transformations -->
+    <property name="sandcastle.addoverloads.xsl" value="${sandcastle.dir}\ProductionTransforms\AddOverloads.xsl" />
+    <property name="sandcastle.addguidfilenames.xsl" value="${sandcastle.dir}\ProductionTransforms\AddGuidFilenames.xsl" />
+    <property name="sandcastle.reflectiontomanifest.xsl" value="${sandcastle.dir}\ProductionTransforms\ReflectionToManifest.xsl" />
+    <property name="sandcastle.reflectiontochmproject.xsl" value="${sandcastle.dir}\ProductionTransforms\ReflectionToChmProject.xsl" />
+    <property name="sandcastle.reflectiontochmcontents.xsl" value="${sandcastle.dir}\ProductionTransforms\ReflectionToChmContents.xsl" />
+    <property name="sandcastle.reflectiontochmindex.xsl" value="${sandcastle.dir}\ProductionTransforms\ReflectionToChmIndex.xsl" />
+    <!-- Help Compiler -->
+    <property name="hhc.exe" overwrite="false" value="C:\Program Files\HTML Help Workshop\hhc.exe" />
 
-  <!-- Directories  -->
-  <property name="hhc.exe" overwrite="false"     value="C:\Program Files\HTML Help Workshop\hhc.exe" />
-  <property name="sandcastle.dir"                value="C:\Program Files\Sandcastle" />
+    <if test="${verbose}">
+      <echo message="presentation: ${presentation.name}" />
+      <echo message="workingdir:   ${sandcastle.workingdir}" />
+      <echo message="docxmldir:    ${documentation.dir}" />
+    </if>
+  </target>
 
-  <!-- Executables -->
-  <property name="sandcastle.mrefbuilder.exe"
-     value="${sandcastle.dir}\productiontools\mrefbuilder.exe" />
-  <property name="sandcastle.buildassembler.exe"
-     value="${sandcastle.dir}\productiontools\buildassembler.exe" />
-  <property name="sandcastle.xsltransform.exe"
-     value="${sandcastle.dir}\productiontools\xsltransform.exe" />
-  <property name="sandcastle.chmbuilder.exe"
-     value="${sandcastle.dir}\productiontools\chmbuilder.exe" />
+  <!-- Create or Cleanup Working Directory -->
+  <target name="CleanDoc">    
+    <mkdir dir="${sandcastle.workingdir}" if="${not directory::exists(sandcastle.workingdir)}" />
+    <delete>
+      <fileset basedir="${sandcastle.workingdir}">
+        <include name="**\*" />
+      </fileset>
+    </delete>
+  </target>
 
-  <!-- Directories -->
-  <property name="sandcastle.workingdir" value="Sandcastle" />
-  <property name="sandcastle.html.dir"   value="${sandcastle.workingdir}\Html" />
-  <property name="sandcastle.chm.dir"    value="${sandcastle.workingdir}\Chm" />
-  <property name="sandcastle.chm.file"   value="${project::get-name()}"/>
-
-  <!-- Transformations -->
-  <property name="sandcastle.addoverloads.xsl"
-     value="${sandcastle.dir}\ProductionTransforms\ApplyVsDocModel.xsl" />
-  <property name="sandcastle.addfriendlyfilenames.xsl"
-     value="${sandcastle.dir}\ProductionTransforms\AddFriendlyFilenames.xsl" />
-  <property name="sandcastle.reflectiontomanifest.xsl"
-     value="${sandcastle.dir}\ProductionTransforms\ReflectionToManifest.xsl" />
-  <property name="sandcastle.createvstoc.xsl"
-     value="${sandcastle.dir}\ProductionTransforms\createvstoc.xsl"/>
-
-  <!--
-    ******************************************************
-    CREATE CHM DOCUMENTATION
-    ******************************************************  -->
-  <target name="Sandcastle.Doc">
-
-    <!-- Check environment -->
-    <fail if="${not file::exists(hhc.exe)}"
-     message ="HTML Help Workshop not found at ${hhc.exe}"/>
-    <fail if="${not file::exists(sandcastle.mrefbuilder.exe)}"
-     message ="MRef Builder not found at ${sandcastle.mrefbuilder.exe}"/>
-    <fail if="${not file::exists(sandcastle.buildassembler.exe)}"
-     message ="Build Assembler not found at ${sandcastle.buildassembler.exe}"/>
-    <fail if="${not file::exists(sandcastle.xsltransform.exe)}"
-     message ="XSL Transform not found at ${sandcastle.xsltransform.exe}"/>
-    <fail if="${not file::exists(sandcastle.chmbuilder.exe)}"
-     message ="CHM Builder not found at ${sandcastle.chmbuilder.exe}"/>
-
-    <!-- Specifies the DLL file that we want to document -->
-    <property name="sandcastle.input.files" value="..\${solution.output}"/>
-
-    <!-- Delete working directory -->
-    <delete dir="${sandcastle.workingdir}"/>
+  <!-- Build documentation -->
+  <target name="BuildDoc" depends="init InitDoc CleanDoc">
+    <!-- Copy core assemblies -->
+    <copy todir="${sandcastle.workingdir}" flatten="true" overwrite="true">
+      <fileset>
+        <include name="${library.dll}" />
+        <include name="${console.exe}" />        
+        <include name="ThirdPartyDlls\*.dll" />
+      </fileset>
+    </copy>
 
     <!-- Copy configuration file, and hard code references -->
-    <copy file="${sandcastle.dir}/Presentation/vs2005/Configuration/Sandcastle.config"
+    <copy file="${sandcastle.dir}/Presentation/${presentation.name}/Configuration/Sandcastle.config"
           tofile="${sandcastle.workingdir}/Sandcastle.config">
-      <filterchain>
-        <replacestring from="%DXROOT%" to="${sandcastle.dir}\" />
-        <replacestring from=".\comments.xml" to="..\${solution.comments}" />
-        <replacestring from=".\Output\html" to=".\Html"/>
+      <filterchain>        
+        <replacestring from="&quot;..\..\" to="&quot;${sandcastle.dir}\" />
+        <replacestring from="&quot;..\" to="&quot;${sandcastle.dir}\Examples\" />
+        <replacestring from="&quot;comments.xml" to="&quot;${documentation.dir}\*.xml" />
       </filterchain>
     </copy>
 
-    <!-- Create HTML Output Environment -->
-    <mkdir dir="${sandcastle.html.dir}" />
-
-    <!-- Create CHM Output Environment -->
-    <mkdir dir="${sandcastle.chm.dir}" />
-    <copy todir="${sandcastle.chm.dir}">
-      <fileset basedir="${sandcastle.dir}/Presentation/vs2005">
-        <include name="Scripts\*.*"/>
-        <include name="Icons\*.*"/>
-        <include name="Styles\*.*"/>
-      </fileset>
-    </copy>
-    
-    <!-- Get  -->
-
     <!-- Run MRefBuilder (introspection on assemblies) to create basic Reflection XML -->
     <exec program="${sandcastle.mrefbuilder.exe}" workingdir="${sandcastle.workingdir}">
-      <arg value="${sandcastle.input.files}" />
-
-      <!-- If you have dependencies 
-      <arg value="/dep:&quot;D:\oracle\102\odp.net\bin\2.x\Oracle.DataAccess.dll&quot;"/>
-      <arg value="/dep:&quot;C:\Program Files\Microsoft CE\v3.1\System.Data.SqlServerCe.dll&quot;"/>
-      -->
-
-      <arg value="/out:reflection.org1.xml" />
+      <arg value="${project::get-name()}.Library.dll" />
+      <arg value="${bot.name}.exe" />
+      <arg value="/out:reflection.org1.xml" />      
     </exec>
 
     <!-- Create final Reflection XML -->
@@ -103,11 +80,10 @@
       <arg value="/xsl:&quot;${sandcastle.addoverloads.xsl}&quot;" />
       <arg value="/out:reflection.org2.xml" />
     </exec>
-
     <!-- Create filenames for html documents -->
     <exec program="${sandcastle.xsltransform.exe}" workingdir="${sandcastle.workingdir}">
       <arg value="reflection.org2.xml" />
-      <arg value="/xsl:&quot;${sandcastle.addfriendlyfilenames.xsl}&quot;" />
+      <arg value="/xsl:&quot;${sandcastle.addguidfilenames.xsl}&quot;" />
       <arg value="/out:reflection.xml" />
     </exec>
 
@@ -118,32 +94,47 @@
       <arg value="/out:manifest.xml" />
     </exec>
 
+    <!-- Create Output Environment -->
+    <mkdir dir="${sandcastle.output.dir}" />
+    <mkdir dir="${sandcastle.output.dir}/html" />
+    <copy todir="${sandcastle.output.dir}">
+      <fileset basedir="${sandcastle.dir}/Presentation">
+        <include name="art/*" />
+        <include name="scripts/*" />
+        <include name="styles/*" />
+      </fileset>
+    </copy>
+
     <!-- Run BuildAssembler (create html topic files) -->
     <exec program="${sandcastle.buildassembler.exe}" workingdir="${sandcastle.workingdir}" >
       <arg value="manifest.xml" />
       <arg value="/config:Sandcastle.config" />
     </exec>
 
-    <!-- Generate an intermediate Toc file that simulates the Whidbey TOC format. -->
+    <!-- Create html Help project -->
     <exec program="${sandcastle.xsltransform.exe}" workingdir="${sandcastle.workingdir}">
-      <arg value="/xsl:&quot;${sandcastle.createvstoc.xsl}&quot;" />
+      <arg value="/xsl:&quot;${sandcastle.reflectiontochmproject.xsl}&quot;" />
       <arg value="reflection.xml" />
-      <arg value="/out:toc.xml" />
+      <arg value="/out:&quot;${sandcastle.output.dir}\test.hhp&quot;" />
     </exec>
-
-    <!-- Generate HHP File -->
-    <exec program="${sandcastle.chmbuilder.exe}" workingdir="${sandcastle.workingdir}">
-      <arg value="/project:${sandcastle.chm.file}" />
-      <arg value="/html:Html" />
-      <arg value="/lcid:1033" />
-      <arg value="/toc:toc.xml" />
-      <arg value="/out:Chm" />
+    <!-- Create html Help project Table Of Contents -->
+    <exec program="${sandcastle.xsltransform.exe}" workingdir="${sandcastle.workingdir}" >
+      <arg value="/xsl:&quot;${sandcastle.reflectiontochmcontents.xsl}&quot;" />
+      <arg value="reflection.xml" />
+      <arg value="/arg:html=Output\html" />
+      <arg value="/out:&quot;${sandcastle.output.dir}\test.hhc&quot;" />
+    </exec>
+    <!-- Create html Help project Index -->
+    <exec program="${sandcastle.xsltransform.exe}" workingdir="${sandcastle.workingdir}" >
+      <arg value="/xsl:&quot;${sandcastle.reflectiontochmindex.xsl}&quot;" />
+      <arg value="reflection.xml" />
+      <arg value="/out:&quot;${sandcastle.output.dir}\test.hhk&quot;" />
     </exec>
 
     <!-- Generate CHM file -->
     <exec program="${hhc.exe}"
-          commandline="${sandcastle.chm.file}.hhp"
-          workingdir="${sandcastle.chm.dir}"
+          commandline="test.hhp"
+          workingdir="${sandcastle.output.dir}"
           failonerror="false"/>
   </target>
 </project>
