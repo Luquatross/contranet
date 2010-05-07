@@ -66,10 +66,10 @@
     <!-- Copy configuration file, and hard code references -->
     <copy file="${sandcastle.dir}/Presentation/${presentation.name}/Configuration/Sandcastle.config"
           tofile="${sandcastle.workingdir}/Sandcastle.config">
-      <filterchain>        
+      <filterchain> 
         <replacestring from="&quot;..\..\" to="&quot;${sandcastle.dir}\" />
         <replacestring from="&quot;..\" to="&quot;${sandcastle.dir}\Examples\" />
-        <replacestring from="&quot;comments.xml" to="&quot;${documentation.dir}\*.xml" />
+        <replacestring from="&quot;.\comments.xml" to="&quot;${documentation.dir}\*.xml" />
       </filterchain>
     </copy>
 
@@ -131,7 +131,7 @@
     <!-- Run BuildAssembler (create html topic files) -->
     <exec program="${sandcastle.buildassembler.exe}" workingdir="${sandcastle.workingdir}" >
       <arg value="manifest.xml" />
-      <arg value="/config:Sandcastle.config" />
+      <arg value="/config:&quot;${sandcastle.workingdir}\Sandcastle.config&quot;" />
     </exec>
 
     <!-- Create html Help project -->
