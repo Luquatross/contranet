@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 <!-- targets to be executed, when omitted from command line default is run -->
 <project name="DeviantArt.Chat" default="BuildAll" xmlns="http://nant.sf.net/release/0.86-beta1/nant.xsd">
+
+  <!-- Include Documentation build file -->
+  <include buildfile="Documentation\Documentation.build" />
   
   <!-- Initialize the build process -->
   <target name="init">
@@ -37,6 +40,7 @@
       <echo message="debug:        ${debug}" />
       <echo message="config:       ${config}" />
       <echo message="plugindir:    ${plugin.dir}" />
+      <echo message="outdir:       ${out.dir}" />
     </if>
   </target>
 
