@@ -1288,6 +1288,9 @@ namespace DeviantArt.Chat.Oberon
                     // output debug message
                     Console.Debug("IsRestarting set to true. Restarting bot.");
 
+                    // reload chatrooms
+                    ReloadChatrooms();
+
                     // restart plugins
                     RestartPlugins();
                 }
@@ -1545,6 +1548,15 @@ namespace DeviantArt.Chat.Oberon
 
                 SaveConfig();
             }
+        }
+
+        /// <summary>
+        /// Delete's all current chatrooms so bot will be ready to add
+        /// new chatrooms.
+        /// </summary>
+        public void ReloadChatrooms()
+        {
+            Chats.Clear();
         }
         #endregion
 
