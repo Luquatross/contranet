@@ -516,6 +516,20 @@ namespace DeviantArt.Chat.Oberon
             foreach (string ignoredUser in IgnoredUsers)
                 ignoredUserElements.Add(new XElement("add", new XAttribute("username", ignoredUser)));
 
+            // get cookie data
+            List<XElement> cookieElements = new List<XElement>();
+            if (AuthCookie != null)
+            {
+                cookieElements = new List<XElement>
+                {
+                    new XElement("add", new XAttribute("key", "uniqueid"), new XAttribute("value", AuthCookie.Values["uniqueid"])),
+                            new XElement("add", new XAttribute("key", "visitcount"), new XAttribute("value", AuthCookie.Values["visitcount"])),
+                            new XElement("add", new XAttribute("key", "visittime"), new XAttribute("value", AuthCookie.Values["visittime"])),
+                            new XElement("add", new XAttribute("key", "username"), new XAttribute("value", AuthCookie.Values["username"])),
+                            new XElement("add", new XAttribute("key", "authtoken"), new XAttribute("value", AuthCookie.Values["authtoken"]))
+                };
+            }
+
             // construct document in linq to xml
             XDocument botConfig = new XDocument(
                 new XDeclaration("1.0", "utf-8", ""),
@@ -529,13 +543,7 @@ namespace DeviantArt.Chat.Oberon
                         ),
                         new XElement("about", new XCData(AboutString)),
                         new XElement("autoJoins", autoJoinsElements.ToArray()),
-                        new XElement("cookieData",
-                            new XElement("add", new XAttribute("key", "uniqueid"), new XAttribute("value", AuthCookie.Values["uniqueid"])),
-                            new XElement("add", new XAttribute("key", "visitcount"), new XAttribute("value", AuthCookie.Values["visitcount"])),
-                            new XElement("add", new XAttribute("key", "visittime"), new XAttribute("value", AuthCookie.Values["visittime"])),
-                            new XElement("add", new XAttribute("key", "username"), new XAttribute("value", AuthCookie.Values["username"])),
-                            new XElement("add", new XAttribute("key", "authtoken"), new XAttribute("value", AuthCookie.Values["authtoken"]))
-                        ),
+                        new XElement("cookieData",cookieElements),
                         new XElement("plugins", pluginElements),
                         new XElement("ignoredUsers", ignoredUserElements)
                     )
