@@ -134,6 +134,7 @@
                 <include name="Config/Log.config" />  <!-- Include logging config -->
                 <include name="Plugins/System/**" />  <!-- Get core plugins -->
                 <include name="Docs/**" />            <!-- Get all documentation -->
+                <include name="../../*.txt" />        <!-- Get license and readme -->
 
                 <exclude name="**/*.log" />      <!-- We don't want any log files -->
                 <exclude name="Logs/Chats/**" /> <!-- We don't want any individual chatroom logs -->
