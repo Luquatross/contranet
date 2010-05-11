@@ -205,7 +205,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
         }
 
         /// <summary>
-        /// Log a chat action tot the chat log file.
+        /// Log a chat action to the chat log file.
         /// </summary>
         /// <param name="chatroom">Chatroom to log for.</param>
         /// <param name="packet">Packet to log.</param>
@@ -248,12 +248,25 @@ namespace DeviantArt.Chat.Oberon.Plugins
         /// </summary>
         private void Part(string chatroom, dAmnServerPacket packet)
         {
-            if (packet.args["e"] != "ok")
-                return;
-            Bot.Console.Notice(string.Format("{0} left the chatroom.", chatroom));
-            Bot.UnregisterChatroom(chatroom);
+            if (packet.args["e"] == "not joined" ||
+                packet.args["e"] == "bad namespace")                
+                return; // bail here because we wouldn't have this chatroom registered in these cases
 
-            if (Bot.ChatroomsOpen() == 0)
+            // get part reason
+            string reason = packet.args["r"];
+            reason = string.IsNullOrEmpty(reason) ? reason : " Reason: " + reason;
+
+            // tell the bot to leave the chatroom
+            Bot.UnregisterChatroom(chatroom);
+            Bot.Console.Notice(string.Format("** Bot has left the chatroom {0}.{1}", chatroom, reason));
+
+            // if it's an autojoin channel, try to sign back in
+            if (Bot.AutoJoin.Contains(chatroom.Trim('#')))
+            {
+                dAmn.Join(chatroom);
+                Bot.Console.Notice("Bot rejoined " + chatroom);
+            }
+            else if(Bot.ChatroomsOpen() == 0)
             {
                 Bot.Console.Warning("No longer joined to any rooms! Exiting...");
                 Bot.Shutdown();
@@ -642,7 +655,7 @@ namespace DeviantArt.Chat.Oberon.Plugins
             if (Bot.AutoJoin.Contains(chatroom.Trim('#')))
             {
                 dAmn.Join(chatroom);
-                Bot.Console.Notice("Bot joined " + chatroom);
+                Bot.Console.Notice("Bot rejoined " + chatroom);
             }
         }
         #endregion
