@@ -520,19 +520,17 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     break;
                 default:                    
                     // show list of commands user has access to
-                    output.Append("<b><u>Available commands</u></b>:<ul>");
+                    output.Append("<b>You have access to the following commands</b>:<br /><sub>");
                     foreach (KeyValuePair<string, string> cmd in commands)
                     {
                         if (Bot.Access.UserHasAccess(from, cmd.Key))
                         {
                             output.Append(string.Format(
-                                "<li>{0} <sub>(Access level: {1})</sub></li>",
-                                cmd.Key,
-                                Bot.Access.GetCommandLevel(cmd.Key)
+                                "[{0}] ",
+                                cmd.Key                                
                             ));
                         }
                     }
-                    output.Append("</ul>");
                     break;
             }
 
