@@ -253,6 +253,11 @@ namespace DeviantArt.Chat.Oberon
         /// List of users who the bot will ignore.
         /// </summary>
         public List<string> IgnoredUsers { get; private set; }
+
+        /// <summary>
+        /// Number of times to try to connect to the chat server.
+        /// </summary>
+        public int MaxConnectionRetries { get; private set; }        
         #endregion
 
         #region Private Variables
@@ -337,6 +342,11 @@ namespace DeviantArt.Chat.Oberon
         /// Thread to check for plugin updates.
         /// </summary>
         private Thread pluginUpdateThread;
+
+        /// <summary>
+        /// Number of times we've tried to connect to the chat servers.
+        /// </summary>
+        private int NumberOfConnectionRetries = 0;
         #endregion
 
         #region Constructor
@@ -371,6 +381,9 @@ namespace DeviantArt.Chat.Oberon
 
             // init ignored user list
             this.IgnoredUsers = new List<string>();
+
+            // init retries
+            this.MaxConnectionRetries = 3;
 
             // Some introduction messages! We've already done quite a bit but only introduce things here...
             this.Console.Notice("Hey thar!");
@@ -1344,6 +1357,7 @@ namespace DeviantArt.Chat.Oberon
             if (connectSucess)
             {
                 KeepListening = true;
+                NumberOfConnectionRetries = 0;
 
                 // load listening thread and start listening for packets     
                 listenThread = new Thread(new ThreadStart(Listen));
@@ -1364,6 +1378,17 @@ namespace DeviantArt.Chat.Oberon
                     AuthCookie = dAmn.GetAuthCookie(Username, Password);
                     if (AuthCookie == null)
                     {
+                        // if we haven't tried too many times, try again!
+                        if (NumberOfConnectionRetries < MaxConnectionRetries)
+                        {
+                            authTokenFromConfig = false;
+                            NumberOfConnectionRetries++;
+                            Console.Warning("Unable to retrieve login cookie. Retrying in 1 second...");
+                            Thread.Sleep(TimeSpan.FromSeconds(1.00));
+                            StartBot();
+                            return;
+                        }
+
                         // something happened where we couldn't retrieve the cookie...have to shut it down
                         Console.Warning("Unable to retrieve login cookie from dAmn servers.");
                         DisplayShutdownWarning();
@@ -1377,11 +1402,24 @@ namespace DeviantArt.Chat.Oberon
 
                     // try connecting again.
                     StartBot();
+                    return;
                 }
                 else
                 {
-                    DisplayShutdownWarning();
-                    return;
+                    // if we haven't tried too many times, try again!
+                    if (NumberOfConnectionRetries < MaxConnectionRetries)
+                    {                        
+                        NumberOfConnectionRetries++;
+                        Console.Warning("Unable to connect to dAmn servers. Retrying in 1 second...");
+                        Thread.Sleep(TimeSpan.FromSeconds(1.00));
+                        StartBot();
+                        return;
+                    }
+                    else
+                    {
+                        DisplayShutdownWarning();
+                        return;
+                    }
                 }
             }
         }
@@ -1564,7 +1602,12 @@ namespace DeviantArt.Chat.Oberon
         /// </summary>
         public void ReloadChatrooms()
         {
-            Chats.Clear();
+            // get a list of all chatrooms joined
+            var chatrooms = Chats.Select(c => c.Key).ToArray();
+
+            // close them all
+            foreach (string chatroom in chatrooms)
+                UnregisterChatroom(chatroom);
         }
         #endregion
 
