@@ -201,6 +201,15 @@
         </copy>               
     </target>
 
+    <!-- Create the help website from html files -->
+    <target name="CreateHelpSiteZip" depends="init InitDoc">
+      <zip zipfile="${documentation.output.dir}\sitehtml.zip">
+        <fileset basedir="${sandcastle.output.dir}\html\">
+          <include name="*" />
+        </fileset>
+      </zip>    
+    </target>
+
     <!-- Cleans up help files -->
     <target name="CleanUpHelp">
         <!-- Delete sandcastle working dir -->
@@ -212,5 +221,5 @@
     <!--
       Below are the main targets to use when building this solution.                
     -->
-    <target name="BuildDoc" depends="init BuildHelp CreateDocs CleanUpHelp" description="This target creates the documenation." />
+    <target name="BuildDoc" depends="init BuildHelp CreateDocs CreateHelpSiteZip CleanUpHelp" description="This target creates the documenation." />
 </project>

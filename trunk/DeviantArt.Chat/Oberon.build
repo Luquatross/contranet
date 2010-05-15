@@ -119,11 +119,11 @@
     <target name="CreateZip" depends="VersionInfo">
         <!-- Create downloads directory -->
         <delete dir="${downloads.dir}" if="${directory::exists(downloads.dir)}" />
-        <mkdir dir="${downloads.dir}" />
+        <mkdir dir="${downloads.dir}" failonerror="true" />
         
         <!-- Create temp directory -->
         <delete dir="downloadtemp" if="${directory::exists('downloadtemp')}" />
-        <mkdir dir="downloadtemp" />
+        <mkdir dir="downloadtemp" failonerror="true" />
         
         <!-- Copy files to temp -->
         <copy todir="downloadtemp" flatten="false">
@@ -162,6 +162,9 @@
         
         <!-- Delete temp -->
         <delete dir="downloadtemp" />
+
+        <!-- Move site html zip -->
+        <move file="${out.dir}\Docs\sitehtml.zip" tofile="${downloads.dir}\${bot.name}_${shortVersion}_Site_HtmlHelp.zip"></move>
     </target>
 
     <!--
