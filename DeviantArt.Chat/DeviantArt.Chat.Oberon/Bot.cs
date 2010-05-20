@@ -1252,7 +1252,8 @@ namespace DeviantArt.Chat.Oberon
                         // up handle it gracefully and let the bot continue to run.
                         try
                         {
-                            method(ns, packet);
+                            // call the method asyncronously to speed up the bot response time
+                            ThreadPool.QueueUserWorkItem(o => method(ns, packet));                            
                         }
                         catch (ThreadInterruptedException ex)
                         {
