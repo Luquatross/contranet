@@ -68,6 +68,7 @@
     <Compile Include="Regexes.cs" />
     <Compile Include="Responses.cs" />
     <Compile Include="SpellCheck.cs" />
+    <Compile Include="VisitCount.cs" />
     <Compile Include="Web References\DictService\Reference.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
