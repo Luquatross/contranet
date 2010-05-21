@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.8.4.*")]
-[assembly: AssemblyFileVersion("0.8.4.*")]
+[assembly: AssemblyVersion("0.8.5.*")]
+[assembly: AssemblyFileVersion("0.8.5.*")]
 
 // Change Log
 // Version 0.8.0.* - Base version.
@@ -42,3 +42,5 @@ using System.Runtime.InteropServices;
 // Version 0.8.2.* - Update Manager for Bot is built-in, so updates happen automatically
 // Version 0.8.3.* - Added automatic update capability for plugins
 // Version 0.8.4.* - Added ability to retry when a connection fails.
+// Version 0.8.5.* - When bot restarts, re-reads config file
+//                 - Plugins are always on when first loaded
