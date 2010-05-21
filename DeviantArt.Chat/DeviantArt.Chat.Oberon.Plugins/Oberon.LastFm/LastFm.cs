@@ -7,7 +7,7 @@ using System.ServiceModel;
 using System.Text;
 using System.Xml;
 using DeviantArt.Chat.Library;
-using DeviantArt.Chat.Oberon.Plugins.ChartLyrics;
+using DeviantArt.Chat.Oberon.Plugins.LyricsWiki;
 
 namespace DeviantArt.Chat.Oberon.Plugins
 {
@@ -32,9 +32,25 @@ namespace DeviantArt.Chat.Oberon.Plugins
         private const string LastFmApiKey = "0aff44a1cb9e80a073823bc16fdc1236";
 
         /// <summary>
-        /// URL to the ChartLyrics API.
+        /// URL to the LyricsWiki API.
         /// </summary>
-        private const string ChartLyricsUrl = "http://api.chartlyrics.com/apiv1.asmx";
+        private const string LyricsWikiUrl = "http://lyrics.wikia.com/server.php";
+
+        /// <summary>
+        /// LyricsWiki SOAP client.
+        /// </summary>
+        private LyricWikiPortTypeClient LyricWikiClient
+        {
+            get
+            {
+                if (_Client == null)
+                    _Client = new LyricWikiPortTypeClient(
+                        new BasicHttpBinding(BasicHttpSecurityMode.None),
+                        new EndpointAddress(LyricsWikiUrl));
+                return _Client;
+            }
+        }
+        private LyricWikiPortTypeClient _Client;        
         #endregion
 
         #region Public Properties
@@ -98,16 +114,11 @@ namespace DeviantArt.Chat.Oberon.Plugins
         }
 
         /// <summary>
-        /// Returns results for a lyric search.
+        /// Retrieves lyrics for a song.
         /// </summary>
-        /// <param name="lyrics">Lyrics to search for.</param>
-        /// <returns>Search results.</returns>
-        private SearchLyricResult[] GetSongsForLyrics(string lyrics)
+        private LyricsResult GetLyricsForSong(string artist, string song)
         {
-            apiv1SoapClient client = new apiv1SoapClient(
-                new BasicHttpBinding(BasicHttpSecurityMode.None),
-                new EndpointAddress(ChartLyricsUrl));
-            return client.SearchLyricText(lyrics);
+            return LyricWikiClient.getSong(artist, song);
         }
 
         /// <summary>
@@ -180,10 +191,10 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 "album [artist name] - [album name] - returns info on the album specified."), (int)PrivClassDefaults.Guests);
             RegisterCommand("song", new BotCommandEvent(Song), new CommandHelp(
                 "Gets info for a song",
-                "song [artist] - [title]</b> - returns info on the track given."), (int)PrivClassDefaults.Guests);
+                "song [artist] - [title] - returns info on the track given."), (int)PrivClassDefaults.Guests);
             RegisterCommand("lyrics", new BotCommandEvent(Lyrics), new CommandHelp(
-                "Searches ChartLyrics for the lyrics given, and returns any results",
-                "lyrics [lyrics] - returns results if there are any"), (int)PrivClassDefaults.Guests);
+                "Uses LyricsWiki to retrieve sampling of lyrics for a song.",
+                "lyrics [artist] - [title] - returns results if there are any"), (int)PrivClassDefaults.Guests);
         }
         #endregion
 
@@ -410,34 +421,31 @@ namespace DeviantArt.Chat.Oberon.Plugins
 
         private void Lyrics(string ns, string from, string message)
         {
-            string lyrics = message;
-            if (string.IsNullOrEmpty(lyrics))
+            string[] args = message.Split('-');
+            if (args.Length != 2)
             {
                 ShowHelp(ns, from, "lyrics");
                 return;
             }
 
-            SearchLyricResult[] results = this.GetSongsForLyrics(lyrics);
-            if (results == null || results.Length == 0)
+            string artist = args[0].Trim();
+            string song = args[1].Trim();
+
+            LyricsResult result = GetLyricsForSong(artist, song);
+            if (result == null)
             {
-                Respond(ns, from, "No results found for <b>\"" + lyrics + "\"</b>");
+                Respond(ns, from, "No results found for <b>\"" + artist + " - " + song + "\"</b>");
             }
             else
-            {
+            {                
                 StringBuilder say = new StringBuilder();
-                say.Append("<b>Song results for <u>" + lyrics + "</u>:</b><br /><sub><ol>");
-                foreach (SearchLyricResult result in results)
-                {
-                    say.AppendFormat("<li><b><a href=\"{0}\">{1}</a> - <a href=\"{2}\">{3}</a> - (<a href=\"{4}\">Lyrics</a> / <a href=\"http://www.youtube.com/results?search_query={5} {6}&search=Search\">Youtube</a>)</li>",
-                        result.ArtistUrl,
-                        result.Artist,
-                        result.SongUrl,
-                        result.Song,
-                        result.SongUrl,
-                        result.Artist,
-                        result.Song);
-                }
-                say.Append("</ol></sub>");
+
+                // add song info
+                say.AppendFormat("<b><a href=\"{0}\">{1}</a></b> by <b>{2}</b>:<br /><sub>{3}</sub>",
+                    result.url,
+                    result.song,
+                    result.artist,
+                    result.lyrics);
                 Say(ns, say.ToString());
             }         
         }
