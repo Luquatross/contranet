@@ -34,3 +34,10 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.1.0")]
 [assembly: AssemblyFileVersion("1.0.1.0")]
+
+// Change Log
+// Version 1.0.0.* - Base version.
+// Version 1.0.1.* - Changed command processing so bot won't respond to a command sent from itself
+//                 - Changed 'plugins' command to be case-insensitive
+//                 - Added ability for command that ends in 'help' to trigger the help, as well as ending in '?'
+//                 - Added plugin descriptions from manifest file for info option in 'plugins' command
