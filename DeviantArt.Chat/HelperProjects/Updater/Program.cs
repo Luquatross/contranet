@@ -16,7 +16,7 @@ namespace Updater
             // ensure arg length
             if (args.Length < 2)
             {
-                MessageBox.Show("You must supply the update URL and extract location as arguments.", "Updater Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("This is the bot updater program. The bot will detect when there is an update and invoke the updater. You cannot run this program directly.", "Oberon Updater", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
