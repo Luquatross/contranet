@@ -519,11 +519,6 @@ namespace DeviantArt.Chat.Oberon
             foreach (string autoJoinChannel in this.AutoJoin)
                 autoJoinsElements.Add(new XElement("add", new XAttribute("channel", autoJoinChannel)));
 
-            // get plugin settings
-            List<XElement> pluginElements = new List<XElement>();
-            foreach (Plugin plugin in botPlugins.Values)
-                pluginElements.Add(new XElement("add", new XAttribute("key", plugin.PluginName), new XAttribute("value", plugin.Status.ToString("G"))));
-
             // get ignored users
             List<XElement> ignoredUserElements = new List<XElement>();
             foreach (string ignoredUser in IgnoredUsers)
@@ -556,8 +551,7 @@ namespace DeviantArt.Chat.Oberon
                         ),
                         new XElement("about", new XCData(AboutString)),
                         new XElement("autoJoins", autoJoinsElements.ToArray()),
-                        new XElement("cookieData",cookieElements),
-                        new XElement("plugins", pluginElements),
+                        new XElement("cookieData",cookieElements),                        
                         new XElement("ignoredUsers", ignoredUserElements)
                     )
                 );
@@ -990,42 +984,21 @@ namespace DeviantArt.Chat.Oberon
         }
 
         /// <summary>
-        /// Turns plugins on or off based on values from the bot config file.
+        /// Turns all plugins on.
         /// </summary>
         private void LoadPluginStatuses()
         {
-            // if file doesn't exist
-            if (!System.IO.File.Exists(ConfigPath))
-                return;
-
-            // create xml document
-            XmlDocument configDoc = new XmlDocument();
-            configDoc.Load(ConfigPath);
-
-            // get root element
-            XmlNode root = configDoc.DocumentElement;
-
             int runningPlugins = 0;
-            XmlNodeList statusSettings = root.SelectNodes("plugins/add");
-            if (statusSettings.Count > 0)
+
+            foreach (string pluginName in botPlugins.Keys)
             {
-                foreach (XmlNode statusSetting in statusSettings)
-                {
-                    // get status
-                    string pluginName = statusSetting.Attributes["key"].Value;
-                    PluginStatus pluginStatus = (statusSetting.Attributes["value"].Value == "On" ? PluginStatus.On : PluginStatus.Off);
-
-                    // set status
-                    SetPluginStatus(pluginName, pluginStatus);
-
-                    // record if it's on
-                    if (pluginStatus == PluginStatus.On)
-                        runningPlugins++;
-                }
-
-                // display how many plugins are activated
-                Console.Notice(string.Format("Plugin statuses loaded. {0} plugins are activated.", runningPlugins));
+                // set status
+                SetPluginStatus(pluginName, PluginStatus.On);
+                runningPlugins++;
             }
+
+            // display how many plugins are activated
+            Console.Notice(string.Format("Plugin statuses loaded. {0} plugins are activated.", runningPlugins));
         }
 
         /// <summary>
@@ -1309,6 +1282,9 @@ namespace DeviantArt.Chat.Oberon
 
                     // output debug message
                     Console.Debug("IsRestarting set to true. Restarting bot.");
+
+                    // reload config file
+                    LoadConfig();
 
                     // reload chatrooms
                     ReloadChatrooms();
