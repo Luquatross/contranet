@@ -656,15 +656,23 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     break;
                 case "info":
                     plugin = (from p in Bot.GetPlugins()
-                              where p.GetPluginKey() == pluginKey
+                              where p.GetPluginKey().ToLower() == pluginKey.ToLower()
                               select p).SingleOrDefault();
                     if (plugin == null)
                     {
                         Respond(ns, from, "** the plugin with key " + pluginKey + " does not exist *");
                         return;
                     }
+
+                    // get description 
+                    string description = string.Empty;
+                    if (plugin.HasManifest)                    
+                        description = "<b>Description</b>: " + plugin.Manifest.Description + "<br />";                    
+
+                    // create output
                     output.Append("<b><u>Plugin Details</u></b>:<br />");
-                    output.Append(plugin.PluginName + "<br />");
+                    output.Append("<b>Name</b>: " + plugin.PluginName + "<br />");
+                    output.Append(description);
                     output.Append("<b>Key</b>: " + plugin.GetPluginKey() + "<br />");
                     output.Append("<b>Commands</b>:<ul>");
 

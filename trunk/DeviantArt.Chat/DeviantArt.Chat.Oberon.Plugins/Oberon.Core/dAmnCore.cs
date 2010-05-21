@@ -104,6 +104,10 @@ namespace DeviantArt.Chat.Oberon.Plugins
                 out target,
                 out eventResponse);
 
+            // if message is from ourselves, don't process it
+            if (!string.IsNullOrEmpty(from) && from.ToLower().Equals(Bot.Username.ToLower()))            
+                return;            
+
             // if message is from a user on our ignore list, throw it out
             if (Bot.IgnoredUsers.Contains(from))
             {
@@ -175,9 +179,9 @@ namespace DeviantArt.Chat.Oberon.Plugins
                     return;
                 }
 
-                // get the last string in the args to determine if help command
+                // get the last string in the args to determine if help command      
                 string lastString = message.Trim().Split(' ').LastOrDefault();
-                if (lastString == "?")
+                if (lastString == "?" || lastString == "help")
                 {
                     Bot.TriggerHelp(command, chatroom, from);
                 }
