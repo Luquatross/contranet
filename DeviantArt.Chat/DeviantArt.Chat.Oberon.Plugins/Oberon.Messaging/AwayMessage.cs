@@ -58,6 +58,10 @@ namespace DeviantArt.Chat.Oberon.Plugins
             string message = commandPacket.Message;
             string owner = Bot.Username;
 
+            // make sure chat hasn't been sent from us
+            if (from.ToLower() == Bot.Username.ToLower())
+                return;
+
             // check to see if user is in our list
             foreach (KeyValuePair<string, string> away in AwayMessages)
             {
