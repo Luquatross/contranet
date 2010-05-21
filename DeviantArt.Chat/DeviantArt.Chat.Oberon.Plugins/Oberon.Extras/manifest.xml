@@ -59,6 +59,14 @@
             <author>bigmanhaywood</author>
             <homepageUrl>http://oberon.thehomeofjon.net/plugins/extras/</homepageUrl>
         </plugin>
+        <plugin>
+            <name>VisitCount</name>
+            <description>
+                <![CDATA[Plugin to keep track of new username's seen in chatroom since bot logs in.]]>
+            </description>
+            <author>bigmanhaywood</author>
+            <homepageUrl>http://oberon.thehomeofjon.net/plugins/extras/</homepageUrl>
+        </plugin>
     </plugins>
     <version>1.0.0.0</version>
     <updates>
