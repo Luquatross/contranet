@@ -36,7 +36,7 @@
             <homepageUrl>http://oberon.thehomeofjon.net/plugins/messaging/</homepageUrl>
         </plugin>
     </plugins>
-    <version>1.0.0.0</version>
+    <version>1.0.1.0</version>
     <updates>
         <!-- The min and max bot version this plugin is compatible with -->
         <minBotVersion>0.1</minBotVersion>
