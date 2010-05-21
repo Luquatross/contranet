@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="10a9ff82-9e3c-474f-a443-e7d6cfd2dc4f" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="6e67e5b2-deab-4c50-85a5-66429024816e" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
   <ClientOptions>
     <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
     <EnableDataBinding>true</EnableDataBinding>
@@ -17,14 +17,12 @@
     <ServiceContractMappings />
   </ClientOptions>
   <MetadataSources>
-    <MetadataSource Address="http://api.chartlyrics.com/apiv1.asmx" Protocol="http" SourceId="1" />
+    <MetadataSource Address="http://lyrics.wikia.com/server.php?wsdl" Protocol="http" SourceId="1" />
   </MetadataSources>
   <Metadata>
-    <MetadataFile FileName="apiv1.wsdl" MetadataType="Wsdl" ID="d6e87870-888c-4133-aae7-7efe57a7ed4e" SourceId="1" SourceUrl="http://api.chartlyrics.com/apiv1.asmx?wsdl" />
-    <MetadataFile FileName="apiv1.disco" MetadataType="Disco" ID="f57503ae-1989-4c45-8f81-e41b98c63ccf" SourceId="1" SourceUrl="http://api.chartlyrics.com/apiv1.asmx?disco" />
+    <MetadataFile FileName="server.wsdl" MetadataType="Wsdl" ID="0459af4e-249f-4c14-bbe7-c36c2d45e55b" SourceId="1" SourceUrl="http://lyrics.wikia.com/server.php?wsdl" />
   </Metadata>
   <Extensions>
-    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
     <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
   </Extensions>
 </ReferenceGroup>

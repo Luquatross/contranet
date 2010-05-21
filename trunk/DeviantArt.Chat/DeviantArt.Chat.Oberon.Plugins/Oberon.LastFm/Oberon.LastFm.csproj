@@ -57,7 +57,7 @@
   <ItemGroup>
     <Compile Include="LastFm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Service References\ChartLyrics\Reference.cs">
+    <Compile Include="Service References\LyricsWiki\Reference.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Reference.svcmap</DependentUpon>
@@ -75,37 +75,30 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="plugin.build" />
-    <None Include="Service References\ChartLyrics\apiv1.wsdl" />
+    <None Include="Service References\LyricsWiki\server.wsdl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="manifest.xml" />
+    <None Include="Service References\LyricsWiki\DeviantArt.Chat.Oberon.Plugins.LyricsWiki.LyricsResult.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\LyricsWiki\DeviantArt.Chat.Oberon.Plugins.LyricsWiki.SongResult.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\LyricsWiki\DeviantArt.Chat.Oberon.Plugins.LyricsWiki.SOTDResult.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\LyricsWiki\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <None Include="Service References\LyricsWiki\configuration.svcinfo" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
-    <WCFMetadataStorage Include="Service References\ChartLyrics\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Service References\ChartLyrics\apiv1.disco" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Service References\ChartLyrics\configuration91.svcinfo" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Service References\ChartLyrics\configuration.svcinfo" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Service References\ChartLyrics\DeviantArt.Chat.Oberon.Plugins.ChartLyrics.GetLyricResult.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\ChartLyrics\DeviantArt.Chat.Oberon.Plugins.ChartLyrics.SearchLyricResult.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </None>
-    <None Include="Service References\ChartLyrics\Reference.svcmap">
-      <Generator>WCF Proxy Generator</Generator>
-      <LastGenOutput>Reference.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="manifest.xml" />
+    <WCFMetadataStorage Include="Service References\LyricsWiki\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
