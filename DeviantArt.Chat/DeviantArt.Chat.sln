@@ -1,15 +1,7 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviantArt.Chat.Oberon", "DeviantArt.Chat.Oberon\DeviantArt.Chat.Oberon.csproj", "{61781D7F-3E2F-4B3B-A5F0-7106F3921A3E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviantArt.Chat.Library", "DeviantArt.Chat.Library\DeviantArt.Chat.Library.csproj", "{A419A260-3C55-43A5-8EC7-82C0608769BC}"
-EndProject
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{4678E941-DDB9-46E4-89A4-D527CDCF79C0}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Oberon.Core", "DeviantArt.Chat.Oberon.Plugins\Oberon.Core\Oberon.Core.csproj", "{58E93353-BB0A-4238-86EC-501B7D7CE838}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Oberon.AI", "DeviantArt.Chat.Oberon.Plugins\Oberon.AI\Oberon.AI.csproj", "{13CE37E8-6E37-4A7E-A703-87A647617C9C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{69C050B3-9588-4EFA-9193-E4E0E02623BB}"
 	ProjectSection(SolutionItems) = preProject
@@ -19,6 +11,22 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "HelperProjects", "HelperProjects", "{9D9AEE3A-27E0-464B-8FDF-C9D193AD3114}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{DE162B2E-6FCF-4E45-85D9-343CB32E683D}"
+	ProjectSection(SolutionItems) = preProject
+		Documentation\Developer Guide.htm = Documentation\Developer Guide.htm
+		Documentation\Documentation.build = Documentation\Documentation.build
+		Documentation\Manual.htm = Documentation\Manual.htm
+		Documentation\Quick Start Guide.htm = Documentation\Quick Start Guide.htm
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviantArt.Chat.Oberon", "DeviantArt.Chat.Oberon\DeviantArt.Chat.Oberon.csproj", "{61781D7F-3E2F-4B3B-A5F0-7106F3921A3E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviantArt.Chat.Library", "DeviantArt.Chat.Library\DeviantArt.Chat.Library.csproj", "{A419A260-3C55-43A5-8EC7-82C0608769BC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Oberon.Core", "DeviantArt.Chat.Oberon.Plugins\Oberon.Core\Oberon.Core.csproj", "{58E93353-BB0A-4238-86EC-501B7D7CE838}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Oberon.AI", "DeviantArt.Chat.Oberon.Plugins\Oberon.AI\Oberon.AI.csproj", "{13CE37E8-6E37-4A7E-A703-87A647617C9C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Oberon.Messaging", "DeviantArt.Chat.Oberon.Plugins\Oberon.Messaging\Oberon.Messaging.csproj", "{D69237F5-2D8A-4212-BC02-28E22018D3AC}"
 EndProject
@@ -33,14 +41,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSNPSharp", "HelperProjects\MsnpSharp\MSNPSharp\MSNPSharp.csproj", "{97CB2DC7-2FE8-4AF5-84D0-6B9872A5E960}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Oberon.DeviantInfo", "DeviantArt.Chat.Oberon.Plugins\Oberon.DeviantInfo\Oberon.DeviantInfo.csproj", "{EC4772AB-E142-4089-BC05-D5CA18D79496}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{DE162B2E-6FCF-4E45-85D9-343CB32E683D}"
-	ProjectSection(SolutionItems) = preProject
-		Documentation\Developer Guide.htm = Documentation\Developer Guide.htm
-		Documentation\Documentation.build = Documentation\Documentation.build
-		Documentation\Manual.htm = Documentation\Manual.htm
-		Documentation\Quick Start Guide.htm = Documentation\Quick Start Guide.htm
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Updater", "HelperProjects\Updater\Updater.csproj", "{7453AD4C-9E9F-414E-9B21-2E2F977AAF91}"
 EndProject
